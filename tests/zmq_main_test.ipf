@@ -2,6 +2,8 @@
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
 #pragma IgorVersion=7.0
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 /// @brief Return the amount of free memory in GB
 ///
 /// Due to memory fragmentation you can not assume that you can still create a wave

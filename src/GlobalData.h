@@ -3,6 +3,8 @@
 #include <mutex>
 #include "ConcurrentQueue.h"
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 class GlobalData
 {
 public:

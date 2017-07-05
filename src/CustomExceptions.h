@@ -4,6 +4,8 @@
 #include <exception>
 #include <string>
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 #define ASSERT(A)                                                              \
   if(!(A))                                                                     \
   {                                                                            \

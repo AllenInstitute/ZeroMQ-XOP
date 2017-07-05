@@ -2,6 +2,8 @@
 
 #include "XOPStandardHeaders.r"
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 resource 'vers' (1) {						/* XOP version info */
 	0x01, 0x00, final, 0x00, 0,				/* version bytes and country integer */
 	"1.00",

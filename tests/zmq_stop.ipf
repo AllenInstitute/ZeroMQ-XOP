@@ -2,6 +2,8 @@
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
 #pragma ModuleName=zmq_stop
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 Function WorksWithoutConnections()
 
 	variable ret

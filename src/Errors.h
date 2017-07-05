@@ -1,5 +1,7 @@
 #pragma once
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 // clang-format off
 // XOP error codes
 #define OLD_IGOR                   1 + FIRST_XOP_ERR

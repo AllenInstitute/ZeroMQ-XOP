@@ -2,6 +2,8 @@
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
 #pragma ModuleName=zmq_connect
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 static Function ComplainsWithInvalidArg1()
 
 	variable err, ret

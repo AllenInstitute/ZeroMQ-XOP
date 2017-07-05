@@ -1,5 +1,7 @@
 #include "ZeroMQ.h"
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 // variable zeromq_server_send(string identity, string msg)
 extern "C" int zeromq_server_send(zeromq_server_sendParams *p)
 {

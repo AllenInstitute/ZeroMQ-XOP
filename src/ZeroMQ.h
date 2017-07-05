@@ -33,6 +33,8 @@
 #undef min
 #undef max
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 #include "json/json.hpp"
 using json = nlohmann::basic_json<>;
 

@@ -1,6 +1,8 @@
 #include "CallFunctionParameterHandler.h"
 #include "ZeroMQ.h"
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 CallFunctionParameterHandler::CallFunctionParameterHandler(
     StringVector params, int parameterTypes[MAX_NUM_PARAMS], int numParams)
     : m_hasPassByRefParams(false)

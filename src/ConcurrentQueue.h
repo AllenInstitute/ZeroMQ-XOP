@@ -3,6 +3,8 @@
 #include <queue>
 #include <mutex>
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 /// Implementation of a multi-consumer/multi-producer queue
 ///
 /// The contention due to locks is deemed acceptable.

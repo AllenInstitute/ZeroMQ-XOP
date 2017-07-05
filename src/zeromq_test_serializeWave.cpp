@@ -4,6 +4,8 @@
 #include <string>
 #include "SerializeWave.h"
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 // string zeromq_test_serializeWave(WAVE wv)
 extern "C" int zeromq_test_serializeWave(zeromq_test_serializeWaveParams *p)
 {

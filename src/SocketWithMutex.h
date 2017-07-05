@@ -1,5 +1,7 @@
 #pragma once
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 /// @param A object name to create
 #define GET_CLIENT_SOCKET(A)                                                   \
   SocketWithMutex A(GlobalData::Instance().ZMQClientSocket(),                  \

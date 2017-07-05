@@ -2,6 +2,8 @@
 #include "HelperFunctions.h"
 #include "RequestInterface.h"
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 std::string GetStringFromHandle(Handle strHandle)
 {
   // Check for special case of null handle.

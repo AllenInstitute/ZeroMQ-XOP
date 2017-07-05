@@ -1,5 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.8)
 
+# This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 PROJECT(ZeroMQ)
 
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)

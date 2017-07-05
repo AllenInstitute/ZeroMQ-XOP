@@ -1,5 +1,7 @@
 /// @file interface.h Available functions in the ZeroMQ XOP
 ///
+/// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+///
 /// - All functions returning a variable always return zero
 /// - Errors are signalled via RTE, use
 /// @code

@@ -6,6 +6,8 @@
 
 #include "XOPResources.h"			// Defines XOP-specific symbols.
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 1100 STR#					// Custom error messages.
 BEGIN
   "ZeroMQ requires Igor Pro 7.01 or later.\0",         // OLD_IGOR

@@ -2,6 +2,8 @@
 #include "RequestInterface.h"
 #include "CallFunctionOperation.h"
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+
 // string zeromq_test_callfunction(string msg)
 extern "C" int zeromq_test_callfunction(zeromq_test_callfunctionParams *p)
 {
