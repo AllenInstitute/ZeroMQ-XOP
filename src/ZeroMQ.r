@@ -1,3 +1,5 @@
+// vim: set ft=rc:
+
 #include "XOPStandardHeaders.r"
 
 resource 'vers' (1) {						/* XOP version info */
