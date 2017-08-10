@@ -20,6 +20,7 @@ Usage
 - Start Igor Pro and execute the following code:
 
 .. code-block:: igorpro
+
   zeromq_stop()
 	zeromq_server_bind("tcp://127.0.0.1:5555")
 	zeromq_handler_start()
