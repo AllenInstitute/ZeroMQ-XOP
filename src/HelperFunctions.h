@@ -3,7 +3,8 @@
 #include <sstream>
 #include <iomanip>
 
-// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+// This file is part of the `ZeroMQ-XOP` project and licensed under
+// BSD-3-Clause.
 
 /// @brief Converts a double value to a specified integer type.
 ///

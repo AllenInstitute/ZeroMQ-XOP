@@ -3,7 +3,8 @@
 #include "CallFunctionParameterHandler.h"
 #include "SerializeWave.h"
 
-// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+// This file is part of the `ZeroMQ-XOP` project and licensed under
+// BSD-3-Clause.
 
 namespace
 {
