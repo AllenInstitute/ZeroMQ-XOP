@@ -74,6 +74,7 @@ Function GetListeningStatus_IGNORE(port)
 
 	// Get the results from the temporary file created by the batch file.
 	Open/P=$(symbDirPath)/R/Z=1 refNum as filename
+	KillPath/Z $(symbDirPath)
 	AbortOnValue (V_flag != 0), 12
 
 	FBinRead refNum, contents
