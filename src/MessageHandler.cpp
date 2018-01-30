@@ -121,18 +121,20 @@ void CallAndReply(RequestInterfacePtr req) noexcept
   {
     try
     {
-      req->CanBeProcessed();
-      auto reply = req->Call();
-      ZeroMQServerSend(req->GetCallerIdentity(), reply.dump(4));
+      try
+      {
+        req->CanBeProcessed();
+        auto reply = req->Call();
+        ZeroMQServerSend(req->GetCallerIdentity(), reply.dump(4));
+      }
+      catch(const std::bad_alloc &)
+      {
+        throw RequestInterfaceException(REQ_OUT_OF_MEMORY);
+      }
     }
-    catch(const std::bad_alloc &)
+    catch(const IgorException &e)
     {
-      throw RequestInterfaceException(REQ_OUT_OF_MEMORY);
-    }
-  }
-  catch(const IgorException &e)
-  {
-    auto docTemplate = R"( {
+      auto docTemplate = R"( {
              "errorCode" : {
                "value" : %d,
                "msg"   : "%s"
@@ -140,26 +142,27 @@ void CallAndReply(RequestInterfacePtr req) noexcept
              }
              )";
 
-    auto reply =
-        json::parse(fmt::sprintf(docTemplate, e.m_errorCode, e.what()));
+      auto reply =
+          json::parse(fmt::sprintf(docTemplate, e.m_errorCode, e.what()));
 
-    if(req->HasValidMessageId())
-    {
-      reply[MESSAGEID_KEY] = req->GetMessageId();
+      if(req->HasValidMessageId())
+      {
+        reply[MESSAGEID_KEY] = req->GetMessageId();
+      }
+
+      auto rc = ZeroMQServerSend(req->GetCallerIdentity(), reply.dump(4));
+
+      // handle host unreachable error
+
+      DebugOutput(
+          fmt::sprintf("%s: ZeroMQSendAsServer returned %d\r", __func__, rc));
     }
-
-    auto rc = ZeroMQServerSend(req->GetCallerIdentity(), reply.dump(4));
-
-    // handle host unreachable error
-
-    DebugOutput(
-        fmt::sprintf("%s: ZeroMQSendAsServer returned %d\r", __func__, rc));
-  }
-  catch(const std::exception &e)
-  {
-    XOPNotice_ts(fmt::sprintf(
-        "%s: Caught std::exception with what=\"%s\". This must NOT happen!\r",
-        __func__, e.what()));
+    catch(const std::exception &e)
+    {
+      XOPNotice_ts(fmt::sprintf(
+          "%s: Caught std::exception with what=\"%s\". This must NOT happen!\r",
+          __func__, e.what()));
+    }
   }
   catch(...)
   {
