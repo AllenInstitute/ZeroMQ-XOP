@@ -35,6 +35,12 @@ int IgorException::HandleException() const
   return m_errorCode;
 }
 
+// Allow to serialize IgorExceptions to JSON
+void to_json(json &j, const IgorException &e)
+{
+  j["errorCode"] = json{{"value", e.m_errorCode}, {"msg", e.what()}};
+}
+
 //--------------------------------------------------------------
 // std::exception
 //--------------------------------------------------------------
