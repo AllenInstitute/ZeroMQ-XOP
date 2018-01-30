@@ -377,6 +377,23 @@ Function ComplainsWithInternalFunction()
 	CHECK_EQUAL_VAR(errorValue, REQ_NON_EXISTING_FUNCTION)
 End
 
+// requires that the XOP is compiled without long name support
+Function ComplainsWithTooLongFunctionName()
+
+	string msg
+	string replyMessage
+	variable errorValue
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionLongFunctionNameFromIgorProEight\"" + \
+		  "}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, ZeroMQ_INTERNAL_ERROR)
+End
+
 Function WorksWithFuncNoArgs()
 
 	string msg

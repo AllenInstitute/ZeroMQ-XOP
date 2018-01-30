@@ -458,6 +458,15 @@ Function TestFunctionPassByRef5(str, var)
 	return 42
 End
 
+#if (IgorVersion() >= 8.00)
+
+Function TestFunctionLongFunctionNameFromIgorProEight()
+
+	return 42
+End
+
+#endif
+
 Structure WaveProperties
 	WAVE/T raw
 	WAVE/T dimensions
