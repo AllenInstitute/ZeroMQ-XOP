@@ -14,7 +14,7 @@ extern "C" int zeromq_test_serializeWave(zeromq_test_serializeWaveParams *p)
 
   DebugOutput(fmt::sprintf("%s\r", __func__));
 
-  auto str = SerializeWave(p->wv);
+  const auto str = SerializeWave(p->wv).dump(4);
 
   DebugOutput(fmt::sprintf("%s: output=%.255s\r", __func__, str));
 

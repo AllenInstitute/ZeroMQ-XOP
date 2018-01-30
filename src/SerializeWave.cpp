@@ -318,6 +318,7 @@ std::string WaveToString(int waveType, waveHndl waveHandle)
     return WaveToStringImpl(waveType, waveHandle, 0);
   }
 
+  // WaveToStringImpl returns a JSON quoted string already
   auto resultTemplate = R"({
       "real"     : %s,
       "imag"     : %s
@@ -535,11 +536,11 @@ void AddWaveNoteIfSet(json &doc, waveHndl waveHandle)
 
 } // anonymous namespace
 
-std::string SerializeWave(waveHndl waveHandle)
+json SerializeWave(waveHndl waveHandle)
 {
   if(waveHandle == nullptr)
   {
-    return "null";
+    return nullptr;
   }
 
   const auto waveType       = WaveType(waveHandle);
@@ -567,5 +568,5 @@ std::string SerializeWave(waveHndl waveHandle)
   AddDimensionLabelsFullIfSet(doc, waveHandle, dimSizes);
   AddWaveNoteIfSet(doc, waveHandle);
 
-  return doc.dump(4);
+  return doc;
 }
