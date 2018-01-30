@@ -87,7 +87,7 @@ be called by sending the following string
          "name" : "FooBar",
          "params" : [
             "ITC18USB_DEV_0",
-            1, true, -1.75
+            1
          ]
        }
     }
