@@ -1,3 +1,6 @@
 [submodule "src/json"]
 	path = src/json
 	url = https://github.com/nlohmann/json
+[submodule "src/fmt"]
+	path = src/fmt
+	url = https://github.com/fmtlib/fmt

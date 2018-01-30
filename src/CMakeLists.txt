@@ -53,9 +53,9 @@ zeromq_test_callfunction.cpp
 zeromq_test_serializeWave.cpp)
 
 SET(SOURCES_EXT
-fmt/format.cc
-fmt/ostream.cc
-fmt/posix.cc)
+fmt/fmt/format.cc
+fmt/fmt/ostream.cc
+fmt/fmt/posix.cc)
 
 SET(HEADERS
 CallFunctionOperation.h

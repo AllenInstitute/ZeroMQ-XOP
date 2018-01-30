@@ -342,7 +342,6 @@ Required additional software:
 - (MacOSX only) Xcode
 - `CMake <https://cmake.org>`__ version 3.8 or later
 - `XOPSupport Toolkit 7 <https://www.wavemetrics.com/products/xoptoolkit/xoptoolkit.htm>`__
-- `fmt library <https://github.com/fmtlib/fmt>`__ in version 5f26b5da2871cc5f562231af9d2062fb18df1ca5
 - `Igor Unit Testing Framework <http://www.igorexchange.com/project/unitTesting>`__
 
 Building libzmq
