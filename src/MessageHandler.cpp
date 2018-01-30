@@ -79,19 +79,8 @@ void WorkerThread()
       }
       catch(const IgorException &e)
       {
-        auto docTemplate = R"( {
-                 "errorCode" : {
-                   "value" : %d,
-                   "msg"   : "%s"
-                   }
-                 }
-                 )";
-
-        auto reply =
-            json::parse(fmt::sprintf(docTemplate, e.m_errorCode, e.what()))
-                .dump(4);
-
-        rc = ZeroMQServerSend(identity, reply);
+        const json reply = e;
+        rc               = ZeroMQServerSend(identity, reply.dump(4));
 
         DebugOutput(
             fmt::sprintf("%s: ZeroMQSendAsServer returned %d\r", __func__, rc));
@@ -134,16 +123,7 @@ void CallAndReply(RequestInterfacePtr req) noexcept
     }
     catch(const IgorException &e)
     {
-      auto docTemplate = R"( {
-             "errorCode" : {
-               "value" : %d,
-               "msg"   : "%s"
-               }
-             }
-             )";
-
-      auto reply =
-          json::parse(fmt::sprintf(docTemplate, e.m_errorCode, e.what()));
+      json reply = e;
 
       if(req->HasValidMessageId())
       {

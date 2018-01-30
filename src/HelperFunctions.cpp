@@ -244,16 +244,8 @@ std::string CallIgorFunctionFromMessage(std::string msg)
   }
   catch(const IgorException &e)
   {
-    auto docTemplate = R"( {
-           "errorCode" : {
-             "value" : %d,
-             "msg"   : "%s"
-             }
-           }
-           )";
-
-    return json::parse(fmt::sprintf(docTemplate, e.m_errorCode, e.what()))
-        .dump(4);
+    const json reply = e;
+    return reply.dump(4);
   }
 }
 
