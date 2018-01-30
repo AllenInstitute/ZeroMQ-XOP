@@ -377,6 +377,23 @@ Function ComplainsWithInternalFunction()
 	CHECK_EQUAL_VAR(errorValue, REQ_NON_EXISTING_FUNCTION)
 End
 
+// requires that the XOP is compiled without long name support
+Function ComplainsWithTooLongFunctionName()
+
+	string msg
+	string replyMessage
+	variable errorValue
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionLongFunctionNameFromIgorProEight\"" + \
+		  "}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, ZeroMQ_INTERNAL_ERROR)
+End
+
 Function WorksWithFuncNoArgs()
 
 	string msg
@@ -1232,32 +1249,4 @@ Function WorksWithPassingMessageIDAndRep()
 	expected = "4711"
 	actual   = ExtractMessageID(replyMessage)
 	CHECK_EQUAL_STR(expected, actual, case_sensitive=1)
-End
-
-static Function ReturnsOOMError()
-	string msg, replyMessage
-	variable errorValue, resultVariable
-	string expected, actual
-
-#ifdef IGOR64
-	printf "Skipping test \"%s\" on Igor Pro 64bit\r", GetRTStackInfo(1)
-	PASS()
-	return NaN
-#endif
-
-	ExhaustMemory(1.0)
-
-	// wave will be returned by TestFunctionReturnExistingWave
-	// on serialization this will then trigger the OOM
-	Make/N=(100e6)/B/O root:bigWAVE
-
-	msg = "{\"version\"     : 1, "                    + \
-		  "\"CallFunction\" : {"                      + \
-		  "\"name\"         : \"TestFunctionReturnExistingWave\"" + \
-		  "}}"
-
-	replyMessage = zeromq_test_callfunction(msg)
-
-	errorValue = ExtractErrorValue(replyMessage)
-	CHECK_EQUAL_VAR(errorValue, REQ_OUT_OF_MEMORY)
 End

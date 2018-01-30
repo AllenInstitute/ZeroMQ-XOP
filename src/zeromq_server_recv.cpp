@@ -1,6 +1,7 @@
 #include "ZeroMQ.h"
 
-// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+// This file is part of the `ZeroMQ-XOP` project and licensed under
+// BSD-3-Clause.
 
 // string zeromq_server_recv(string *identity)
 extern "C" int zeromq_server_recv(zeromq_server_recvParams *p)

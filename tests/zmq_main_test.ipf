@@ -74,6 +74,7 @@ Function GetListeningStatus_IGNORE(port)
 
 	// Get the results from the temporary file created by the batch file.
 	Open/P=$(symbDirPath)/R/Z=1 refNum as filename
+	KillPath/Z $(symbDirPath)
 	AbortOnValue (V_flag != 0), 12
 
 	FBinRead refNum, contents
@@ -456,6 +457,15 @@ Function TestFunctionPassByRef5(str, var)
 
 	return 42
 End
+
+#if (IgorVersion() >= 8.00)
+
+Function TestFunctionLongFunctionNameFromIgorProEight()
+
+	return 42
+End
+
+#endif
 
 Structure WaveProperties
 	WAVE/T raw

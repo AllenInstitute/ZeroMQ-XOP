@@ -4,7 +4,8 @@
 #include <exception>
 #include <string>
 
-// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+// This file is part of the `ZeroMQ-XOP` project and licensed under
+// BSD-3-Clause.
 
 #define ASSERT(A)                                                              \
   if(!(A))                                                                     \
@@ -49,6 +50,8 @@ public:
   /// Displays the exception if required; gets the return code.
   int HandleException() const;
 };
+
+void to_json(json &j, const IgorException &e);
 
 int HandleException(const std::exception &e);
 

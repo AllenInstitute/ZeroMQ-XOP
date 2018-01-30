@@ -33,9 +33,10 @@
 #undef min
 #undef max
 
-// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+// This file is part of the `ZeroMQ-XOP` project and licensed under
+// BSD-3-Clause.
 
-#include "json/json.hpp"
+#include "json/src/json.hpp"
 using json = nlohmann::basic_json<>;
 
 class CallFunctionOperation;
@@ -52,9 +53,9 @@ using LockGuard = std::lock_guard<std::recursive_mutex>;
 #pragma warning(push)
 #pragma warning(disable : 4018)
 #endif
-#include "fmt/ostream.h"
-#include "fmt/format.h"
-#include "fmt/printf.h"
+#include "fmt/fmt/ostream.h"
+#include "fmt/fmt/format.h"
+#include "fmt/fmt/printf.h"
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif

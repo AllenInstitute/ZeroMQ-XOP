@@ -3,7 +3,8 @@
 #include "CallFunctionParameterHandler.h"
 #include "SerializeWave.h"
 
-// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+// This file is part of the `ZeroMQ-XOP` project and licensed under
+// BSD-3-Clause.
 
 namespace
 {
@@ -30,23 +31,28 @@ std::string GetTypeStringForIgorType(int igorType)
   }
 }
 
-std::string ExtractReturnStringFromUnion(IgorTypeUnion *ret, int returnType)
+json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
 {
-  std::string result;
-  bool needsQuotes = false;
-
   switch(returnType)
   {
   case NT_FP64:
-    result      = To_stringHighRes(ret->variable);
-    needsQuotes = !std::isfinite(ret->variable);
+    if(isfinite(ret->variable))
+    {
+      return json::parse(To_stringHighRes(ret->variable));
+    }
+    else
+    {
+      return To_stringHighRes(ret->variable);
+    }
     break;
   case HSTRING_TYPE:
-    result = GetStringFromHandle(ret->stringHandle);
+  {
+    auto result = GetStringFromHandle(ret->stringHandle);
     WMDisposeHandle(ret->stringHandle);
     ret->stringHandle = nullptr;
-    needsQuotes       = true;
-    break;
+    return result;
+  }
+  break;
   case WAVE_TYPE:
     if(ret->waveHandle)
     {
@@ -56,23 +62,15 @@ std::string ExtractReturnStringFromUnion(IgorTypeUnion *ret, int returnType)
         throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
       }
     }
-    result = SerializeWave(ret->waveHandle);
+    return SerializeWave(ret->waveHandle);
     break;
   case DATAFOLDER_TYPE:
-    result      = SerializeDataFolder(ret->dataFolderHandle);
-    needsQuotes = true;
+    return SerializeDataFolder(ret->dataFolderHandle);
     break;
   default:
     ASSERT(0);
     break;
   }
-
-  if(needsQuotes)
-  {
-    return "\"" + result + "\"";
-  }
-
-  return result;
 }
 
 } // anonymous namespace
@@ -280,21 +278,11 @@ json CallFunctionOperation::Call() const
     throw RequestInterfaceException(REQ_FUNCTION_ABORTED);
   }
 
-  auto retJSONTemplate = R"(
-    {
-       "errorCode" : {
-         "value" : 0
-       },
-       "result" : {
-         "type"  : "%s",
-         "value" : %s
-      }
-    }
-  )";
-
-  auto doc = json::parse(
-      fmt::sprintf(retJSONTemplate, GetTypeStringForIgorType(fip.returnType),
-                   ExtractReturnStringFromUnion(&retStorage, fip.returnType)));
+  json doc;
+  doc["errorCode"] = {"value", 0};
+  doc["result"]    = {
+      {"type", GetTypeStringForIgorType(fip.returnType)},
+      {"value", ExtractReturnValueFromUnion(&retStorage, fip.returnType)}};
 
   // only serialize the pass-by-ref params if we have some
   if(p.HasPassByRefParameters())

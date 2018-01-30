@@ -1,7 +1,8 @@
 #include "ZeroMQ.h"
 #include "CustomExceptions.h"
 
-// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+// This file is part of the `ZeroMQ-XOP` project and licensed under
+// BSD-3-Clause.
 
 //--------------------------------------------------------------
 // IgorException
@@ -32,6 +33,12 @@ int IgorException::HandleException() const
   XOPNotice_ts(what());
 
   return m_errorCode;
+}
+
+// Allow to serialize IgorExceptions to JSON
+void to_json(json &j, const IgorException &e)
+{
+  j["errorCode"] = json{{"value", e.m_errorCode}, {"msg", e.what()}};
 }
 
 //--------------------------------------------------------------
