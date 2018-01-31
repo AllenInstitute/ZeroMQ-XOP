@@ -2,6 +2,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.8)
 
 # This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
+option(WITH_LONG_NAMES "Use Long Names for Igor Pro 8" OFF)
+
 PROJECT(ZeroMQ)
 
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -77,6 +79,10 @@ SocketWithMutex.h
 ZeroMQ.h)
 
 SOURCE_GROUP("Headers" FILES ${HEADERS})
+
+IF(WITH_LONG_NAMES)
+  ADD_DEFINITIONS(-DXOP_LONG_NAMES_AND_PATHS=1)
+ENDIF()
 
 INCLUDE_DIRECTORIES(XOPSupport . "libzmq/include")
 
