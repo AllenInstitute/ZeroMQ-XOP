@@ -111,6 +111,11 @@ Function TEST_CASE_END_OVERRIDE(name)
 	zeromq_stop()
 End
 
+// JSONSimple returns the following types in W_TokenType
+// 1: object
+// 3: string
+// 0: number
+
 Function ExtractErrorValue(replyMessage)
 	string replyMessage
 
@@ -120,6 +125,14 @@ Function ExtractErrorValue(replyMessage)
 	REQUIRE_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
+
+	WAVE/Z W_TokenType
+	CHECK_WAVE(W_TokenType, NUMERIC_WAVE)
+	REQUIRE(DimSize(W_TokenType, 0) > 3)
+	CHECK_EQUAL_VAR(W_TokenType[0], 1)
+	CHECK_EQUAL_VAR(W_TokenType[1], 3)
+	CHECK_EQUAL_VAR(W_TokenType[2], 1)
+	CHECK_EQUAL_VAR(W_TokenType[3], 3)
 
 	WAVE/Z/T T_TokenText
 	CHECK_WAVE(T_TokenText, TEXT_WAVE)
@@ -158,8 +171,12 @@ Function/S ExtractMessageID(replyMessage)
 	WAVE/Z W_TokenSize
 	CHECK_WAVE(W_TokenSize, NUMERIC_WAVE)
 
+	WAVE/Z W_TokenType
+	CHECK_WAVE(W_TokenType, NUMERIC_WAVE)
+
 	FindValue/TXOP=4/TEXT="messageID" T_TokenText
-	CHECK_NEQ_VAR(V_value,-1)
+	REQUIRE_NEQ_VAR(V_value,-1)
+	CHECK_EQUAL_VAR(W_TokenType[V_value + 1], 3)
 
 	return T_TokenText[V_value + 1]
 End
@@ -185,6 +202,9 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 	WAVE/Z W_TokenSize
 	CHECK_WAVE(W_TokenSize, NUMERIC_WAVE)
 
+	WAVE/Z W_TokenType
+	CHECK_WAVE(W_TokenType, NUMERIC_WAVE)
+
 	if(!ParamIsDefault(var))
 		type = "variable"
 	elseif(!ParamIsDefault(str))
@@ -205,6 +225,7 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 
 	FindValue/TXOP=4/TEXT="result" T_TokenText
 	CHECK_NEQ_VAR(V_value,-1)
+	CHECK_EQUAL_VAR(W_TokenType[V_Value + 1], 1)
 
 	FindValue/TXOP=4/TEXT="type" T_TokenText
 	CHECK_NEQ_VAR(V_value,-1)
