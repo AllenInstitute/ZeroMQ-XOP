@@ -9,24 +9,26 @@
 class CallFunctionParameterHandler
 {
 public:
-  CallFunctionParameterHandler(StringVector params,
-                               int parameterTypes[MAX_NUM_PARAMS],
-                               int numParams);
+  CallFunctionParameterHandler(StringVector params, FunctionInfo fip);
+
   ~CallFunctionParameterHandler();
 
-  unsigned char *GetValues()
-  {
-    return &m_values[0];
-  }
+  unsigned char *GetParameterValueStorage();
 
-  bool HasPassByRefParameters();
-
-  // Return a jsons style array for the pass-by-reference parameters
-  json GetPassByRefArray();
+  // Return a jsons style array for the pass-by-reference input parameters
+  json GetPassByRefInputArray();
+  json GetReturnValues();
+  void *GetReturnValueStorage();
 
 private:
+  json ReadPassByRefParameters(int first, int last);
+
   unsigned char m_values[MAX_NUM_PARAMS * sizeof(double)];
   std::vector<int> m_paramTypes;
   std::vector<CountInt> m_paramSizesInBytes;
-  bool m_hasPassByRefParams;
+  bool m_multipleReturnValueSyntax;
+  int m_numReturnValues;
+  int m_numInputParams;
+  int m_returnType;
+  IgorTypeUnion m_retStorage;
 };

@@ -3,6 +3,18 @@
 #include <sstream>
 #include <iomanip>
 
+#define WAVEWAVE_TYPE                                                          \
+  0x00020000 // Used with WAVE_TYPE to signify WAVE/WAVE parameter with
+// CheckFunctionForm
+
+// Used with CheckFunctionForm when calling a function that has no direct return
+// value because it uses multiple return syntax
+#define FV_NORETURN_TYPE 0x00020000 // Requires Igor Pro 8.00 or later
+
+bool IsBitSet(int val, int bit);
+int ClearBit(int val, int bit);
+int SetBit(int val, int bit);
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
@@ -150,3 +162,8 @@ std::string CreateStringFromZMsg(zmq_msg_t *msg);
 
 void InitHandle(Handle *handle, size_t size);
 void WriteZMsgIntoHandle(Handle *handle, zmq_msg_t *msg);
+
+bool UsesMultipleReturnValueSyntax(FunctionInfo fip);
+int GetNumberOfReturnValues(FunctionInfo fip);
+int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues);
+int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues);

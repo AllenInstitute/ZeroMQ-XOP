@@ -189,6 +189,7 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 	STRUCT WaveProperties &wvProp
 	WAVE/T passByRefWave
 
+	variable lastPassByRefRow
 	string actual, expected
 	string type = ""
 
@@ -218,16 +219,21 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 	else
 		FAIL()
 	endif
+	WAVE W_TokenType
+
+//	Duplicate/O T_TokenText, root:T_TokenText
+//	Duplicate/O W_TokenSize, root:W_TokenSize
+//	Duplicate/O W_TokenType, root:W_TokenType
 
 	actual   = T_TokenText[1]
 	expected = "errorCode"
 	CHECK_EQUAL_STR(actual, expected)
 
 	FindValue/TXOP=4/TEXT="result" T_TokenText
-	CHECK_NEQ_VAR(V_value,-1)
+	REQUIRE_NEQ_VAR(V_value,-1)
 	CHECK_EQUAL_VAR(W_TokenType[V_Value + 1], 1)
 
-	FindValue/TXOP=4/TEXT="type" T_TokenText
+	FindValue/TXOP=4/TEXT="type"/S=(V_Value) T_TokenText
 	CHECK_NEQ_VAR(V_value,-1)
 
 	if(strlen(type) > 0)
@@ -252,9 +258,22 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 
 	if(!ParamIsDefault(passByRefWave))
 		FindValue/TXOP=4/TEXT="passByReference" T_TokenText
-		CHECK_NEQ_VAR(V_value,-1)
-		Redimension/N=(W_TokenSize[V_value + 1]) passByRefWave
-		passByRefWave[] = T_TokenText[V_value + 2 + p]
+		variable firstPassByRefRow = V_value
+		CHECK_NEQ_VAR(firstPassByRefRow,-1)
+
+		Redimension/N=(W_TokenSize[firstPassByRefRow + 1]) passByRefWave
+
+		FindValue/TXOP=4/TEXT="result" T_TokenText
+		CHECK_NEQ_VAR(lastPassByRefRow, -1)
+
+		lastPassByRefRow = V_Value
+		variable i, idx
+		for(i = firstPassByRefRow; i < lastPassByRefRow; i += 1)
+			if(!cmpstr(T_TokenText[i], "value"))
+				passByRefWave[idx] = T_TokenText[i + 1]
+				idx++
+			endif
+		endfor
 	endif
 End
 
