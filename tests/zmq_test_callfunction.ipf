@@ -442,6 +442,7 @@ Function WorksWithFunc2Vars()
 		  "\"params\" : [1, 2]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
 	ExtractReturnValue(replyMessage, var=resultVar)
@@ -480,6 +481,7 @@ Function WorksWithFuncStrVarStr()
 		  "\"params\" : [\"1\", 2, \"3\"]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
 	ExtractReturnValue(replyMessage, str=resultString)
