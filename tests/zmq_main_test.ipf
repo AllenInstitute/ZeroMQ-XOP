@@ -117,12 +117,12 @@ Function ExtractErrorValue(replyMessage)
 	string actual, expected
 	variable errorCode
 
-	REQUIRE_EQUAL_VAR(numtype(strlen(replyMessage)), 0)
+	REQUIRE_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
 	WAVE/Z/T T_TokenText
-	CHECK(WAveExists(T_TokenText))
+	CHECK_WAVE(T_TokenText, TEXT_WAVE)
 
 	actual   = T_TokenText[1]
 	expected = "errorCode"
@@ -148,15 +148,15 @@ Function/S ExtractMessageID(replyMessage)
 	string actual, expected
 	string type = ""
 
-	REQUIRE_EQUAL_VAR(numtype(strlen(replyMessage)), 0)
+	REQUIRE_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
 	WAVE/Z/T T_TokenText
-	CHECK(WaveExists(T_TokenText))
+	CHECK_WAVE(T_TokenText, TEXT_WAVE)
 
 	WAVE/Z W_TokenSize
-	CHECK(WaveExists(W_TokenSize))
+	CHECK_WAVE(W_TokenSize, NUMERIC_WAVE)
 
 	FindValue/TXOP=4/TEXT="messageID" T_TokenText
 	CHECK_NEQ_VAR(V_value,-1)
@@ -175,15 +175,15 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 	string actual, expected
 	string type = ""
 
-	REQUIRE_EQUAL_VAR(numtype(strlen(replyMessage)), 0)
+	REQUIRE_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
 	WAVE/Z/T T_TokenText
-	CHECK(WaveExists(T_TokenText))
+	CHECK_WAVE(T_TokenText, TEXT_WAVE)
 
 	WAVE/Z W_TokenSize
-	CHECK(WaveExists(W_TokenSize))
+	CHECK_WAVE(W_TokenSize, NUMERIC_WAVE)
 
 	if(!ParamIsDefault(var))
 		type = "variable"
@@ -481,12 +481,12 @@ Function ParseSerializedWave(replyMessage, s)
 	variable numTokens, start
 	string expected, actual
 
-	REQUIRE_EQUAL_VAR(numtype(strlen(replyMessage)), 0)
+	REQUIRE_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
 	WAVE/Z/T T_TokenText
-	CHECK(WaveExists(T_TokenText))
+	CHECK_WAVE(T_TokenText, TEXT_WAVE)
 
 	WAVE/Z W_TokenSize
 	REQUIRE(WaveExists(W_TokenSize))
