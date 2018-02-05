@@ -279,7 +279,7 @@ json CallFunctionOperation::Call() const
   }
 
   json doc;
-  doc["errorCode"] = {"value", 0};
+  doc["errorCode"] = {{"value", 0}};
   doc["result"]    = {
       {"type", GetTypeStringForIgorType(fip.returnType)},
       {"value", ExtractReturnValueFromUnion(&retStorage, fip.returnType)}};

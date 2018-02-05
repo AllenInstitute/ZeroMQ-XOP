@@ -378,7 +378,7 @@ Function ComplainsWithInternalFunction()
 End
 
 // requires that the XOP is compiled without long name support
-Function ComplainsWithTooLongFunctionName()
+Function ComplainsWithTooLongFuncName()
 
 	string msg
 	string replyMessage
@@ -391,7 +391,8 @@ Function ComplainsWithTooLongFunctionName()
 
 	replyMessage = zeromq_test_callfunction(msg)
 	errorValue = ExtractErrorValue(replyMessage)
-	CHECK_EQUAL_VAR(errorValue, ZeroMQ_INTERNAL_ERROR)
+
+	CHECK_EQUAL_VAR(errorValue, REQ_NON_EXISTING_FUNCTION)
 End
 
 Function WorksWithFuncNoArgs()
@@ -442,6 +443,7 @@ Function WorksWithFunc2Vars()
 		  "\"params\" : [1, 2]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
 	ExtractReturnValue(replyMessage, var=resultVar)
@@ -480,6 +482,7 @@ Function WorksWithFuncStrVarStr()
 		  "\"params\" : [\"1\", 2, \"3\"]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
 	ExtractReturnValue(replyMessage, str=resultString)
