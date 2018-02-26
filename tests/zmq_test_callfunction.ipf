@@ -1284,18 +1284,22 @@ Function [WAVE/T wv] TestFunctionMultRet5(variable inputParam)
 	Make/FREE/T wv = num2str(p)
 End
 
+Function [WAVE/DF wv] TestFunctionMultRet6(variable inputParam)
+
+	Make/FREE/DF wv = root:
+End
+
+Function [WAVE/WAVE wv] TestFunctionMultRet7(variable inputParam)
+
+	Make/FREE content = p
+	Make/FREE/WAVE wv = content
+End
+
 Function/WAVE GetComplexWave(variable inputParam)
 
 	Make/C/FREE wv = cmplx(p, p^2)
 
 	return wv
-End
-
-Function/DF PAssbyrefDFR(DFREF &inputParam)
-
-	DFREF returnPath = inputParam
-	DFREF inputParam = root:
-	return returnPath
 End
 
 Function Dostuff()
@@ -1314,8 +1318,8 @@ Function blah()
 	msg = "{\"version\"     : 1, "                      + \
 		  " \"messageID\"   : \"4711\", "               + \
 		  "\"CallFunction\" : {"                        + \
-		  "\"name\"         : \"PAssbyrefDFR\"," + \
-		  "\"params\"       : [ \"root:Packages\" ]"                   + \
+		  "\"name\"         : \"TestFunctionMultRet7\","+ \
+		  "\"params\"       : [ 42 ]"                   + \
 		  "}}"
 
 	replyMessage = zeromq_test_callfunction(msg)

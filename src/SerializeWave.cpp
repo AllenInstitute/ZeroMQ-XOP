@@ -184,6 +184,28 @@ struct WriteIntoStream<std::string, withComma>
   }
 };
 
+template <int withComma>
+struct WriteIntoStream<waveHndl, withComma>
+{
+  void operator()(fmt::MemoryWriter &writer, waveHndl val)
+  {
+    auto formatSpec = GetFormatString<waveHndl, withComma>()();
+
+    writer.write(formatSpec, SerializeWave(val).dump(4));
+  }
+};
+
+template <int withComma>
+struct WriteIntoStream<DataFolderHandle, withComma>
+{
+  void operator()(fmt::MemoryWriter &writer, DataFolderHandle val)
+  {
+    auto formatSpec = GetFormatString<std::string, withComma>()();
+
+    writer.write(formatSpec, JSONQuote(SerializeDataFolder(val)));
+  }
+};
+
 template <typename T>
 void OutputArray(fmt::MemoryWriter &writer, T *data, CountInt dataLength)
 {
@@ -298,7 +320,11 @@ std::string WaveToStringImpl(int waveType, waveHndl waveHandle, CountInt offset)
     ToString<char *>(writer, waveHandle, offset);
     break;
   case WAVE_TYPE:
+    ToString<waveHndl>(writer, waveHandle, offset);
+    break;
   case DATAFOLDER_TYPE:
+    ToString<DataFolderHandle>(writer, waveHandle, offset);
+    break;
   default:
     ASSERT(0);
     return std::string();

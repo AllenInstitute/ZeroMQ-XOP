@@ -161,12 +161,12 @@ void CallFunctionOperation::CanBeProcessed() const
   const auto firstInputParamIndex =
       GetFirstInputParameterIndex(fip, numReturnValues);
 
-  // check passed parameters
+  // check input parameters
   for(auto i = firstInputParamIndex; i < numParamsSupplied; i += 1)
   {
     auto igorType = fip.parameterTypes[i];
 
-    if(IsBitSet(igorType, NT_FP64))
+    if(IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX))
     {
       char *lastChar;
       std::strtod(m_params[i].c_str(), &lastChar);

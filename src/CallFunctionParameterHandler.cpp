@@ -42,15 +42,10 @@ json ExtractFromUnion(IgorTypeUnion *ret, int igorType)
     return SerializeDataFolder(ret->dataFolderHandle);
     break;
   default:
-    if(IsWaveType(igorType) && ret->waveHandle)
+    if(IsWaveType(igorType))
     {
-      auto type = WaveType(ret->waveHandle);
-      if(IsBitSet(igorType, DATAFOLDER_TYPE) || IsBitSet(igorType, WAVE_TYPE))
-      {
-        throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
-      }
+      return SerializeWave(ret->waveHandle);
     }
-    return SerializeWave(ret->waveHandle);
     break;
   }
 }
@@ -211,8 +206,6 @@ json CallFunctionParameterHandler::GetReturnValues()
     return doc;
   }
 }
-
-// FIXME write table with supported/unsupported values
 
 void *CallFunctionParameterHandler::GetReturnValueStorage()
 {

@@ -57,23 +57,25 @@ Direction: World -> Igor Pro
 Call Igor Pro functions and return the result
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Supported parameter types:
-
--  string (including pass-by-reference)
--  variable (including pass-by-reference)
--  datafolder reference
-
-Supported return types:
-
--  string
--  variable
--  wave (without wave reference waves or datafolder reference waves)
--  datafolder reference
-
-Current ``CallFunction`` limitations:
-
--  Filling in optional parameters is not supported.
--  Passing wave/structure parameters is not supported.
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|Type                    | by-value Parameter | by-ref Parameter | optional Parameter | Return value | Multiple return values|
++========================+====================+==================+====================+==============+=======================+
+|Variable aka double     |         x          |        x         |        -           |       x      |           x           |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|Variable/C aka complex  |         -          |        -         |        -           |       -      |           -           |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|int/int64/uint64/uint   |         -          |        -         |        -           |       -      |           -           |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|String                  |         x          |        x         |        -           |       x      |           x           |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|Wave                    |         -          |        -         |        -           |       x      |           x           |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|DFREF                   |         x          |        x         |        -           |       x      |                       |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|FUNCREF                 |         -          |        -         |        -           |       -      |                       |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|STRUCT                  |         -          |        -         |        -           |       -      |           -           |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
 
 The Igor Pro function ``FooBar(string panelTitle, variable index)`` can
 be called by sending the following string
