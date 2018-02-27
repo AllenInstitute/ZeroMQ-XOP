@@ -711,13 +711,20 @@ Function/S GetWaveTypeString(wv)
 			result = "NT_I64"
 			break
 		case 0:
-			result = "TEXT_WAVE_TYPE"
-			break
-		case WAVE_WAVE:
-			result = "WAVE_TYPE"
-			break
-		case DATAFOLDER_WAVE:
-			result = "DATAFOLDER_TYPE"
+			switch(WaveType(wv, 1))
+				case 2:
+					result = "TEXT_WAVE_TYPE"
+					break
+				case 3:
+					result = "DATAFOLDER_TYPE"
+					break
+				case 4:
+					result = "WAVE_TYPE"
+					break
+				default:
+					FAIL()
+					break
+			endswitch
 			break
 		default:
 			FAIL()
@@ -761,6 +768,7 @@ Function CompareWaveWithSerialized(wv, s)
 		REQUIRE_EQUAL_VAR(numpnts(s.raw), 0)
 	else
 		if(!type) // textWave
+			//FIXME add dfref and wave support
 			Make/FREE/N=(numPoints)/T convWaveText
 			// work around JSONSimple bug
 			convWaveText[] = ReplaceString("\\\"", s.raw[p], "\"")

@@ -4,34 +4,6 @@
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
-Function ComplainsWithWaveRefWave()
-
-	variable err
-
-	try
-		Make/FREE/WAVE wv
-		zeromq_test_serializeWave(wv); AbortOnRTE
-		FAIL()
-	catch
-		err = GetRTError(1)
-		PASS()
-	endtry
-End
-
-Function ComplainsWithDFRefWave()
-
-	variable err
-
-	try
-		Make/FREE/DF wv
-		zeromq_test_serializeWave(wv); AbortOnRTE
-		FAIL()
-	catch
-		err = GetRTError(1)
-		PASS()
-	endtry
-End
-
 Function WorksWithInvalidRef()
 
 	string actual, expected
@@ -93,6 +65,29 @@ Function WorksWithNonEmptyFloatWave()
 	STRUCT WaveProperties s
 	ParseSerializedWave(actual, s)
 	CompareWaveWithSerialized(wv, s)
+End
+
+Function WorksWithNonEmptyDREFWave()
+
+	string actual
+	Make/N=(1)/DF wv = root:Packages
+	actual = zeromq_test_serializeWave(wv)
+
+	STRUCT WaveProperties s
+	ParseSerializedWave(actual, s)
+	CompareWaveWithSerialized(wv, s)
+End
+
+Function WorksWithNonEmptyWaveWave()
+
+	string actual
+	Make/Free data = p
+	Make/N=(1)/WAVE wv = data
+	actual = zeromq_test_serializeWave(wv)
+
+	STRUCT WaveProperties s
+	ParseSerializedWave(actual, s)
+	CompareWaveWithSerialized(data, s)
 End
 
 Function WorksWithNonEmptyIntegerWaves()
