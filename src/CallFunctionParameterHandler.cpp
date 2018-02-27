@@ -46,6 +46,7 @@ json ExtractFromUnion(IgorTypeUnion *ret, int igorType)
     {
       return SerializeWave(ret->waveHandle);
     }
+    ASSERT(0);
     break;
   }
 }
@@ -73,6 +74,33 @@ std::string GetTypeStringForIgorType(int igorType)
     ASSERT(0);
     break;
   }
+}
+
+IgorTypeUnion ConvertStringToIgorTypeUnion(std::string param, int igorType)
+{
+  igorType = ClearBit(igorType, FV_REF_TYPE);
+
+  IgorTypeUnion u = {};
+
+  switch(igorType)
+  {
+  case NT_FP64:
+    u.variable = ConvertStringToDouble(param);
+    break;
+  case HSTRING_TYPE:
+    u.stringHandle = WMNewHandle(param.size());
+    ASSERT(u.stringHandle != nullptr);
+    memcpy(*u.stringHandle, param.c_str(), param.size());
+    break;
+  case DATAFOLDER_TYPE:
+    u.dataFolderHandle = DeSerializeDataFolder(param.c_str());
+    break;
+  default:
+    ASSERT(0);
+    break;
+  }
+
+  return u;
 }
 
 } // anonymous namespace
@@ -135,37 +163,14 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
 
   const auto firstInputParamIndex =
       GetFirstInputParameterIndex(fip, m_numReturnValues);
-
   unsigned char *dest = GetParameterValueStorage();
+
   for(int i = 0; i < fip.numRequiredParameters; i++)
   {
     if(i >= firstInputParamIndex)
     {
-      const auto inputParamIndex = i - firstInputParamIndex;
-
-      IgorTypeUnion u;
-
-      const auto type = m_paramTypes[i] & ~FV_REF_TYPE;
-
-      switch(type)
-      {
-      case NT_FP64:
-        u.variable = ConvertStringToDouble(inputParams[inputParamIndex]);
-        break;
-      case HSTRING_TYPE:
-        u.stringHandle = WMNewHandle(inputParams[inputParamIndex].size());
-        ASSERT(u.stringHandle != nullptr);
-        memcpy(*u.stringHandle, inputParams[i].c_str(),
-               inputParams[inputParamIndex].size());
-        break;
-      case DATAFOLDER_TYPE:
-        u.dataFolderHandle =
-            DeSerializeDataFolder(inputParams[inputParamIndex].c_str());
-        break;
-      default:
-        ASSERT(0);
-        break;
-      }
+      const auto u = ConvertStringToIgorTypeUnion(
+          inputParams[i - firstInputParamIndex], m_paramTypes[i]);
 
       // we write one parameter after another into our array
       // we can not use IgorTypeUnion here as the padding on 32bit
@@ -199,7 +204,6 @@ json CallFunctionParameterHandler::GetReturnValues()
   {
     json doc;
 
-    // fixme return one array with pairs and not two arrays
     doc["value"] = ExtractFromUnion(&m_retStorage, m_returnType);
     doc["type"]  = GetTypeStringForIgorType(m_returnType);
 
@@ -221,7 +225,7 @@ json CallFunctionParameterHandler::ReadPassByRefParameters(int first, int last)
 {
   unsigned char *src = GetParameterValueStorage();
 
-  json elems;
+  json elems = {};
 
   for(int i = 0; i < m_paramTypes.size() && i < last; i++)
   {

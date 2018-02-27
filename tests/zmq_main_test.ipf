@@ -112,9 +112,10 @@ Function TEST_CASE_END_OVERRIDE(name)
 End
 
 // JSONSimple returns the following types in W_TokenType
-// 1: object
-// 3: string
 // 0: number
+// 1: object
+// 2: array
+// 3: string
 
 Function ExtractErrorValue(replyMessage)
 	string replyMessage
@@ -181,15 +182,17 @@ Function/S ExtractMessageID(replyMessage)
 	return T_TokenText[V_value + 1]
 End
 
-Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave])
+Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave, resultWave])
 	string replyMessage
 	variable &var
 	string &str
 	string &dfr
 	STRUCT WaveProperties &wvProp
 	WAVE/T passByRefWave
+	WAVE/T resultWave
 
-	variable lastPassByRefRow
+	variable lastPassByRefRow, firstPassByRefRow
+	variable i, idx, resultRow
 	string actual, expected
 	string type = ""
 
@@ -216,24 +219,27 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 		type = "wave"
 	elseif(!ParamIsDefault(passByRefWave))
 		// do nothing
+	elseif(!ParamIsDefault(resultWave))
+		// do nothing
 	else
 		FAIL()
 	endif
 	WAVE W_TokenType
 
-//	Duplicate/O T_TokenText, root:T_TokenText
-//	Duplicate/O W_TokenSize, root:W_TokenSize
-//	Duplicate/O W_TokenType, root:W_TokenType
+	Duplicate/O T_TokenText, root:T_TokenText
+	Duplicate/O W_TokenSize, root:W_TokenSize
+	Duplicate/O W_TokenType, root:W_TokenType
 
 	actual   = T_TokenText[1]
 	expected = "errorCode"
 	CHECK_EQUAL_STR(actual, expected)
 
 	FindValue/TXOP=4/TEXT="result" T_TokenText
-	REQUIRE_NEQ_VAR(V_value,-1)
-	CHECK_EQUAL_VAR(W_TokenType[V_Value + 1], 1)
+	resultRow = V_Value
+	REQUIRE_NEQ_VAR(resultRow, -1)
+	CHECK(W_TokenType[resultRow + 1] == 1 || W_TokenType[resultRow + 1] == 2)
 
-	FindValue/TXOP=4/TEXT="type"/S=(V_Value) T_TokenText
+	FindValue/TXOP=4/TEXT="type"/S=(resultRow) T_TokenText
 	CHECK_NEQ_VAR(V_value,-1)
 
 	if(strlen(type) > 0)
@@ -252,25 +258,44 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 		ParseSerializedWave(replyMessage, wvProp)
 	elseif(!ParamIsDefault(passByRefWave))
 		// do nothing
+	elseif(!ParamIsDefault(resultWave))
+		// do nothing
 	else
 		FAIL()
 	endif
 
 	if(!ParamIsDefault(passByRefWave))
 		FindValue/TXOP=4/TEXT="passByReference" T_TokenText
-		variable firstPassByRefRow = V_value
+		firstPassByRefRow = V_value
 		CHECK_NEQ_VAR(firstPassByRefRow,-1)
-
 		Redimension/N=(W_TokenSize[firstPassByRefRow + 1]) passByRefWave
 
 		FindValue/TXOP=4/TEXT="result" T_TokenText
 		CHECK_NEQ_VAR(lastPassByRefRow, -1)
 
+		idx = 0
 		lastPassByRefRow = V_Value
-		variable i, idx
 		for(i = firstPassByRefRow; i < lastPassByRefRow; i += 1)
 			if(!cmpstr(T_TokenText[i], "value"))
 				passByRefWave[idx] = T_TokenText[i + 1]
+				idx++
+			endif
+		endfor
+	endif
+
+	if(!ParamIsDefault(resultWave))
+		FindValue/TXOP=4/TEXT="passByReference" T_TokenText
+		lastPassByRefRow = V_Value
+		if(lastPassByRefRow == -1)
+			lastPassByRefRow = DimSize(T_TokenText, 0) - 1
+		endif
+
+		Redimension/N=(W_TokenSize[resultRow + 1]) resultWave
+
+		idx = 0
+		for(i = resultRow; i <= lastPassByRefRow; i += 1)
+			if(!cmpstr(T_TokenText[i], "value"))
+				resultWave[idx] = T_TokenText[i + 1]
 				idx++
 			endif
 		endfor
@@ -321,6 +346,14 @@ End
 
 Function TestFunctionInvalidSig1(wv)
 	WAVE wv
+End
+
+Function TestFunctionInvalidSig2(num)
+	variable/C num
+End
+
+Function TestFunctionInvalidSig3(s)
+	STRUCT WMBackgroundStruct &s
 End
 
 Function/C TestFunctionInvalidRet2()
@@ -498,6 +531,12 @@ Function TestFunctionPassByRef5(str, var)
 	return 42
 End
 
+Function TestFunctionPassByRef6([s])
+	STRUCT WMBackgroundStruct &s
+
+	return 42
+End
+
 #if (IgorVersion() >= 8.00)
 
 Function TestFunctionLongFunctionNameFromIgorProEight()
@@ -505,11 +544,52 @@ Function TestFunctionLongFunctionNameFromIgorProEight()
 	return 42
 End
 
+Function/WAVE ReturnWaveWithLongNames()
+
+	Make/O/N=1 AVeryLongNameOnlyAllowedWithIgorProEight
+	WAVE wv = AVeryLongNameOnlyAllowedWithIgorProEight
+	SetDimLabel 0, 0, AVeryLongLabelOnlyAllowedWithIgorProEight, wv
+
+	return wv
+End
+
 #endif
+
+Function [variable result, string str, variable var] TestFunctionMultipleReturnValuesValid1()
+
+	result = 123
+	str    = "Hi there!"
+	var    = NaN
+End
+
+Function [WAVE wv] TestFunctionMultipleReturnValuesValid2()
+
+	Make/FREE wv = p
+End
+
+Function [DFREF dfr] TestFunctionMultipleReturnValuesValid3()
+
+	DFREF dfr = root:Packages
+End
+
+Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid4(variable inputVar, string inputStr)
+
+	outputVar = 23 + inputVar
+	outputStr = inputStr + "!!"
+End
+
+Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid5()
+
+End
+
+Function [variable result] TestFunctionMultipleReturnValuesInValid1(variable &param)
+
+	result = 42
+End
 
 Structure WaveProperties
 	WAVE/T raw
-	WAVE/T dimensions
+	WAVE dimensions
 	string type
 	variable modificationDate
 EndStructure
@@ -555,7 +635,7 @@ Function ParseSerializedWave(replyMessage, s)
 
 		Make/N=(4)/I/FREE dimensions
 		dimensions[0, numTokens - 1] = str2num(T_TokenText[V_Value + 2 + p])
-		WAVE/T s.dimensions = dimensions
+		WAVE s.dimensions = dimensions
 	endif
 
 	FindValue/TXOP=4/TEXT="real" T_TokenText
