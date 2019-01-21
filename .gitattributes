@@ -1,0 +1,3 @@
+src/json   -text -whitespace
+src/libzmq -text -whitespace
+src/fmt    -text -whitespace
