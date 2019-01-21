@@ -284,11 +284,7 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave,
 	endif
 
 	if(!ParamIsDefault(resultWave))
-		FindValue/TXOP=4/TEXT="passByReference" T_TokenText
-		lastPassByRefRow = V_Value
-		if(lastPassByRefRow == -1)
-			lastPassByRefRow = DimSize(T_TokenText, 0) - 1
-		endif
+		lastPassByRefRow = DimSize(T_TokenText, 0) - 1
 
 		Redimension/N=(W_TokenSize[resultRow + 1]) resultWave
 
@@ -342,6 +338,10 @@ Function/S TestFunctionStrVarStr(str1, var1, str2)
 	variable var1
 
 	return str1 + "_" + num2str(var1) + "_" + str2
+End
+
+Function TestFunctionOptionalStructArg([s])
+	STRUCT WMBackgroundStruct &s
 End
 
 Function TestFunctionInvalidSig1(wv)
@@ -582,9 +582,12 @@ Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValues
 
 End
 
-Function [variable result] TestFunctionMultipleReturnValuesInValid1(variable &param)
+Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid6(variable inputVar, string& inputStr)
 
-	result = 42
+	outputVar = 23 + inputVar
+	outputStr = inputStr + "!!"
+
+	inputStr  = "dummy text"
 End
 
 Structure WaveProperties

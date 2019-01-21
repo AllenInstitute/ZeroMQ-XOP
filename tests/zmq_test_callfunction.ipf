@@ -481,7 +481,7 @@ Function ComplainsWithTooLongFunctionName()
 #endif
 End
 
-Function WorksWithFuncNoArgs()
+Function WorksWithFuncNoArgs1()
 
 	string msg
 	string replyMessage
@@ -490,6 +490,22 @@ Function WorksWithFuncNoArgs()
 	msg = "{\"version\"     : 1, "                    + \
 		  "\"CallFunction\" : {"                      + \
 		  "\"name\"         : \"TestFunctionNoArgs\"" + \
+		  "}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+End
+
+Function WorksWithFuncNoArgs2()
+
+	string msg
+	string replyMessage
+	variable errorValue
+
+	msg = "{\"version\"     : 1, "                    + \
+		  "\"CallFunction\" : {"                      + \
+		  "\"name\"         : \"TestFunctionOptionalStructArg\"" + \
 		  "}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
@@ -1492,7 +1508,7 @@ End
 Function WorksWithMultipleReturnValues5()
 	string msg, replyMessage
 	variable errorValue
-	string expected, actual, returnValue
+	string expected, actual
 
 	msg = "{\"version\"     : 1, "                                        + \
 		  "\"CallFunction\" : {"                                          + \
@@ -1514,5 +1530,42 @@ Function WorksWithMultipleReturnValues5()
 
 	expected = ""
 	actual   = wv[1]
+	CHECK_EQUAL_STR(expected, actual)
+End
+
+Function WorksWithMultipleReturnValues6()
+
+	string msg
+	string replyMessage
+	variable errorValue
+	string expected, actual
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionMultipleReturnValuesValid6\"," + \
+		  "\"params\"       : [4711, \"my string\"]}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	Make/FREE/T/N=0 resultWave
+	ExtractReturnValue(replyMessage, resultWave=resultWave)
+	CHECK_EQUAL_VAR(DimSize(resultWave, 0), 2)
+
+	expected = "4734"
+	actual   = resultWave[0]
+	CHECK_EQUAL_STR(expected, actual)
+
+	expected = "my string!!"
+	actual   = resultWave[1]
+	CHECK_EQUAL_STR(expected, actual)
+
+	Make/FREE/T/N=0 passByRefWave
+	ExtractReturnValue(replyMessage, passByRefWave=passByRefWave)
+	CHECK_EQUAL_VAR(DimSize(passByRefWave, 0), 1)
+
+	expected = "dummy text"
+	actual   = passByRefWave[0]
 	CHECK_EQUAL_STR(expected, actual)
 End

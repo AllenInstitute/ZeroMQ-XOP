@@ -9,11 +9,6 @@
 namespace
 {
 
-bool IsWaveType(int igorType)
-{
-  return IsBitSet(igorType, WAVE_TYPE) || IsBitSet(igorType, TEXT_WAVE_TYPE);
-}
-
 json ExtractFromUnion(IgorTypeUnion *ret, int igorType)
 {
   igorType = ClearBit(igorType, FV_REF_TYPE);
@@ -186,7 +181,7 @@ json CallFunctionParameterHandler::GetPassByRefInputArray()
 {
   if(m_multipleReturnValueSyntax)
   {
-    return json();
+    return ReadPassByRefParameters(m_numReturnValues, INT_MAX);
   }
   else
   {
@@ -231,12 +226,7 @@ json CallFunctionParameterHandler::ReadPassByRefParameters(int first, int last)
   {
     const auto igorType = m_paramTypes[i];
 
-    if(!IsBitSet(igorType, FV_REF_TYPE))
-    {
-      continue;
-    }
-
-    if(i >= first)
+    if(i >= first && IsBitSet(igorType, FV_REF_TYPE))
     {
       if(IsBitSet(igorType, NT_FP64) || IsBitSet(igorType, HSTRING_TYPE) ||
          IsBitSet(igorType, DATAFOLDER_TYPE) || IsWaveType(igorType))

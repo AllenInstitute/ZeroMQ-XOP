@@ -502,3 +502,16 @@ int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues)
 {
   return fip.returnType != FV_NORETURN_TYPE ? 0 : numReturnValues;
 }
+
+bool IsConvertibleToDouble(std::string str)
+{
+  char *lastChar;
+  auto val = std::strtod(str.c_str(), &lastChar);
+
+  return *lastChar == '\0';
+}
+
+bool IsWaveType(int igorType)
+{
+  return IsBitSet(igorType, WAVE_TYPE) || IsBitSet(igorType, TEXT_WAVE_TYPE);
+}

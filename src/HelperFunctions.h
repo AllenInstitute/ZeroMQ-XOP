@@ -167,3 +167,7 @@ bool UsesMultipleReturnValueSyntax(FunctionInfo fip);
 int GetNumberOfReturnValues(FunctionInfo fip);
 int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues);
 int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues);
+
+bool IsConvertibleToDouble(std::string str);
+
+bool IsWaveType(int igorType);

@@ -161,46 +161,74 @@ void CallFunctionOperation::CanBeProcessed() const
   const auto firstInputParamIndex =
       GetFirstInputParameterIndex(fip, numReturnValues);
 
-  // check input parameters
-  for(auto i = firstInputParamIndex; i < numParamsSupplied; i += 1)
-  {
-    auto igorType = fip.parameterTypes[i];
+  // check the function signature
 
-    if(IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX))
-    {
-      char *lastChar;
-      std::strtod(m_params[i].c_str(), &lastChar);
-
-      if(*lastChar != '\0')
-      {
-        throw RequestInterfaceException(REQ_INVALID_PARAM_FORMAT);
-      }
-
-      continue;
-    }
-    else if(multipleReturnValueSyntax && IsBitSet(igorType, FV_REF_TYPE))
-    {
-      throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
-    }
-    else if(IsBitSet(igorType, HSTRING_TYPE))
-    {
-      continue;
-    }
-    else if(IsBitSet(igorType, DATAFOLDER_TYPE))
-    {
-      continue;
-    }
-
-    throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
-  }
-
-  // fixme check output parameters when multiple return value syntax is used
-
+  // 1: return values
   if(fip.returnType != NT_FP64 && fip.returnType != HSTRING_TYPE &&
      fip.returnType != WAVE_TYPE && fip.returnType != DATAFOLDER_TYPE &&
      fip.returnType != FV_NORETURN_TYPE)
   {
     throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
+  }
+
+  for(auto i = 0; i < fip.numRequiredParameters; i += 1)
+  {
+    auto igorType = fip.parameterTypes[i];
+
+    // 2: output parameter
+    if(i < firstInputParamIndex)
+    {
+      if(IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX))
+      {
+        continue;
+      }
+      else if(IsBitSet(igorType, HSTRING_TYPE))
+      {
+        continue;
+      }
+      else if(IsBitSet(igorType, DATAFOLDER_TYPE))
+      {
+        continue;
+      }
+      else if(IsWaveType(igorType))
+      {
+        continue;
+      }
+
+      throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
+    }
+    else
+    {
+      // 3: input parameter
+      if(IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX))
+      {
+        continue;
+      }
+      else if(IsBitSet(igorType, HSTRING_TYPE))
+      {
+        continue;
+      }
+      else if(IsBitSet(igorType, DATAFOLDER_TYPE))
+      {
+        continue;
+      }
+
+      throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
+    }
+  }
+
+  // check passed parameters
+  for(auto i = 0; i < numParamsSupplied; i += 1)
+  {
+    auto igorType = fip.parameterTypes[firstInputParamIndex + i];
+
+    if(IsBitSet(igorType, NT_FP64))
+    {
+      if(!IsConvertibleToDouble(m_params[i]))
+      {
+        throw RequestInterfaceException(REQ_INVALID_PARAM_FORMAT);
+      }
+    }
   }
 
   DebugOutput(fmt::sprintf("%s: Request Object can be processed.\r", __func__));
@@ -236,8 +264,8 @@ json CallFunctionOperation::Call() const
 
   auto passByRef = p.GetPassByRefInputArray();
 
-  // we can have optional pass-by-ref structures which we don't support
-  // FIXME check
+  // we can have optional pass-by-ref parameters like structures
+  // and in that case passByRef is empty
   if(!passByRef.empty())
   {
     doc["passByReference"] = {passByRef};
