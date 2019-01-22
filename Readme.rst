@@ -342,7 +342,7 @@ Required additional software:
 - (MacOSX only) Xcode
 - `CMake <https://cmake.org>`__ version 3.8 or later
 - `XOPSupport Toolkit 7 <https://www.wavemetrics.com/products/xoptoolkit/xoptoolkit.htm>`__
-- `Igor Unit Testing Framework <http://www.igorexchange.com/project/unitTesting>`__
+- `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`__
 
 Building libzmq
 ~~~~~~~~~~~~~~~
