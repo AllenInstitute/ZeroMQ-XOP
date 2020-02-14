@@ -418,8 +418,8 @@ Building and installing the ZeroMQ.xop
 Running the test suite
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- Create in "Igor Procedures" a shortcut pointing to
-  ``Packages\unit-testing``
+- Clone the `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`_.
+- Create in "Igor Procedures" a shortcut pointing to the "procedures" directory of that repository.
 - Open Packages/ZeroMQ/tests/RunTests.pxp
 - Execute in Igor ``run()``
 - The test suite always passes *without* errors
