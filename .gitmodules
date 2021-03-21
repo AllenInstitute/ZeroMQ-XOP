@@ -10,3 +10,6 @@
 [submodule "utf"]
 	path = utf
 	url = https://github.com/byte-physics/igor-unit-testing-framework
+[submodule "src/cmake/CreateLaunchers"]
+	path = src/cmake/CreateLaunchers
+	url = https://github.com/caseymcc/CreateLaunchers.git
