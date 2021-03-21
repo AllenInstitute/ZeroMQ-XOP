@@ -187,7 +187,7 @@ void MessageHandler::StopHandler()
   DebugOutput(fmt::sprintf("%s: Shutting down the handler.\r", __func__));
 
   {
-    LockGuard lock(threadShouldFinishMutex);
+    LockGuard innerLock(threadShouldFinishMutex);
     threadShouldFinish = true;
   }
 
