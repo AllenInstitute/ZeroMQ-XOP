@@ -1,6 +1,6 @@
 #pragma TextEncoding = "UTF-8"
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
-#pragma IgorVersion=7.0
+#pragma IgorVersion=8.0
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
