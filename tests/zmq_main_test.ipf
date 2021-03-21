@@ -97,7 +97,6 @@ End
 Function TEST_CASE_BEGIN_OVERRIDE(name)
 	string name
 
-	TEST_CASE_BEGIN(name)
 	zeromq_stop()
 	zeromq_set(ZeroMQ_SET_FLAGS_DEBUG | ZeroMQ_SET_FLAGS_DEFAULT)
 End
@@ -106,7 +105,6 @@ Function TEST_CASE_END_OVERRIDE(name)
 	string name
 
 	DoXOPIdle
-	TEST_CASE_END(name)
 
 	zeromq_stop()
 End
