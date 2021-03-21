@@ -7,3 +7,6 @@
 [submodule "src/libzmq"]
 	path = src/libzmq
 	url = https://github.com/zeromq/libzmq.git
+[submodule "utf"]
+	path = utf
+	url = https://github.com/byte-physics/igor-unit-testing-framework
