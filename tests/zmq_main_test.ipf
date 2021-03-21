@@ -120,7 +120,7 @@ Function ExtractErrorValue(replyMessage)
 	string actual, expected
 	variable errorCode
 
-	REQUIRE_PROPER_STR(replyMessage)
+	CHECK_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
@@ -159,7 +159,7 @@ Function/S ExtractMessageID(replyMessage)
 	string actual, expected
 	string type = ""
 
-	REQUIRE_PROPER_STR(replyMessage)
+	CHECK_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
@@ -173,7 +173,7 @@ Function/S ExtractMessageID(replyMessage)
 	CHECK_WAVE(W_TokenType, NUMERIC_WAVE)
 
 	FindValue/TXOP=4/TEXT="messageID" T_TokenText
-	REQUIRE_NEQ_VAR(V_value,-1)
+	CHECK_NEQ_VAR(V_value,-1)
 	CHECK_EQUAL_VAR(W_TokenType[V_value + 1], 3)
 
 	return T_TokenText[V_value + 1]
@@ -190,7 +190,7 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 	string actual, expected
 	string type = ""
 
-	REQUIRE_PROPER_STR(replyMessage)
+	CHECK_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
@@ -500,7 +500,7 @@ Function ParseSerializedWave(replyMessage, s)
 	variable numTokens, start
 	string expected, actual
 
-	REQUIRE_PROPER_STR(replyMessage)
+	CHECK_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
@@ -639,42 +639,42 @@ Function CompareWaveWithSerialized(wv, s)
 
 	// dimensions
 	Make/FREE/N=(4)/I dims = DimSize(wv, p)
-	REQUIRE_EQUAL_WAVES(dims, s.dimensions)
+	CHECK_EQUAL_WAVES(dims, s.dimensions)
 
 	if(s.modificationDate == 0)
-		REQUIRE_EQUAL_VAR(ModDate(wv), s.modificationDate)
+		CHECK_EQUAL_VAR(ModDate(wv), s.modificationDate)
 	else
-		REQUIRE_EQUAL_VAR(ModDate(wv) - date2secs(1970, 1, 1), s.modificationDate)
+		CHECK_EQUAL_VAR(ModDate(wv) - date2secs(1970, 1, 1), s.modificationDate)
 	endif
 
 	// type
 	type = WaveType(wv)
 	expectedType = GetWaveTypeString(wv)
 	actualType   = s.type
-	REQUIRE_EQUAL_STR(expectedType, actualType)
+	CHECK_EQUAL_STR(expectedType, actualType)
 
 	numPoints = numpnts(s.raw)
 
 	// content
 	if(sum(dims) == 0)
-		REQUIRE_EQUAL_VAR(numpnts(s.raw), 0)
+		CHECK_EQUAL_VAR(numpnts(s.raw), 0)
 	else
 		if(!type) // textWave
 			Make/FREE/N=(numPoints)/T convWaveText
 			// work around JSONSimple bug
 			convWaveText[] = ReplaceString("\\\"", s.raw[p], "\"")
 			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWaveText
-			REQUIRE_EQUAL_WAVES(wv, convWaveText, mode=WAVE_DATA)
+			CHECK_EQUAL_WAVES(wv, convWaveText, mode=WAVE_DATA)
 		elseif(type & COMPLEX_WAVE)
 			Make/FREE/N=(numPoints/2)/Y=(type)/C convWaveComplex
 			convWaveComplex[] = cmplx(str2num(s.raw[p]), str2num(s.raw[numPoints / 2 + p]))
 			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWaveComplex
-			REQUIRE_EQUAL_WAVES(wv, convWaveComplex, mode=WAVE_DATA)
+			CHECK_EQUAL_WAVES(wv, convWaveComplex, mode=WAVE_DATA)
 		else
 			Make/FREE/N=(numPoints)/Y=(type) convWave
 			convWave[] = str2num(s.raw[p])
 			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWave
-			REQUIRE_EQUAL_WAVES(wv, convWave, mode=WAVE_DATA)
+			CHECK_EQUAL_WAVES(wv, convWave, mode=WAVE_DATA)
 		endif
 	endif
 End
