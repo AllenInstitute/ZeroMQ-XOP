@@ -18,11 +18,11 @@ Function StopsBinds()
 
 	ret = zeromq_server_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 1)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 
 	ret = zeromq_stop()
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
 End
 
 Function StopsConnections()
@@ -31,13 +31,13 @@ Function StopsConnections()
 
 	ret = zeromq_server_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 1)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 
 	ret = zeromq_client_connect("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
 
 	ret = zeromq_stop()
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
 	/// @todo how to check that the connections are closed?
 End

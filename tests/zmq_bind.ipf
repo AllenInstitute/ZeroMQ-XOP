@@ -54,47 +54,47 @@ Function BindsToLocalHost()
 
 	variable ret
 
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
 	ret = zeromq_server_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 1)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 End
 
 Function BindsToLocalHostIPV6()
 
 	variable ret
 
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V6), 0)
 	zeromq_set(ZeroMQ_SET_FLAGS_IPV6)
 	ret = zeromq_server_bind("tcp://::1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 1)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V6), 1)
 End
 
 Function BindsToLocalHostIPV6AndIPV4()
 
 	variable ret
 
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
 	ret = zeromq_server_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 1)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 	// the ipv6 flag juggling is required due to https://github.com/zeromq/libzmq/issues/853
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666), 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666, TCP_V6), 0)
 	zeromq_set(ZeroMQ_SET_FLAGS_IPV6)
 	ret = zeromq_server_bind("tcp://::1:6666")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666), 1)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666, TCP_V6), 1)
 End
 
 Function ComplainsOnBindOnUsedPort()
 
 	variable err, ret
 
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
 	ret = zeromq_server_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 1)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 
 	try
 		ret = zeromq_server_bind("tcp://127.0.0.1:5555"); AbortOnRTE
@@ -109,14 +109,14 @@ Function AllowsBindingMultiplePorts()
 
 	variable err, ret
 
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
 	ret = zeromq_server_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 1)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 
 	ret = zeromq_server_bind("tcp://127.0.0.1:6666")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666), 1)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666, TCP_V4), 1)
 End
 
 Function DoesNotAcceptLargeMessages()
@@ -129,7 +129,7 @@ Function DoesNotAcceptLargeMessages()
 
 	rc = zeromq_server_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555), 1)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 
 	zeromq_client_connect("tcp://127.0.0.1:5555")
 

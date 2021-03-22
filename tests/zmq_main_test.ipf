@@ -2,6 +2,9 @@
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
 #pragma IgorVersion=8.0
 
+Constant TCP_V4 = 4
+Constant TCP_V6 = 6
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
 /// @brief Return the amount of free memory in GB
@@ -35,14 +38,23 @@ End
 /// @brief Check using netstat that a process listens on the given port
 ///
 /// Adapted and inspired by http://www.igorexchange.com/node/1243
-Function GetListeningStatus_IGNORE(port)
-	variable port
+Function GetListeningStatus_IGNORE(port, tcpVersion)
+	variable port, tcpVersion
 
-	string tmpDir, symbDirPath, filename, cmd, fullPath
+	string tmpDir, symbDirPath, filename, cmd, fullPath, localhost
 	string contents = ""
 	variable refNum
 
 #ifdef WINDOWS
+
+	if(tcpVersion == 4)
+		localhost = "0.0.0.0:0"
+	elseif(tcpVersion == 6)
+		localhost = "\[::\]:0"
+	else
+		FAIL()
+	endif
+
 	tmpDir = SpecialDirPath("Temporary", 0, 0, 0)
 
 	// Make sure that the directory we just got is, in fact, a directory.
@@ -62,7 +74,7 @@ Function GetListeningStatus_IGNORE(port)
 	// Convert the path into a windows path that uses "\" as the path separator.
 	fullPath = ParseFilePath(5, fullPath, "\\", 0, 0)
 
-	sprintf cmd, "cmd /C \"netstat -fAN | findStr %d | findstr 0.0.0.0:0 > %s\"", port, fullPath
+	sprintf cmd, "cmd /C \"netstat -fAN | findStr %d | findStr %s > %s\"", port, localhost, fullPath
 	ExecuteScriptText/B/W=2 cmd
 	AbortOnValue (V_flag != 0), 7
 
