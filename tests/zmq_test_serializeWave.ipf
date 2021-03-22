@@ -307,26 +307,29 @@ End
 
 Function DoesIncludeDimensionUnit()
 
-	string actual, expected
+	string actual, expected, array, replyMessage, xUnit, yUnit
 	string unit = "myUnit"
 
 	Make/FREE/N=(1, 2)/R wv = 4711
 	SetScale/P y, 0, 1, unit, wv
 
-	actual = zeromq_test_serializeWave(wv)
+	replyMessage = zeromq_test_serializeWave(wv)
 
 	STRUCT WaveProperties s
-	ParseSerializedWave(actual, s)
+	ParseSerializedWave(replyMessage, s)
 	CompareWaveWithSerialized(wv, s)
 
 	Wave/T T_TokenText
 	FindValue/TXOP=4/TEXT="unit" T_TokenText
 	CHECK_NEQ_VAR(V_Value, -1)
-	// no x units
-	actual = T_TokenText[V_value + 2]
-	CHECK_EMPTY_STR(actual)
-	actual = T_TokenText[V_value + 3]
-	CHECK_EQUAL_STR(unit, actual)
+
+	array = T_TokenText[V_value + 1]
+	CHECK_PROPER_STR(array)
+
+	SplitString/E="\"(.*)\"[,[:space:]]*\"(.*)\"" array, xUnit, yUnit
+	CHECK_EQUAL_VAR(V_flag, 2)
+	CHECK_EMPTY_STR(xUnit)
+	CHECK_EQUAL_STR(yUnit, unit)
 
 	FindValue/TXOP=4/TEXT="delta" T_TokenText
 	CHECK_EQUAL_VAR(V_Value, -1)
@@ -371,7 +374,7 @@ End
 
 Function DoesIncludeDimensionLabelFull()
 
-	string actual, expected
+	string actual, expected, xLabel, yLabel, array
 	string replyMessage
 	string lbl = "myLabel"
 
@@ -388,14 +391,13 @@ Function DoesIncludeDimensionLabelFull()
 	FindValue/TXOP=4/TEXT="each" T_TokenText
 	CHECK_EQUAL_VAR(V_Value, -1)
 
-	FindValue/TXOP=4/TEXT="full" T_TokenText
-	CHECK_NEQ_VAR(V_Value, -1)
+	array = T_TokenText[V_value + 1]
+	CHECK_PROPER_STR(array)
 
-	// x has default label ""
-	actual = T_TokenText[V_value + 2]
-	CHECK_EMPTY_STR(actual)
-	actual = T_TokenText[V_value + 3]
-	CHECK_EQUAL_STR(actual, lbl)
+	SplitString/E="\"(.*)\"[,[:space:]]*\"(.*)\"" array, xLabel, yLabel
+	CHECK_EQUAL_VAR(V_flag, 2)
+	CHECK_EMPTY_STR(xLabel)
+	CHECK_EQUAL_STR(yLabel, lbl)
 End
 
 Function DoesIncludeDimensionLabelEach()

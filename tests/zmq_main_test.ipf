@@ -503,7 +503,7 @@ Function ParseSerializedWave(replyMessage, s)
 	STRUCT WaveProperties &s
 
 	variable numTokens, start
-	string expected, actual
+	string expected, actual, typeLine, type, dimLine, size0, size1, size2, size3
 
 	CHECK_PROPER_STR(replyMessage)
 
@@ -515,14 +515,12 @@ Function ParseSerializedWave(replyMessage, s)
 	WAVE/Z W_TokenSize
 	REQUIRE(WaveExists(W_TokenSize))
 
-	FindValue/TXOP=4/TEXT="type" T_TokenText
-	CHECK_NEQ_VAR(V_value, -1)
-	start = V_Value
-	FindValue/TXOP=4/S=(start + 1)/TEXT="type" T_TokenText
-	if(V_Value != -1)
-		s.type = T_TokenText[V_Value + 1]
-	else
-		s.type = T_TokenText[start + 1]
+	// "type": "NT_FP32"
+	typeLine = GrepList(replyMessage, "\"type\": \".*_.*\"", 0, "\n")
+	if(strlen(typeLine) > 0)
+		SplitString/E="[[:space:]]\"type\": \"(.*)\"" typeLine, type
+		CHECK_EQUAL_VAR(V_Flag, 1)
+		s.type = type
 	endif
 
 	FindValue/TXOP=4/TEXT="modification" T_TokenText
@@ -532,13 +530,15 @@ Function ParseSerializedWave(replyMessage, s)
 		s.modificationDate = NaN
 	endif
 
-	FindValue/TXOP=4/TEXT="size" T_TokenText
+	FindValue/TXOP=4/TEXT="dimension" T_TokenText
 	if(V_value != -1)
-		CHECK_NEQ_VAR(V_value, -1)
-		numTokens = W_TokenSize[V_Value + 1]
+		dimLine = ReplaceString(" ", trimString(T_TokenText[V_Value + 1], 2), "")
+		string/g root:str = dimLine
 
-		Make/N=(4)/I/FREE dimensions
-		dimensions[0, numTokens - 1] = str2num(T_TokenText[V_Value + 2 + p])
+		SplitString/E="\"size\":\[([[:digit:]]*),?([[:digit:]]*),?([[:digit:]]*),?([[:digit:]]*),?\]" dimLine, size0, size1, size2, size3
+		CHECK(V_Flag >= 1)
+		Make/N=(4)/I/FREE dimensions = {str2num(size0), str2num(size1), str2num(size2), str2num(size3)}
+		dimensions[] = dimensions[p] == -1 ? 0 : dimensions[p]
 		WAVE/T s.dimensions = dimensions
 	endif
 
