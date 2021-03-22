@@ -424,8 +424,8 @@ void InitHandle(Handle *handle, size_t size)
   }
   else
   {
-    WMSetHandleSize(*handle, size);
-    ASSERT(WMGetHandleSize(*handle) == size);
+    int ret = WMSetHandleSize(*handle, size);
+    ASSERT(!ret);
   }
 }
 
