@@ -68,3 +68,8 @@ RequestInterfaceException::RequestInterfaceException(int errorCode)
     : IgorException(errorCode, GetErrorMessageFromCode(errorCode))
 {
 }
+
+RequestInterfaceException::~RequestInterfaceException()
+{
+  // do nothing
+}

@@ -9,4 +9,5 @@ class RequestInterfaceException : public IgorException
 {
 public:
   explicit RequestInterfaceException(int errorCode);
+  virtual ~RequestInterfaceException() override;
 };

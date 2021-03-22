@@ -45,6 +45,8 @@ public:
   explicit IgorException(int errorCode);
   IgorException(int errorCode, std::string errorMessage);
 
+  virtual ~IgorException() override;
+
   const char *what() const noexcept override;
 
   /// Displays the exception if required; gets the return code.
