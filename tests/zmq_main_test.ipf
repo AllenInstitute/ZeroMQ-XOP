@@ -2,6 +2,8 @@
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
 #pragma IgorVersion=8.0
 
+#include "::procedures:ZeroMQ_Interop"
+
 Constant TCP_V4 = 4
 Constant TCP_V6 = 6
 
