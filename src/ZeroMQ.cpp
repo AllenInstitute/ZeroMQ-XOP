@@ -68,7 +68,7 @@ HOST_IMPORT int XOPMain(IORecHandle ioRecHandle)
 
     SetXOPType(RESIDENT | IDLE);
 
-    if(igorVersion < 701)
+    if(igorVersion < XOP_MINIMUM_IGORVERSION)
     {
       SetXOPResult(OLD_IGOR);
       return EXIT_FAILURE;

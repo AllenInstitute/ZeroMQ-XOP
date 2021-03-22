@@ -95,6 +95,7 @@ using namespace fmt::literals; // NOLINT
 #pragma clang diagnostic pop
 #endif
 
+#include "cmake_config.h"
 #include "functions.h"
 #include "GlobalData.h"
 #include "CustomExceptions.h"
