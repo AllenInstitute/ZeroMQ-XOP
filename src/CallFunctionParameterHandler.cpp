@@ -40,7 +40,6 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
       break;
     default:
       ASSERT(0);
-      break;
     }
 
     arraySizeInBytes += m_paramSizesInBytes[i];
@@ -68,7 +67,6 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
       break;
     default:
       ASSERT(0);
-      break;
     }
 
     // we write one parameter after another into our array
