@@ -721,12 +721,54 @@ End
 // define MEMORY_LEAK_TESTING for testing against memory leaks
 // these tests tend to be flaky, so they are not enabled by default
 
-Function Run()
+// Entry point for UTF
+Function run()
+	return RunWithOpts()
+End
 
-	string procs = ""
-	procs += "zmq_set.ipf;zmq_bind.ipf;zmq_connect.ipf;zmq_stop.ipf;"
-	procs += "zmq_test_callfunction.ipf;zmq_start_handler.ipf;zmq_stop_handler.ipf;"
-	procs += "zmq_test_interop.ipf;zmq_test_serializeWave.ipf"
+// Examples:
+// - RunWithOpts()
+// - RunWithOpts(testsuite = "zmq_set.ipf")
+// - RunWithOpts(testcase = "StopsBinds")
+Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
+	variable debugMode
+	string list = ""
+	string name = "ZeroMQ-XOP"
 
-	RunTest(procs)
+	// speeds up testing to start with a fresh copy
+	KillWindow/Z HistoryCarbonCopy
+	DisableDebugOutput()
+
+	if(ParamIsDefault(allowdebug))
+		debugMode = 0
+	else
+		debugMode = IUTF_DEBUG_FAILED_ASSERTION | IUTF_DEBUG_ENABLE | IUTF_DEBUG_ON_ERROR | IUTF_DEBUG_NVAR_SVAR_WAVE
+	endif
+
+	if(ParamIsDefault(testcase))
+		testcase = ""
+	endif
+
+	// sorted list
+	list = AddListItem("zmq_bind.ipf", list, ";", inf)
+	list = AddListItem("zmq_connect.ipf", list, ";", inf)
+	list = AddListItem("zmq_set.ipf", list, ";", inf)
+	list = AddListItem("zmq_start_handler.ipf", list, ";", inf)
+	list = AddListItem("zmq_stop.ipf", list, ";", inf)
+	list = AddListItem("zmq_stop_handler.ipf", list, ";", inf)
+	list = AddListItem("zmq_test_callfunction.ipf", list, ";", inf)
+	list = AddListItem("zmq_test_interop.ipf", list, ";", inf)
+	list = AddListItem("zmq_test_serializeWave.ipf", list, ";", inf)
+
+	if(ParamIsDefault(testsuite))
+		testsuite = list
+	else
+		// do nothing
+	endif
+
+	if(strlen(testcase) == 0)
+		RunTest(testsuite, name = name, enableJU = 1, debugMode= debugMode)
+	else
+		RunTest(testsuite, name = name, enableJU = 1, debugMode= debugMode, testcase = testcase)
+	endif
 End
