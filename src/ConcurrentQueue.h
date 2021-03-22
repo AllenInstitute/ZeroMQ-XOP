@@ -49,7 +49,7 @@ public:
 
   /// Apply the given functor to all elements in the queue
   ///
-  /// @tparam F Functor must accept an object of type T
+  /// @tparam Functor must accept an object of type ConcurrentQueue::T
   ///           and *never* throw
   template <typename Functor>
   void apply_to_all(Functor F)
