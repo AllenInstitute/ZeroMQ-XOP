@@ -679,7 +679,8 @@ Function CompareWaveWithSerialized(wv, s)
 			Make/FREE/N=(numPoints)/Y=(type) convWave
 			convWave[] = str2num(s.raw[p])
 			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWave
-			CHECK_EQUAL_WAVES(wv, convWave, mode=WAVE_DATA)
+			// workaround IP9 when converting text to numbers
+			CHECK_EQUAL_WAVES(wv, convWave, mode=WAVE_DATA, tol = 1e-15)
 		endif
 	endif
 End
