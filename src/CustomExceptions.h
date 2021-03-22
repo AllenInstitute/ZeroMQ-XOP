@@ -56,7 +56,7 @@ void to_json(json &j, const IgorException &e);
 int HandleException(const std::exception &e);
 
 #define BEGIN_OUTER_CATCH                                                      \
-  p->result = 0;                                                               \
+  p->result = decltype(p->result)();                                           \
   try                                                                          \
   {                                                                            \
     GlobalData::Instance().EnsureInteropProcFileAvailable();
