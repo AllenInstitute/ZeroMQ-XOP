@@ -1,0 +1,3 @@
+#pragma once
+
+constexpr int XOP_MINIMUM_IGORVERSION = @XOP_MINIMUM_IGORVERSION@;
