@@ -8,7 +8,7 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
     StringVector params, int parameterTypes[MAX_NUM_PARAMS], int numParams)
     : m_hasPassByRefParams(false)
 {
-  ASSERT(numParams == (int) params.size());
+  ASSERT(numParams == static_cast<int>(params.size()));
 
   if(numParams == 0)
   {
