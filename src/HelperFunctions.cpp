@@ -139,6 +139,8 @@ void ApplyFlags(double flags)
                            ZMQ_VERSION_MAJOR, ZMQ_VERSION_MINOR,
                            ZMQ_VERSION_PATCH));
 
+  DebugOutput(fmt::sprintf("%s: git revision %s\r", __func__, GIT_REVISION));
+
   if((val & ZeroMQ_SET_FLAGS::DEFAULT) == ZeroMQ_SET_FLAGS::DEFAULT)
   {
     GlobalData::Instance().SetDebugFlag(false);

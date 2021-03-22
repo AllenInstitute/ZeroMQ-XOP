@@ -104,6 +104,7 @@ using namespace fmt::literals; // NOLINT
 #include "ConcurrentXOPNotice.h"
 #include "SocketWithMutex.h"
 #include "Errors.h"
+#include "git_version.h"
 
 // see also FunctionInfo XOPSupport function
 const int MAX_NUM_PARAMS        = 100;
