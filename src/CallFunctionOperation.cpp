@@ -44,7 +44,7 @@ json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
     auto result = GetStringFromHandle(ret->stringHandle);
     WMDisposeHandle(ret->stringHandle);
     ret->stringHandle = nullptr;
-    return result;
+    return std::move(result);
   }
   case WAVE_TYPE:
     if(ret->waveHandle)
