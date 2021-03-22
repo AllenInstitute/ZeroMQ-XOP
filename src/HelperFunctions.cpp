@@ -21,11 +21,11 @@ std::string GetStringFromHandle(Handle strHandle)
 ///
 /// @param	h	Wave to set dimension labels on
 /// @param	Dimension	Dimension to set labels on
-/// @param	colLabels	vector of labels to set
+/// @param	dimLabels	vector of labels to set
 ///
 /// dimLabels[k] will be assigned to index k of the wave
 ///
-/// @return Igor error code
+/// @throws Igor error code
 void SetDimensionLabels(waveHndl h, int Dimension,
                         const std::vector<std::string> &dimLabels)
 {
