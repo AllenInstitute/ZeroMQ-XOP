@@ -715,6 +715,9 @@ Function/WAVE TestFunctionReturnExistingWave()
 	return bigWave
 End
 
+// define MEMORY_LEAK_TESTING for testing against memory leaks
+// these tests tend to be flaky, so they are not enabled by default
+
 Function Run()
 
 	string procs = ""

@@ -697,6 +697,8 @@ Function WorksWithFuncStrArg1()
 	CHECK_EQUAL_STR(resultString, expected)
 End
 
+#ifdef MEMORY_LEAK_TESTING
+
 Function DoesNotHaveMemLeaksReturnString()
 	variable i, errorValue, memBefore, memAfter
 
@@ -724,6 +726,8 @@ Function DoesNotHaveMemLeaksReturnString()
 
 	CHECK(memAfter < memBefore * 1.15)
 End
+
+#endif
 
 Function WorksWithFuncNullWaveReturn()
 
@@ -821,6 +825,8 @@ Function ComplainsWithFuncReturnDFWave()
 	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_RET)
 End
 
+#ifdef MEMORY_LEAK_TESTING
+
 Function DoesNotHaveMemLeaksReturnWave()
 	variable i, errorValue, memBefore, memAfter
 
@@ -843,6 +849,8 @@ Function DoesNotHaveMemLeaksReturnWave()
 
 	CHECK(memAfter < memBefore * 1.05)
 End
+
+#endif
 
 Function ComplainsWithFuncAndIntParam1()
 
@@ -1054,6 +1062,8 @@ Function WorksWithFunctionsAndPassByRef3()
 	CHECK_EQUAL_STR(expected, actual)
 End
 
+#ifdef MEMORY_LEAK_TESTING
+
 Function DoesNotHaveMemLeaksPassByRefStr()
 	variable i, errorValue, memBefore, memAfter
 
@@ -1078,6 +1088,8 @@ Function DoesNotHaveMemLeaksPassByRefStr()
 
 	CHECK(memAfter < memBefore * 1.05)
 End
+
+#endif
 
 Function WorksWithReturningNullDFR()
 
