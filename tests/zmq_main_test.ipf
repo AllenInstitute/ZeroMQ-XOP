@@ -82,7 +82,7 @@ Function GetListeningStatus_IGNORE(port)
 
 	return strlen(contents) > 0
 #else
-	sprintf cmd, "do shell script \"netstat -an\"", port
+	sprintf cmd, "do shell script \"netstat -an\""
 
 	ExecuteScriptText/Z cmd
 	AbortOnValue (V_flag != 0), 7
