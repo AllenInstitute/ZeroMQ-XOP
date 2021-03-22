@@ -78,40 +78,28 @@ std::size_t GetWaveElementSize(int dataType)
   // not guaranteed by the standard but should work
   case NT_CMPLX | NT_FP32:
     return 2 * sizeof(float);
-    break;
   case NT_CMPLX | NT_FP64:
     return 2 * sizeof(double);
-    break;
   case NT_FP32:
     return sizeof(float);
-    break;
   case NT_FP64:
     return sizeof(double);
-    break;
   case NT_I8:
     return sizeof(int8_t);
-    break;
   case NT_I8 | NT_UNSIGNED:
     return sizeof(uint8_t);
-    break;
   case NT_I16:
     return sizeof(int16_t);
-    break;
   case NT_I16 | NT_UNSIGNED:
     return sizeof(uint16_t);
-    break;
   case NT_I32:
     return sizeof(int32_t);
-    break;
   case NT_I32 | NT_UNSIGNED:
     return sizeof(uint32_t);
-    break;
   case NT_I64:
     return sizeof(int64_t);
-    break;
   case NT_I64 | NT_UNSIGNED:
     return sizeof(uint64_t);
-    break;
   default:
     return 0;
   }
