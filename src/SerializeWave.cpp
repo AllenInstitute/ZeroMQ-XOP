@@ -79,9 +79,6 @@ std::string GetWaveTypeString(int waveType)
     break;
   default:
     ASSERT(0);
-    // never reached
-    return std::string();
-    break;
   }
 
   if(isComplex)
