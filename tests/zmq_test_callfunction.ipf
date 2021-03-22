@@ -916,66 +916,64 @@ Function WorksWithFuncAndDoubleParam()
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 End
 
-// tests are flaky
-//
-//Function WorksWithFunctionsWhichAbort1()
-//
-//	string msg, replyMessage, expected
-//	variable errorValue, err
-//
-//	msg = "{\"version\"     : 1, "                   + \
-//		  "\"CallFunction\" : {"                     + \
-//		  "\"name\"         : \"TestFunctionAbort1\"" + \
-//		  "}}"
-//
-//	try
-//		replyMessage = zeromq_test_callfunction(msg)
-//	catch
-//	endtry
-//
-//	errorValue = ExtractErrorValue(replyMessage)
-//	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
-//End
-//
-//Function WorksWithFunctionsWhichAbort2()
-//
-//	string msg, replyMessage, expected
-//	variable errorValue, err
-//
-//	msg = "{\"version\"     : 1, "                   + \
-//		  "\"CallFunction\" : {"                     + \
-//		  "\"name\"         : \"TestFunctionAbort2\"" + \
-//		  "}}"
-//
-//	try
-//		replyMessage = zeromq_test_callfunction(msg)
-//	catch
-//	endtry
-//
-//	errorValue = ExtractErrorValue(replyMessage)
-//	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
-//End
-//
+Function WorksWithFunctionsWhichAbort1()
+
+	string msg, replyMessage, expected
+	variable errorValue, err
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionAbort1\"" + \
+		  "}}"
+
+	try
+		replyMessage = zeromq_test_callfunction(msg)
+	catch
+	endtry
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+End
+
+Function WorksWithFunctionsWhichAbort2()
+
+	string msg, replyMessage, expected
+	variable errorValue, err
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionAbort2\"" + \
+		  "}}"
+
+	try
+		replyMessage = zeromq_test_callfunction(msg)
+	catch
+	endtry
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+End
+
 // Works with functions which Abort and have pass by ref parameters
-//Function WorksWithFunctionsAndPassByRef4()
-//
-//	string msg, replyMessage
-//	string expected, actual
-//	variable errorValue, resultVariable
-//
-//	msg = "{\"version\"     : 1, "                   + \
-//		  "\"CallFunction\" : {"                     + \
-//		  "\"name\"         : \"TestFunctionPassByRef4\"," + \
-//		  "\"params\" : [123, \"nothing\"]}}"
-//
-//	try
-//		replyMessage = zeromq_test_callfunction(msg)
-//	catch
-//	endtry
-//
-//	errorValue = ExtractErrorValue(replyMessage)
-//	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
-//End
+Function WorksWithFunctionsAndPassByRef4()
+
+	string msg, replyMessage
+	string expected, actual
+	variable errorValue, resultVariable
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionPassByRef4\"," + \
+		  "\"params\" : [123, \"nothing\"]}}"
+
+	try
+		replyMessage = zeromq_test_callfunction(msg)
+	catch
+	endtry
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+End
 
 Function WorksWithFunctionsAndPassByRef1()
 
