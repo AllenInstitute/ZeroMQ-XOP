@@ -298,8 +298,6 @@ std::string WaveToStringImpl(int waveType, waveHndl waveHandle, CountInt offset)
   case DATAFOLDER_TYPE:
   default:
     ASSERT(0);
-    return std::string();
-    break;
   }
 
   return writer.str();
