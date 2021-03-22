@@ -255,7 +255,7 @@ json CallFunctionOperation::Call() const
   CallFunctionParameterHandler p(m_params, fip.parameterTypes,
                                  fip.numRequiredParameters);
 
-  rc = CallFunction(&fip, (void *) p.GetValues(), &retStorage);
+  rc = CallFunction(&fip, static_cast<void *>(p.GetValues()), &retStorage);
   ASSERT(rc == 0);
 
   auto functionAborted = SpinProcess();
