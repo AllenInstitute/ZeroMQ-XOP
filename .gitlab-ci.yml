@@ -1,0 +1,316 @@
+# This file is a template, and might need editing before it works on your project.
+# see https://docs.gitlab.com/ce/ci/yaml/README.html for all available options
+
+variables:
+  GIT_SUBMODULE_STRATEGY: "recursive"
+  MACOSX_XCODE_VERSION: "12.0.0"
+  CMAKE_OSX_DEPLOYMENT_TARGET: "10.10"
+
+stages:
+  - first
+  - second
+  - third
+  - fourth
+
+download-xoptoolkit:
+  stage: first
+  tags:
+    - docker, debian
+  image:
+    name: ${CI_REGISTRY}/internal/docker-utils
+  script:
+    - curl -L --user ${XOPTOOLKIT_USER}:${XOPTOOLKIT_PW} https://www.wavemetrics.net/ecomm/xop/XOPToolkit8.exe --output XOPToolkit8.exe
+    - 7z x -y XOPToolkit8.exe
+    - mv XOP\ Toolkit\ 8/IgorXOPs8/XOPSupport .
+  artifacts:
+    paths:
+      - XOPSupport
+
+compile-libzmq-windows:
+  stage: first
+  tags:
+    - windows, shell
+  parallel:
+    matrix:
+      - CONFIG_TYPE:
+        - Release
+        - Debug
+        ARCHITECTURE:
+        - x86
+        - x64
+  rules:
+    - when: manual
+    - if: '$ARCHITECTURE == "x64"'
+      variables:
+        GENERATOR_PLATFORM: "x64"
+    - if: '$ARCHITECTURE == "x86"'
+      variables:
+        GENERATOR_PLATFORM: "Win32"
+  script:
+    - del /S /Q output
+    - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCHITECTURE%
+    - cd src/libzmq
+    - md build
+    - cd build
+    - cmake -G "Visual Studio 16 2019" -A %GENERATOR_PLATFORM% -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DZMQ_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=../../../output/win/%ARCHITECTURE%/libzmq/%CONFIG_TYPE% ..
+    - cmake --build . --config %CONFIG_TYPE% --target install
+    # - ctest -C %CONFIG_TYPE%
+  artifacts:
+    paths:
+      - output/win
+
+compile-libzmq-macosx:
+  stage: first
+  when: manual
+  tags:
+    - macosx, xcode, catalina
+  parallel:
+    matrix:
+      - CONFIG_TYPE:
+        - Release
+        - Debug
+  script:
+    - rm -rf output
+    - cd src/libzmq
+    - mkdir build
+    - cd build
+    - cmake -G "Xcode" -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DCMAKE_INSTALL_PREFIX=../../../output/mac/libzmq/${CONFIG_TYPE} ..
+    - cmake --build . --config ${CONFIG_TYPE} --target install
+  artifacts:
+    paths:
+      - output/mac
+
+compile-xop-windows:
+  stage: second
+  tags:
+    - windows, shell
+  parallel:
+    matrix:
+      - CONFIG_TYPE:
+        - Release
+        - Debug
+        ARCHITECTURE:
+        - x86
+        - x64
+  rules:
+    - if: '$ARCHITECTURE == "x64"'
+      variables:
+        GENERATOR_PLATFORM: "x64"
+    - if: '$ARCHITECTURE == "x86"'
+      variables:
+        GENERATOR_PLATFORM: "Win32"
+  script:
+    - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCHITECTURE%
+    - md build
+    - cd build
+    - cmake -G "Visual Studio 16 2019" -A %GENERATOR_PLATFORM% -DCMAKE_BUILD_TYPE=%CONFIG_TYPE% -DMSVC_RUNTIME_DYNAMIC=ON -DWARNINGS_AS_ERRORS=ON ../src
+    - cmake --build . --config %CONFIG_TYPE% --target install
+  needs:
+    - download-xoptoolkit
+  artifacts:
+    paths:
+      - output/win
+
+compile-xop-release-macosx:
+  stage: second
+  tags:
+    - macosx, xcode, catalina
+  script:
+    - mkdir build
+    - cd build
+    - cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=ON ../src
+    - cmake --build . --config Release --target install
+  needs:
+    - download-xoptoolkit
+  artifacts:
+    paths:
+      - output/mac
+
+compile-xop-debug-coverage-macosx:
+  stage: second
+  tags:
+    - macosx, xcode, catalina
+  script:
+    - mkdir build
+    - cd build
+    - cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Debug -DWARNINGS_AS_ERRORS=ON -DCOVERAGE=ON -DSANITIZER=ON ../src
+    - cmake --build . --config Debug --target install
+  needs:
+    - download-xoptoolkit
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - output/mac
+
+# clang-tidy:
+#   tags:
+#     - macosx, xcode, catalina
+#   stage: first
+#   script:
+#     - mkdir build
+#     - cd build
+#     - cmake -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src
+#       # make paths in replacement file relative
+#     - cmake --build . --config Debug --target clang-tidy ||
+#       (gsed -i "s/'\/.*${CI_PROJECT_NAMESPACE}\/${CI_PROJECT_NAME}\//'/g" clang-tidy-fixes.yaml; exit 1)
+#   artifacts:
+#     when: always
+#     expire_in: 1 week
+#     paths:
+#       - build/clang-tidy-fixes.yaml
+#
+# codesign-and-notarize-xop-macosx:
+#   tags:
+#     - macosx, xcode, catalina
+#   stage: second
+#   script:
+#     - cd output/mac
+#     - unzip JSON-64.zip
+#     - ../../tools/notarize-macos.py --username "${APPLE_NOTARIZATION_USERNAME}" --password "${APPLE_NOTARIZATION_PASSWORD}" --certname "${APPLE_NOTARIZATION_CERTNAME}" --bundleid "com.wavemetrics.xops.JSON-64" --folder "Release/JSON-64.xop"
+#     - zip -ru JSON-64.zip Release
+#   artifacts:
+#     paths:
+#       - output/mac/JSON-64.zip
+#   needs:
+#     - compile-release-macosx-64bit
+#
+# testing-macosx-bigsur-release-v9:
+#   tags:
+#     - macosx, igorpro, bigsur
+#   stage: third
+#   variables:
+#     IGORPRO_VERSION: "9"
+#   script:
+#       - rm -rf "$HOME/Documents/WaveMetrics"
+#       - mkdir -p "$HOME/Documents/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/Igor Extensions (64-bit)"
+#       - unzip output/mac/*.zip -d "$HOME/Documents/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/Igor Extensions (64-bit)"
+#       - mkdir -p "$HOME/Documents/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/User Procedures"
+#       - ln -s $(pwd)/utf/procedures "$HOME/Documents/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/User Procedures"
+#       - cd tests
+#       - touch DO_AUTORUN.TXT
+#       - /Applications/Igor\ Pro\ ${IGORPRO_VERSION}\ Folder/Igor64.app/Contents/MacOS/Igor64 /I RunTests.pxp
+#         # generate a proper exit value
+#       - exit $(grep "errors\|failures=\"[0-9]\+\"" JU_*.xml | grep -cv "failures=\"0\" errors=\"0\"")
+#   artifacts:
+#     when: always
+#     reports:
+#         junit: tests/JU_*.xml
+#   needs:
+#     - codesign-and-notarize-xop-macosx
+#
+testing-macosx:
+  tags:
+    - macosx, igorpro, catalina
+  stage: third
+  parallel:
+    matrix:
+      - IGORPRO_VERSION:
+        - 8
+        - 9
+  script:
+      - rm -rf "$HOME/Documents/WaveMetrics"
+      - mkdir -p "$HOME/Documents/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/Igor Extensions (64-bit)"
+      - unzip output/mac/xop/Debug/*.zip -d "$HOME/Documents/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/Igor Extensions (64-bit)"
+      - mkdir -p "$HOME/Documents/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/User Procedures"
+      - ln -s $(pwd)/utf/procedures "$HOME/Documents/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/User Procedures/utf"
+      - cd tests
+      - touch DO_AUTORUN.TXT
+      - export UBSAN_OPTIONS=print_stacktrace=1,suppressions=$(pwd)/UBSAN.supp,log_path=$(pwd)/sanitizer.log
+      - DYLD_INSERT_LIBRARIES=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/${MACOSX_XCODE_VERSION}/lib/darwin/libclang_rt.asan_osx_dynamic.dylib
+        /Applications/Igor\ Pro\ ${IGORPRO_VERSION}\ Folder/Igor64.app/Contents/MacOS/Igor64 /I RunTests.pxp
+      - export SANIFILE=$(find . -name sanitizer.log.*)
+      - if [ "$SANIFILE" ]; then cat $SANIFILE; echo -e "\e[31mSanitizer does not agree with code !"; fi
+      - test ! "$SANIFILE"
+        # generate a proper exit value
+      - exit $(grep "errors\|failures=\"[0-9]\+\"" JU_*.xml | grep -cv "failures=\"0\" errors=\"0\"")
+  artifacts:
+    when: always
+    reports:
+        junit: tests/JU_*.xml
+    paths:
+        - tests/JU_*.xml
+        - tests/report.html
+        - tests/default.profraw
+        - tests/sanitizer.log.*
+  needs:
+    - compile-xop-debug-coverage-macosx
+
+# testing-docker-windows:
+#   stage: third
+#   tags:
+#     - docker, debian
+#   parallel:
+#     matrix:
+#       - IGORPRO_VERSION:
+#         - 8
+#         ARCHITECTURE:
+#         - x86
+#         - x64
+#   rules:
+#     - if: '$ARCHITECTURE == "x64"'
+#       variables:
+#         EXECUTE_FLAGS: ""
+#         IGORPRO_XOP_FOLDER: "Igor Extensions"
+#     - if: '$ARCHITECTURE == "x86"'
+#       variables:
+#         EXECUTE_FLAGS: "--32bit"
+#         IGORPRO_XOP_FOLDER: "Igor Extensions (64-bit)"
+#   image:
+#     name: ${CI_REGISTRY}/internal/docker-igorpro:v${IGORPRO_VERSION}
+#   script:
+#     - ln -rs utf/procedures "/home/igor/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/User Procedures/utf"
+#     - ln -rs output/win/${ARCHITECTURE}/xop/Release "/home/igor/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/${IGORPRO_XOP_FOLDER}/"
+#     - cd tests
+#     - touch DO_AUTORUN.TXT
+#     - igorpro execute ${EXECUTE_FLAGS} --screenshot "RunTests.pxp"
+#       # generate a proper exit value
+#     - exit $(grep "errors\|failures=\"[0-9]\+\"" JU_*.xml | grep -cv "failures=\"0\" errors=\"0\"")
+#   artifacts:
+#     when: always
+#     reports:
+#       junit: tests/JU_*.xml
+#     paths:
+#       - tests/*.xml
+#       - screenshot/*.png
+#   retry:
+#     max: 2
+#     when: runner_system_failure
+#   needs:
+#     - compile-xop-windows
+
+packaging:
+  stage: fourth
+  tags:
+    - debian, docker
+  image:
+    name: ${CI_REGISTRY}/internal/docker-utils:latest
+  script:
+    - mkdir package
+    - zip -r package/ZeroMQ-XOP-$(git describe --tags --always).zip CONTRIBUTING.md LICENSE.txt procedures help/*.ihf output/mac/xop/Release/*.zip output/win/*/xop/Release/*{.xop,.dll}
+    - zip -r package/ZeroMQ-PDB-$(git describe --tags --always).zip output/win/*/xop/Release/*.pdb
+  needs:
+    - compile-xop-windows
+    - compile-xop-release-macosx
+  artifacts:
+    paths:
+      - package
+
+coverage:
+  stage: fourth
+  tags:
+    - macosx, xcode, catalina
+  script:
+      - mkdir -p build/coverage
+      - mv tests/default.profraw build/coverage
+      - cd build
+      - cmake -G "Xcode" -DCOVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ../src
+      - cmake --build . --config Debug --target install
+      - cmake --build . --target coverage
+  coverage: '/TOTAL.+ (\d+\.\d+%)$/'
+  artifacts:
+    paths:
+      - build/coverage
+  needs:
+      - compile-xop-debug-coverage-macosx
+      - download-xoptoolkit
+      - testing-macosx
