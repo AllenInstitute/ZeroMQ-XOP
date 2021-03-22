@@ -831,7 +831,6 @@ Function DoesNotHaveMemLeaksReturnWave()
 	variable i, errorValue, memBefore, memAfter
 
 	string replyMessage
-	variable initialSize = 100
 	STRUCT WaveProperties s
 
 	string msg = "{\"version\"     : 1, "               + \
