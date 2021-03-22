@@ -1,0 +1,11 @@
+prefix=C:/Gitlab-Runner/builds/aDs3TqU8/0/mirror/zeromq-xop/output/win/x86/libzmq/Release
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libzmq
+Description: 0MQ c++ library
+Version: 4.2.3
+Libs: -L${libdir} -lzmq
+Libs.private: -lstdc++ 
+Cflags: -I${includedir} 

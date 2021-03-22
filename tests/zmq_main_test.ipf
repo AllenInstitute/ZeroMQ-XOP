@@ -1,6 +1,11 @@
 #pragma TextEncoding = "UTF-8"
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
-#pragma IgorVersion=7.0
+#pragma IgorVersion=8.0
+
+#include "::procedures:ZeroMQ_Interop"
+
+Constant TCP_V4 = 4
+Constant TCP_V6 = 6
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
@@ -35,14 +40,23 @@ End
 /// @brief Check using netstat that a process listens on the given port
 ///
 /// Adapted and inspired by http://www.igorexchange.com/node/1243
-Function GetListeningStatus_IGNORE(port)
-	variable port
+Function GetListeningStatus_IGNORE(port, tcpVersion)
+	variable port, tcpVersion
 
-	string tmpDir, symbDirPath, filename, cmd, fullPath
+	string tmpDir, symbDirPath, filename, cmd, fullPath, localhost
 	string contents = ""
 	variable refNum
 
 #ifdef WINDOWS
+
+	if(tcpVersion == 4)
+		localhost = "0.0.0.0:0"
+	elseif(tcpVersion == 6)
+		localhost = "\[::\]:0"
+	else
+		FAIL()
+	endif
+
 	tmpDir = SpecialDirPath("Temporary", 0, 0, 0)
 
 	// Make sure that the directory we just got is, in fact, a directory.
@@ -62,7 +76,7 @@ Function GetListeningStatus_IGNORE(port)
 	// Convert the path into a windows path that uses "\" as the path separator.
 	fullPath = ParseFilePath(5, fullPath, "\\", 0, 0)
 
-	sprintf cmd, "cmd /C \"netstat -fAN | findStr %d | findstr 0.0.0.0:0 > %s\"", port, fullPath
+	sprintf cmd, "cmd /C \"netstat -fAN | findStr %d | findStr %s > %s\"", port, localhost, fullPath
 	ExecuteScriptText/B/W=2 cmd
 	AbortOnValue (V_flag != 0), 7
 
@@ -82,7 +96,7 @@ Function GetListeningStatus_IGNORE(port)
 
 	return strlen(contents) > 0
 #else
-	sprintf cmd, "do shell script \"netstat -an\"", port
+	sprintf cmd, "do shell script \"netstat -an\""
 
 	ExecuteScriptText/Z cmd
 	AbortOnValue (V_flag != 0), 7
@@ -97,7 +111,6 @@ End
 Function TEST_CASE_BEGIN_OVERRIDE(name)
 	string name
 
-	TEST_CASE_BEGIN(name)
 	zeromq_stop()
 	zeromq_set(ZeroMQ_SET_FLAGS_DEBUG | ZeroMQ_SET_FLAGS_DEFAULT)
 End
@@ -106,7 +119,6 @@ Function TEST_CASE_END_OVERRIDE(name)
 	string name
 
 	DoXOPIdle
-	TEST_CASE_END(name)
 
 	zeromq_stop()
 End
@@ -122,7 +134,7 @@ Function ExtractErrorValue(replyMessage)
 	string actual, expected
 	variable errorCode
 
-	REQUIRE_PROPER_STR(replyMessage)
+	CHECK_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
@@ -161,7 +173,7 @@ Function/S ExtractMessageID(replyMessage)
 	string actual, expected
 	string type = ""
 
-	REQUIRE_PROPER_STR(replyMessage)
+	CHECK_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
@@ -175,7 +187,7 @@ Function/S ExtractMessageID(replyMessage)
 	CHECK_WAVE(W_TokenType, NUMERIC_WAVE)
 
 	FindValue/TXOP=4/TEXT="messageID" T_TokenText
-	REQUIRE_NEQ_VAR(V_value,-1)
+	CHECK_NEQ_VAR(V_value,-1)
 	CHECK_EQUAL_VAR(W_TokenType[V_value + 1], 3)
 
 	return T_TokenText[V_value + 1]
@@ -192,7 +204,7 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 	string actual, expected
 	string type = ""
 
-	REQUIRE_PROPER_STR(replyMessage)
+	CHECK_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
@@ -479,15 +491,6 @@ Function TestFunctionPassByRef5(str, var)
 	return 42
 End
 
-#if (IgorVersion() >= 8.00)
-
-Function TestFunctionLongFunctionNameFromIgorProEight()
-
-	return 42
-End
-
-#endif
-
 Structure WaveProperties
 	WAVE/T raw
 	WAVE/T dimensions
@@ -500,9 +503,9 @@ Function ParseSerializedWave(replyMessage, s)
 	STRUCT WaveProperties &s
 
 	variable numTokens, start
-	string expected, actual
+	string expected, actual, typeLine, type, dimLine, size0, size1, size2, size3
 
-	REQUIRE_PROPER_STR(replyMessage)
+	CHECK_PROPER_STR(replyMessage)
 
 	JSONSimple/Q/Z replyMessage
 
@@ -512,14 +515,12 @@ Function ParseSerializedWave(replyMessage, s)
 	WAVE/Z W_TokenSize
 	REQUIRE(WaveExists(W_TokenSize))
 
-	FindValue/TXOP=4/TEXT="type" T_TokenText
-	CHECK_NEQ_VAR(V_value, -1)
-	start = V_Value
-	FindValue/TXOP=4/S=(start + 1)/TEXT="type" T_TokenText
-	if(V_Value != -1)
-		s.type = T_TokenText[V_Value + 1]
-	else
-		s.type = T_TokenText[start + 1]
+	// "type": "NT_FP32"
+	typeLine = GrepList(replyMessage, "\"type\": \".*_.*\"", 0, "\n")
+	if(strlen(typeLine) > 0)
+		SplitString/E="[[:space:]]\"type\": \"(.*)\"" typeLine, type
+		CHECK_EQUAL_VAR(V_Flag, 1)
+		s.type = type
 	endif
 
 	FindValue/TXOP=4/TEXT="modification" T_TokenText
@@ -529,13 +530,15 @@ Function ParseSerializedWave(replyMessage, s)
 		s.modificationDate = NaN
 	endif
 
-	FindValue/TXOP=4/TEXT="size" T_TokenText
+	FindValue/TXOP=4/TEXT="dimension" T_TokenText
 	if(V_value != -1)
-		CHECK_NEQ_VAR(V_value, -1)
-		numTokens = W_TokenSize[V_Value + 1]
+		dimLine = ReplaceString(" ", trimString(T_TokenText[V_Value + 1], 2), "")
+		string/g root:str = dimLine
 
-		Make/N=(4)/I/FREE dimensions
-		dimensions[0, numTokens - 1] = str2num(T_TokenText[V_Value + 2 + p])
+		SplitString/E="\"size\":\[([[:digit:]]*),?([[:digit:]]*),?([[:digit:]]*),?([[:digit:]]*),?\]" dimLine, size0, size1, size2, size3
+		CHECK(V_Flag >= 1)
+		Make/N=(4)/I/FREE dimensions = {str2num(size0), str2num(size1), str2num(size2), str2num(size3)}
+		dimensions[] = dimensions[p] == -1 ? 0 : dimensions[p]
 		WAVE/T s.dimensions = dimensions
 	endif
 
@@ -641,42 +644,43 @@ Function CompareWaveWithSerialized(wv, s)
 
 	// dimensions
 	Make/FREE/N=(4)/I dims = DimSize(wv, p)
-	REQUIRE_EQUAL_WAVES(dims, s.dimensions)
+	CHECK_EQUAL_WAVES(dims, s.dimensions)
 
 	if(s.modificationDate == 0)
-		REQUIRE_EQUAL_VAR(ModDate(wv), s.modificationDate)
+		CHECK_EQUAL_VAR(ModDate(wv), s.modificationDate)
 	else
-		REQUIRE_EQUAL_VAR(ModDate(wv) - date2secs(1970, 1, 1), s.modificationDate)
+		CHECK_EQUAL_VAR(ModDate(wv) - date2secs(1970, 1, 1), s.modificationDate)
 	endif
 
 	// type
 	type = WaveType(wv)
 	expectedType = GetWaveTypeString(wv)
 	actualType   = s.type
-	REQUIRE_EQUAL_STR(expectedType, actualType)
+	CHECK_EQUAL_STR(expectedType, actualType)
 
 	numPoints = numpnts(s.raw)
 
 	// content
 	if(sum(dims) == 0)
-		REQUIRE_EQUAL_VAR(numpnts(s.raw), 0)
+		CHECK_EQUAL_VAR(numpnts(s.raw), 0)
 	else
 		if(!type) // textWave
 			Make/FREE/N=(numPoints)/T convWaveText
 			// work around JSONSimple bug
 			convWaveText[] = ReplaceString("\\\"", s.raw[p], "\"")
 			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWaveText
-			REQUIRE_EQUAL_WAVES(wv, convWaveText, mode=WAVE_DATA)
+			CHECK_EQUAL_WAVES(wv, convWaveText, mode=WAVE_DATA)
 		elseif(type & COMPLEX_WAVE)
 			Make/FREE/N=(numPoints/2)/Y=(type)/C convWaveComplex
 			convWaveComplex[] = cmplx(str2num(s.raw[p]), str2num(s.raw[numPoints / 2 + p]))
 			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWaveComplex
-			REQUIRE_EQUAL_WAVES(wv, convWaveComplex, mode=WAVE_DATA)
+			CHECK_EQUAL_WAVES(wv, convWaveComplex, mode=WAVE_DATA)
 		else
 			Make/FREE/N=(numPoints)/Y=(type) convWave
 			convWave[] = str2num(s.raw[p])
 			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWave
-			REQUIRE_EQUAL_WAVES(wv, convWave, mode=WAVE_DATA)
+			// workaround IP9 when converting text to numbers
+			CHECK_EQUAL_WAVES(wv, convWave, mode=WAVE_DATA, tol = 1e-15)
 		endif
 	endif
 End
@@ -714,12 +718,57 @@ Function/WAVE TestFunctionReturnExistingWave()
 	return bigWave
 End
 
-Function Run()
+// define MEMORY_LEAK_TESTING for testing against memory leaks
+// these tests tend to be flaky, so they are not enabled by default
 
-	string procs = ""
-	procs += "zmq_set.ipf;zmq_bind.ipf;zmq_connect.ipf;zmq_stop.ipf;"
-	procs += "zmq_test_callfunction.ipf;zmq_start_handler.ipf;zmq_stop_handler.ipf;"
-	procs += "zmq_test_interop.ipf;zmq_test_serializeWave.ipf"
+// Entry point for UTF
+Function run()
+	return RunWithOpts()
+End
 
-	RunTest(procs)
+// Examples:
+// - RunWithOpts()
+// - RunWithOpts(testsuite = "zmq_set.ipf")
+// - RunWithOpts(testcase = "StopsBinds")
+Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
+	variable debugMode
+	string list = ""
+	string name = "ZeroMQ-XOP"
+
+	// speeds up testing to start with a fresh copy
+	KillWindow/Z HistoryCarbonCopy
+	DisableDebugOutput()
+
+	if(ParamIsDefault(allowdebug))
+		debugMode = 0
+	else
+		debugMode = IUTF_DEBUG_FAILED_ASSERTION | IUTF_DEBUG_ENABLE | IUTF_DEBUG_ON_ERROR | IUTF_DEBUG_NVAR_SVAR_WAVE
+	endif
+
+	if(ParamIsDefault(testcase))
+		testcase = ""
+	endif
+
+	// sorted list
+	list = AddListItem("zmq_bind.ipf", list, ";", inf)
+	list = AddListItem("zmq_connect.ipf", list, ";", inf)
+	list = AddListItem("zmq_set.ipf", list, ";", inf)
+	list = AddListItem("zmq_start_handler.ipf", list, ";", inf)
+	list = AddListItem("zmq_stop.ipf", list, ";", inf)
+	list = AddListItem("zmq_stop_handler.ipf", list, ";", inf)
+	list = AddListItem("zmq_test_callfunction.ipf", list, ";", inf)
+	list = AddListItem("zmq_test_interop.ipf", list, ";", inf)
+	list = AddListItem("zmq_test_serializeWave.ipf", list, ";", inf)
+
+	if(ParamIsDefault(testsuite))
+		testsuite = list
+	else
+		// do nothing
+	endif
+
+	if(strlen(testcase) == 0)
+		RunTest(testsuite, name = name, enableJU = 1, debugMode= debugMode)
+	else
+		RunTest(testsuite, name = name, enableJU = 1, debugMode= debugMode, testcase = testcase)
+	endif
 End

@@ -23,6 +23,11 @@ IgorException::IgorException(int errorCode, std::string errorMessage)
 {
 }
 
+IgorException::~IgorException()
+{
+  // do nothing
+}
+
 const char *IgorException::what() const noexcept
 {
   return m_message.c_str();

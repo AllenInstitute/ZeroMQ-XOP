@@ -36,8 +36,22 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
+#ifdef MACIGOR64
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#pragma clang diagnostic ignored "-Wtautological-overlap-compare"
+#pragma clang diagnostic ignored "-Wswitch-enum"
+#pragma clang diagnostic ignored "-Wc++17-extensions"
+#pragma clang diagnostic ignored "-Wweak-vtables"
+#pragma clang diagnostic ignored "-Wcovered-switch-default"
+#endif
+
 #include "json/src/json.hpp"
-using json = nlohmann::basic_json<>;
+using json = nlohmann::json;
+
+#ifdef MACIGOR64
+#pragma clang diagnostic pop
+#endif
 
 class CallFunctionOperation;
 using CallFunctionOperationPtr = std::shared_ptr<CallFunctionOperation>;
@@ -49,15 +63,36 @@ using StringVector = std::vector<std::string>;
 
 using LockGuard = std::lock_guard<std::recursive_mutex>;
 
+#ifdef MACIGOR64
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpadded"
+#pragma clang diagnostic ignored "-Wswitch-enum"
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
+#pragma clang diagnostic ignored "-Wheader-hygiene"
+#pragma clang diagnostic ignored "-Wweak-vtables"
+#pragma clang diagnostic ignored "-Wunused-member-function"
+#pragma clang diagnostic ignored "-Wsigned-enum-bitfield"
+#pragma clang diagnostic ignored "-Wdouble-promotion"
+#pragma clang diagnostic ignored "-Wc++2a-compat"
+#endif
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4018)
+#pragma warning(disable : 4702)
 #endif
-#include "fmt/fmt/ostream.h"
-#include "fmt/fmt/format.h"
-#include "fmt/fmt/printf.h"
+
+#include <fmt/format.h>
+#include <fmt/printf.h>
+
+using namespace fmt::literals; // NOLINT
+
 #ifdef _MSC_VER
 #pragma warning(pop)
+#endif
+
+#ifdef MACIGOR64
+#pragma clang diagnostic pop
 #endif
 
 #include "functions.h"

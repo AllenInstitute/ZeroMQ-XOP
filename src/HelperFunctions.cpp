@@ -21,11 +21,11 @@ std::string GetStringFromHandle(Handle strHandle)
 ///
 /// @param	h	Wave to set dimension labels on
 /// @param	Dimension	Dimension to set labels on
-/// @param	colLabels	vector of labels to set
+/// @param	dimLabels	vector of labels to set
 ///
 /// dimLabels[k] will be assigned to index k of the wave
 ///
-/// @return Igor error code
+/// @throws Igor error code
 void SetDimensionLabels(waveHndl h, int Dimension,
                         const std::vector<std::string> &dimLabels)
 {
@@ -78,40 +78,28 @@ std::size_t GetWaveElementSize(int dataType)
   // not guaranteed by the standard but should work
   case NT_CMPLX | NT_FP32:
     return 2 * sizeof(float);
-    break;
   case NT_CMPLX | NT_FP64:
     return 2 * sizeof(double);
-    break;
   case NT_FP32:
     return sizeof(float);
-    break;
   case NT_FP64:
     return sizeof(double);
-    break;
   case NT_I8:
     return sizeof(int8_t);
-    break;
   case NT_I8 | NT_UNSIGNED:
     return sizeof(uint8_t);
-    break;
   case NT_I16:
     return sizeof(int16_t);
-    break;
   case NT_I16 | NT_UNSIGNED:
     return sizeof(uint16_t);
-    break;
   case NT_I32:
     return sizeof(int32_t);
-    break;
   case NT_I32 | NT_UNSIGNED:
     return sizeof(uint32_t);
-    break;
   case NT_I64:
     return sizeof(int64_t);
-    break;
   case NT_I64 | NT_UNSIGNED:
     return sizeof(uint64_t);
-    break;
   default:
     return 0;
   }
@@ -259,7 +247,7 @@ int ZeroMQClientSend(std::string payload)
                            payloadLength, socket.get()));
 
   // empty
-  rc = zmq_send(socket.get(), NULL, 0, ZMQ_SNDMORE);
+  rc = zmq_send(socket.get(), nullptr, 0, ZMQ_SNDMORE);
   ZEROMQ_ASSERT(rc == 0);
 
   // payload
@@ -285,7 +273,7 @@ int ZeroMQServerSend(std::string identity, std::string payload)
   ZEROMQ_ASSERT(rc > 0);
 
   // empty
-  rc = zmq_send(socket.get(), NULL, 0, ZMQ_SNDMORE);
+  rc = zmq_send(socket.get(), nullptr, 0, ZMQ_SNDMORE);
   ZEROMQ_ASSERT(rc == 0);
 
   // payload
@@ -424,8 +412,8 @@ void InitHandle(Handle *handle, size_t size)
   }
   else
   {
-    WMSetHandleSize(*handle, size);
-    ASSERT(WMGetHandleSize(*handle) == size);
+    int ret = WMSetHandleSize(*handle, size);
+    ASSERT(!ret);
   }
 }
 

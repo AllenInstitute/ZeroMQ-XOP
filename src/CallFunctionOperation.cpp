@@ -15,19 +15,14 @@ std::string GetTypeStringForIgorType(int igorType)
   {
   case NT_FP64:
     return "variable";
-    break;
   case HSTRING_TYPE:
     return "string";
-    break;
   case WAVE_TYPE:
     return "wave";
-    break;
   case DATAFOLDER_TYPE:
     return "dfref";
-    break;
   default:
     ASSERT(0);
-    break;
   }
 }
 
@@ -44,15 +39,13 @@ json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
     {
       return To_stringHighRes(ret->variable);
     }
-    break;
   case HSTRING_TYPE:
   {
     auto result = GetStringFromHandle(ret->stringHandle);
     WMDisposeHandle(ret->stringHandle);
     ret->stringHandle = nullptr;
-    return result;
+    return std::move(result);
   }
-  break;
   case WAVE_TYPE:
     if(ret->waveHandle)
     {
@@ -63,13 +56,10 @@ json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
       }
     }
     return SerializeWave(ret->waveHandle);
-    break;
   case DATAFOLDER_TYPE:
     return SerializeDataFolder(ret->dataFolderHandle);
-    break;
   default:
     ASSERT(0);
-    break;
   }
 }
 
@@ -265,7 +255,7 @@ json CallFunctionOperation::Call() const
   CallFunctionParameterHandler p(m_params, fip.parameterTypes,
                                  fip.numRequiredParameters);
 
-  rc = CallFunction(&fip, (void *) p.GetValues(), &retStorage);
+  rc = CallFunction(&fip, static_cast<void *>(p.GetValues()), &retStorage);
   ASSERT(rc == 0);
 
   auto functionAborted = SpinProcess();

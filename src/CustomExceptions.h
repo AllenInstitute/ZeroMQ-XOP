@@ -45,6 +45,8 @@ public:
   explicit IgorException(int errorCode);
   IgorException(int errorCode, std::string errorMessage);
 
+  virtual ~IgorException() override;
+
   const char *what() const noexcept override;
 
   /// Displays the exception if required; gets the return code.
@@ -56,7 +58,7 @@ void to_json(json &j, const IgorException &e);
 int HandleException(const std::exception &e);
 
 #define BEGIN_OUTER_CATCH                                                      \
-  p->result = 0;                                                               \
+  p->result = decltype(p->result)();                                           \
   try                                                                          \
   {                                                                            \
     GlobalData::Instance().EnsureInteropProcFileAvailable();

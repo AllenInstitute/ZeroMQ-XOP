@@ -377,7 +377,6 @@ Function ComplainsWithInternalFunction()
 	CHECK_EQUAL_VAR(errorValue, REQ_NON_EXISTING_FUNCTION)
 End
 
-// requires that the XOP is compiled without long name support
 Function ComplainsWithTooLongFuncName()
 
 	string msg
@@ -386,7 +385,7 @@ Function ComplainsWithTooLongFuncName()
 
 	msg = "{\"version\"     : 1, "                   + \
 		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"TestFunctionLongFunctionNameFromIgorProEight\"" + \
+		  "\"name\"         : \"TestFunctionLongFunctionNameFromIgorProEightTestFunctionLongFunctionNameFromIgorProEightTestFunctionLongFunctionNameFromIgorProEightTestFunctionLongFunctionNameFromIgorProEightTestFunctionLongFunctionNameFromIgorProEightTestFunctionLongFunctionNameFromIgorProEightTestFunctionLongFunctionNameFromIgorProEightTestFunctionLongFunctionNameFromIgorProEightTestFunctionLongFunctionNameFromIgorProEightTestFunctionLongFunctionNameFromIgorProEight\"" + \
 		  "}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
@@ -698,6 +697,8 @@ Function WorksWithFuncStrArg1()
 	CHECK_EQUAL_STR(resultString, expected)
 End
 
+#ifdef MEMORY_LEAK_TESTING
+
 Function DoesNotHaveMemLeaksReturnString()
 	variable i, errorValue, memBefore, memAfter
 
@@ -725,6 +726,8 @@ Function DoesNotHaveMemLeaksReturnString()
 
 	CHECK(memAfter < memBefore * 1.15)
 End
+
+#endif
 
 Function WorksWithFuncNullWaveReturn()
 
@@ -822,11 +825,12 @@ Function ComplainsWithFuncReturnDFWave()
 	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_RET)
 End
 
+#ifdef MEMORY_LEAK_TESTING
+
 Function DoesNotHaveMemLeaksReturnWave()
 	variable i, errorValue, memBefore, memAfter
 
 	string replyMessage
-	variable initialSize = 100
 	STRUCT WaveProperties s
 
 	string msg = "{\"version\"     : 1, "               + \
@@ -844,6 +848,8 @@ Function DoesNotHaveMemLeaksReturnWave()
 
 	CHECK(memAfter < memBefore * 1.05)
 End
+
+#endif
 
 Function ComplainsWithFuncAndIntParam1()
 
@@ -910,66 +916,64 @@ Function WorksWithFuncAndDoubleParam()
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 End
 
-// tests are flaky
-//
-//Function WorksWithFunctionsWhichAbort1()
-//
-//	string msg, replyMessage, expected
-//	variable errorValue, err
-//
-//	msg = "{\"version\"     : 1, "                   + \
-//		  "\"CallFunction\" : {"                     + \
-//		  "\"name\"         : \"TestFunctionAbort1\"" + \
-//		  "}}"
-//
-//	try
-//		replyMessage = zeromq_test_callfunction(msg)
-//	catch
-//	endtry
-//
-//	errorValue = ExtractErrorValue(replyMessage)
-//	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
-//End
-//
-//Function WorksWithFunctionsWhichAbort2()
-//
-//	string msg, replyMessage, expected
-//	variable errorValue, err
-//
-//	msg = "{\"version\"     : 1, "                   + \
-//		  "\"CallFunction\" : {"                     + \
-//		  "\"name\"         : \"TestFunctionAbort2\"" + \
-//		  "}}"
-//
-//	try
-//		replyMessage = zeromq_test_callfunction(msg)
-//	catch
-//	endtry
-//
-//	errorValue = ExtractErrorValue(replyMessage)
-//	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
-//End
-//
+Function WorksWithFunctionsWhichAbort1()
+
+	string msg, replyMessage, expected
+	variable errorValue, err
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionAbort1\"" + \
+		  "}}"
+
+	try
+		replyMessage = zeromq_test_callfunction(msg)
+	catch
+	endtry
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+End
+
+Function WorksWithFunctionsWhichAbort2()
+
+	string msg, replyMessage, expected
+	variable errorValue, err
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionAbort2\"" + \
+		  "}}"
+
+	try
+		replyMessage = zeromq_test_callfunction(msg)
+	catch
+	endtry
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+End
+
 // Works with functions which Abort and have pass by ref parameters
-//Function WorksWithFunctionsAndPassByRef4()
-//
-//	string msg, replyMessage
-//	string expected, actual
-//	variable errorValue, resultVariable
-//
-//	msg = "{\"version\"     : 1, "                   + \
-//		  "\"CallFunction\" : {"                     + \
-//		  "\"name\"         : \"TestFunctionPassByRef4\"," + \
-//		  "\"params\" : [123, \"nothing\"]}}"
-//
-//	try
-//		replyMessage = zeromq_test_callfunction(msg)
-//	catch
-//	endtry
-//
-//	errorValue = ExtractErrorValue(replyMessage)
-//	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
-//End
+Function WorksWithFunctionsAndPassByRef4()
+
+	string msg, replyMessage
+	string expected, actual
+	variable errorValue, resultVariable
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionPassByRef4\"," + \
+		  "\"params\" : [123, \"nothing\"]}}"
+
+	try
+		replyMessage = zeromq_test_callfunction(msg)
+	catch
+	endtry
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+End
 
 Function WorksWithFunctionsAndPassByRef1()
 
@@ -1055,6 +1059,8 @@ Function WorksWithFunctionsAndPassByRef3()
 	CHECK_EQUAL_STR(expected, actual)
 End
 
+#ifdef MEMORY_LEAK_TESTING
+
 Function DoesNotHaveMemLeaksPassByRefStr()
 	variable i, errorValue, memBefore, memAfter
 
@@ -1079,6 +1085,8 @@ Function DoesNotHaveMemLeaksPassByRefStr()
 
 	CHECK(memAfter < memBefore * 1.05)
 End
+
+#endif
 
 Function WorksWithReturningNullDFR()
 

@@ -8,7 +8,7 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
     StringVector params, int parameterTypes[MAX_NUM_PARAMS], int numParams)
     : m_hasPassByRefParams(false)
 {
-  ASSERT(numParams == (int) params.size());
+  ASSERT(numParams == static_cast<int>(params.size()));
 
   if(numParams == 0)
   {
@@ -40,7 +40,6 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
       break;
     default:
       ASSERT(0);
-      break;
     }
 
     arraySizeInBytes += m_paramSizesInBytes[i];
@@ -68,7 +67,6 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
       break;
     default:
       ASSERT(0);
-      break;
     }
 
     // we write one parameter after another into our array

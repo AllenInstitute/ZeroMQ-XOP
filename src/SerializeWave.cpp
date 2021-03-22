@@ -79,9 +79,6 @@ std::string GetWaveTypeString(int waveType)
     break;
   default:
     ASSERT(0);
-    // never reached
-    return std::string();
-    break;
   }
 
   if(isComplex)
@@ -301,8 +298,6 @@ std::string WaveToStringImpl(int waveType, waveHndl waveHandle, CountInt offset)
   case DATAFOLDER_TYPE:
   default:
     ASSERT(0);
-    return std::string();
-    break;
   }
 
   return writer.str();
@@ -359,7 +354,8 @@ std::string DimensionSizesToString(std::vector<CountInt> dimensionSizes)
 
 void AddDataFullScaleIfSet(json &doc, waveHndl waveHandle)
 {
-  std::vector<double> entries = {DOUBLE_NAN, DOUBLE_NAN};
+  std::vector<double> entries = {std::numeric_limits<double>::quiet_NaN(),
+                                 std::numeric_limits<double>::quiet_NaN()};
 
   // see the documentation to MDGetWaveScaling, the order 1, 0 is correct
   auto rc = MDGetWaveScaling(waveHandle, -1, &entries[1], &entries[0]);

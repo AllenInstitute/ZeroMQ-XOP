@@ -1,0 +1,13 @@
+--languages=igorpro,c++,c
+--recurse=yes
+# See https://github.com/universal-ctags/ctags/issues/759#issuecomment-171155113
+--exclude=output/*
+--exclude=src/libzmq/builds/*
+--exclude=src/libzmq/src/*
+--exclude=src/libzmq/tests/*
+--exclude=src/json/benchmarks/*
+--exclude=src/json/test/*
+--exclude=src/fmt/test/*
+--exclude=utf/docu/*
+--exclude=utf/internal_dev/*
+--exclude=utf/tests/*

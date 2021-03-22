@@ -32,8 +32,8 @@ T lockToIntegerRange(double val)
   }
 
   // If value lies outside range of integer type, return an error.
-  if(val > (double) std::numeric_limits<T>::max() ||
-     val < (double) std::numeric_limits<T>::min())
+  if(val > static_cast<double>(std::numeric_limits<T>::max()) ||
+     val < static_cast<double>(std::numeric_limits<T>::min()))
   {
     throw IgorException(kParameterOutOfRange);
   }

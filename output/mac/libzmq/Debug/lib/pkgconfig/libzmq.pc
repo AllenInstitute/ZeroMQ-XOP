@@ -1,0 +1,11 @@
+prefix=/Users/ci/work/builds/3s2PYmqh/2/mirror/zeromq-xop/output/mac/libzmq/Debug
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libzmq
+Description: 0MQ c++ library
+Version: 4.2.3
+Libs: -L${libdir} -lzmq
+Libs.private: -lstdc++ 
+Cflags: -I${includedir} 

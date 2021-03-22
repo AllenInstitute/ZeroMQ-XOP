@@ -16,40 +16,40 @@ XOPIORecResult RegisterFunction()
   switch(funcIndex)
   {
   case 0:
-    returnValue = (XOPIORecResult) zeromq_client_connect;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_client_connect);
     break;
   case 1:
-    returnValue = (XOPIORecResult) zeromq_client_recv;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_client_recv);
     break;
   case 2:
-    returnValue = (XOPIORecResult) zeromq_client_send;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_client_send);
     break;
   case 3:
-    returnValue = (XOPIORecResult) zeromq_handler_start;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_handler_start);
     break;
   case 4:
-    returnValue = (XOPIORecResult) zeromq_handler_stop;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_handler_stop);
     break;
   case 5:
-    returnValue = (XOPIORecResult) zeromq_server_bind;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_bind);
     break;
   case 6:
-    returnValue = (XOPIORecResult) zeromq_server_recv;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_recv);
     break;
   case 7:
-    returnValue = (XOPIORecResult) zeromq_server_send;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_send);
     break;
   case 8:
-    returnValue = (XOPIORecResult) zeromq_set;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set);
     break;
   case 9:
-    returnValue = (XOPIORecResult) zeromq_stop;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_stop);
     break;
   case 10:
-    returnValue = (XOPIORecResult) zeromq_test_callfunction;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_callfunction);
     break;
   case 11:
-    returnValue = (XOPIORecResult) zeromq_test_serializeWave;
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_serializeWave);
     break;
   }
   return returnValue;
