@@ -1,11 +1,12 @@
-prefix=C:/Gitlab-Runner/builds/aDs3TqU8/0/mirror/zeromq-xop/output/win/x64/libzmq/Release
-exec_prefix=${prefix}
-libdir=${prefix}/lib
-includedir=${prefix}/include
+prefix=C:/Gitlab-Runner/builds/aDs3TqU8/1/mirror/zeromq-xop/output/win/x64/libzmq/Release
+exec_prefix=C:/Gitlab-Runner/builds/aDs3TqU8/1/mirror/zeromq-xop/output/win/x64/libzmq/Release
+libdir=C:/Gitlab-Runner/builds/aDs3TqU8/1/mirror/zeromq-xop/output/win/x64/libzmq/Release/lib
+includedir=C:/Gitlab-Runner/builds/aDs3TqU8/1/mirror/zeromq-xop/output/win/x64/libzmq/Release/include
 
 Name: libzmq
 Description: 0MQ c++ library
-Version: 4.2.3
+Version: 4.3.4
 Libs: -L${libdir} -lzmq
 Libs.private: -lstdc++ 
+Requires.private: 
 Cflags: -I${includedir} 
