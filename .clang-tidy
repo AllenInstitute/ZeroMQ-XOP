@@ -1,0 +1,35 @@
+# FIXME fix the code and don't disable the following checks
+#
+# hicpp-signed-bitwise
+
+Checks: '*,
+        -abseil-*,
+        -readability-implicit-bool-conversion,
+        -google-runtime-references,
+        -fuchsia-default-arguments,
+        -fuchsia-default-arguments-calls,
+        -fuchsia-default-arguments-declarations,
+        -cppcoreguidelines-pro-type-reinterpret-cast,
+        -clang-diagnostic-missing-prototypes,
+        -llvm-header-guard,
+        -cppcoreguidelines-macro-usage,
+        -clang-diagnostic-unused-macros,
+        -hicpp-signed-bitwise,
+        -modernize-use-trailing-return-type,
+        -llvmlibc-restrict-system-libc-headers,
+        -llvmlibc-callee-namespace,
+        -llvmlibc-implementation-in-namespace,
+        -misc-no-recursion,
+        -readability-use-anyofallof,
+        -clang-diagnostic-extra-semi-stmt,
+        -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+        -hicpp-no-array-decay,
+        -cppcoreguidelines-avoid-non-const-global-variables,
+        -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+        -cppcoreguidelines-pro-type-union-access,
+        -fuchsia-overloaded-operator,
+        -fuchsia-statically-constructed-objects,
+        -clang-diagnostic-signed-enum-bitfield'
+
+FormatStyle: 'file'
+WarningsAsErrors: '*'
