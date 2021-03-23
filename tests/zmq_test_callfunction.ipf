@@ -558,6 +558,7 @@ Function WorksWithFunc2Strings()
 		  "\"params\" : [\"1\", \"2\"]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
 	ExtractReturnValue(replyMessage, str=resultString)
