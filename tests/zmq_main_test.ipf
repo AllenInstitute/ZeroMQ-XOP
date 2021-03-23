@@ -373,6 +373,10 @@ Function/C TestFunctionInvalidRet2()
 	return cmplx(0, 1)
 End
 
+Function [STRUCT WMBackgroundStruct s] TestFunctionInvalidRet3()
+
+End
+
 Function/WAVE TestFunctionReturnNullWave()
 	return $""
 End
@@ -566,6 +570,41 @@ Function/WAVE ReturnWaveWithLongNames()
 	SetDimLabel 0, 0, AVeryLongLabelOnlyAllowedWithIgorProEight, wv
 
 	return wv
+End
+
+Function [variable result, string str, variable var] TestFunctionMultipleReturnValuesValid1()
+
+	result = 123
+	str    = "Hi there!"
+	var    = NaN
+End
+
+Function [WAVE wv] TestFunctionMultipleReturnValuesValid2()
+
+	Make/FREE wv = p
+End
+
+Function [DFREF dfr] TestFunctionMultipleReturnValuesValid3()
+
+	DFREF dfr = root:Packages
+End
+
+Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid4(variable inputVar, string inputStr)
+
+	outputVar = 23 + inputVar
+	outputStr = inputStr + "!!"
+End
+
+Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid5()
+
+End
+
+Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid6(variable inputVar, string& inputStr)
+
+	outputVar = 23 + inputVar
+	outputStr = inputStr + "!!"
+
+	inputStr  = "dummy text"
 End
 
 Structure WaveProperties

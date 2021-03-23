@@ -425,6 +425,21 @@ Function ComplainsWithInvalidFuncRet2()
 	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_RET)
 End
 
+Function ComplainsWithInvalidFuncRet3()
+
+	string msg
+	string replyMessage
+	variable errorValue
+
+	msg = "{\"version\" : 1, "                + \
+		  "\"CallFunction\" : {"              + \
+		  "\"name\" : \"TestFunctionInvalidRet3\"}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_RET)
+End
+
 Function ComplainsWithGarbageInParams()
 
 	string msg
@@ -1420,4 +1435,178 @@ Function WorksWithLongNames()
 	ExtractReturnValue(replyMessage, wvProp=s)
 	WAVE wv = ReturnWaveWithLongNames()
 	CompareWaveWithSerialized(wv, s)
+End
+
+Function WorksWithMultipleReturnValues1()
+	string msg, replyMessage
+	variable errorValue
+	string expected, actual
+
+	msg = "{\"version\"     : 1, "                                        + \
+		  "\"CallFunction\" : {"                                          + \
+		  "\"name\"         : \"TestFunctionMultipleReturnValuesValid1\"" + \
+		  "}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	Make/FREE/T/N=0 wv
+	ExtractReturnValue(replyMessage, resultWave=wv)
+	expected = "123"
+	actual   = wv[0]
+	CHECK_EQUAL_STR(expected, actual)
+
+	expected = "Hi there!"
+	actual   = wv[1]
+	CHECK_EQUAL_STR(expected, actual)
+
+	expected = "NaN"
+	actual   = wv[2]
+	CHECK_EQUAL_STR(expected, actual)
+End
+
+Function WorksWithMultipleReturnValues2()
+	string msg, replyMessage
+	variable errorValue
+	string expected, actual
+
+	msg = "{\"version\"     : 1, "                                        + \
+		  "\"CallFunction\" : {"                                          + \
+		  "\"name\"         : \"TestFunctionMultipleReturnValuesValid2\"" + \
+		  "}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	Make/FREE/T/N=0 wv
+	ExtractReturnValue(replyMessage, resultWave=wv)
+	CHECK_EQUAL_VAR(DimSize(wv, 0), 1)
+
+	STRUCT WaveProperties s
+	ParseSerializedWave(replyMessage, s)
+	Make/FREE/T refWave = num2str(p)
+	CHECK_EQUAL_WAVES(refWave, s.raw)
+	Make/FREE/I dims = {128, 0, 0, 0}
+	CHECK_EQUAL_WAVES(dims, s.dimensions)
+End
+
+Function WorksWithMultipleReturnValues3()
+	string msg, replyMessage
+	variable errorValue
+	string expected, actual, returnValue
+
+	msg = "{\"version\"     : 1, "                                        + \
+		  "\"CallFunction\" : {"                                          + \
+		  "\"name\"         : \"TestFunctionMultipleReturnValuesValid3\"" + \
+		  "}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	Make/FREE/T/N=0 wv
+	ExtractReturnValue(replyMessage, dfr=returnValue, resultWave=wv)
+	CHECK_EQUAL_VAR(DimSize(wv, 0), 1)
+
+	actual = returnValue
+	expected = "root:Packages:"
+	CHECK_EQUAL_STR(actual, expected)
+End
+
+Function WorksWithMultipleReturnValues4()
+	string msg, replyMessage
+	variable errorValue
+	string expected, actual, returnValue
+
+	msg = "{\"version\"     : 1, "                                        + \
+		  "\"CallFunction\" : {"                                          + \
+		  "\"name\"         : \"TestFunctionMultipleReturnValuesValid4\"," + \
+		  "\"params\": [ 4711, \"my string\"]}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	Make/FREE/T/N=0 wv
+	ExtractReturnValue(replyMessage, resultWave=wv)
+	CHECK_EQUAL_VAR(DimSize(wv, 0), 2)
+
+	expected = "4734"
+	actual   = wv[0]
+	CHECK_EQUAL_STR(expected, actual)
+
+	expected = "my string!!"
+	actual   = wv[1]
+	CHECK_EQUAL_STR(expected, actual)
+End
+
+Function WorksWithMultipleReturnValues5()
+	string msg, replyMessage
+	variable errorValue
+	string expected, actual
+
+	msg = "{\"version\"     : 1, "                                        + \
+		  "\"CallFunction\" : {"                                          + \
+		  "\"name\"         : \"TestFunctionMultipleReturnValuesValid5\"" + \
+		  "}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	Make/FREE/T/N=0 wv
+	ExtractReturnValue(replyMessage, resultWave=wv)
+	CHECK_EQUAL_VAR(DimSize(wv, 0), 2)
+
+	expected = "0" // different default value compared to standard return values which use NaN
+	actual   = wv[0]
+	CHECK_EQUAL_STR(expected, actual)
+
+	expected = ""
+	actual   = wv[1]
+	CHECK_EQUAL_STR(expected, actual)
+End
+
+Function WorksWithMultipleReturnValues6()
+
+	string msg
+	string replyMessage
+	variable errorValue
+	string expected, actual
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionMultipleReturnValuesValid6\"," + \
+		  "\"params\"       : [4711, \"my string\"]}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	Make/FREE/T/N=0 resultWave
+	ExtractReturnValue(replyMessage, resultWave=resultWave)
+	CHECK_EQUAL_VAR(DimSize(resultWave, 0), 2)
+
+	expected = "4734"
+	actual   = resultWave[0]
+	CHECK_EQUAL_STR(expected, actual)
+
+	expected = "my string!!"
+	actual   = resultWave[1]
+	CHECK_EQUAL_STR(expected, actual)
+
+	Make/FREE/T/N=0 passByRefWave
+	ExtractReturnValue(replyMessage, passByRefWave=passByRefWave)
+	CHECK_EQUAL_VAR(DimSize(passByRefWave, 0), 1)
+
+	expected = "dummy text"
+	actual   = passByRefWave[0]
+	CHECK_EQUAL_STR(expected, actual)
 End

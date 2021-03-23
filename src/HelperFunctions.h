@@ -157,3 +157,8 @@ void WriteZMsgIntoHandle(Handle *handle, zmq_msg_t *msg);
 
 bool IsConvertibleToDouble(const std::string &str);
 bool IsWaveType(int igorType);
+
+bool UsesMultipleReturnValueSyntax(FunctionInfo fip);
+int GetNumberOfReturnValues(FunctionInfo fip);
+int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues);
+int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues);

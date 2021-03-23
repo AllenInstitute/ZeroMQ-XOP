@@ -23,6 +23,8 @@ private:
   unsigned char m_values[MAX_NUM_PARAMS * sizeof(double)] = {};
   std::vector<int> m_paramTypes;
   std::vector<CountInt> m_paramSizesInBytes;
+  bool m_multipleReturnValueSyntax;
+  int m_numReturnValues;
   int m_numInputParams;
   int m_returnType;
   IgorTypeUnion m_retStorage = {};

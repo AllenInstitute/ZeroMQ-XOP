@@ -96,10 +96,13 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
   ASSERT(sizeof(fip.parameterTypes) / sizeof(int) == MAX_NUM_PARAMS);
   ASSERT(fip.totalNumParameters < MAX_NUM_PARAMS);
 
-  m_numInputParams = static_cast<int>(fip.numRequiredParameters);
+  m_multipleReturnValueSyntax = UsesMultipleReturnValueSyntax(fip);
+  m_numReturnValues           = GetNumberOfReturnValues(fip);
+  m_numInputParams = GetNumberOfInputParameters(fip, m_numReturnValues);
+
   ASSERT(m_numInputParams == static_cast<int>(inputParams.size()));
 
-  if(m_numInputParams == 0)
+  if(m_numInputParams == 0 && !m_multipleReturnValueSyntax)
   {
     return;
   }
@@ -112,7 +115,10 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
 
   for(int i = 0; i < fip.numRequiredParameters; i++)
   {
-    const auto type = m_paramTypes[i] & ~FV_REF_TYPE;
+    DebugOutput(fmt::format("{}: Parameter={} with type {:X}\r", __func__, i,
+                            m_paramTypes[i]));
+
+    const auto type = ClearBit(m_paramTypes[i], FV_REF_TYPE);
 
     switch(type)
     {
@@ -126,35 +132,52 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
       m_paramSizesInBytes[i] = sizeof(DataFolderHandle);
       break;
     default:
+      if(IsWaveType(type))
+      {
+        m_paramSizesInBytes[i] = sizeof(waveHndl);
+        break;
+      }
       ASSERT(0);
     }
   }
 
+  const auto firstInputParamIndex =
+      GetFirstInputParameterIndex(fip, m_numReturnValues);
   unsigned char *dest = GetParameterValueStorage();
   for(int i = 0; i < fip.numRequiredParameters; i++)
   {
-    auto u = ConvertStringToIgorTypeUnion(inputParams[i], m_paramTypes[i]);
+    if(i >= firstInputParamIndex)
+    {
+      const auto u = ConvertStringToIgorTypeUnion(
+          inputParams[i - firstInputParamIndex], m_paramTypes[i]);
 
-    // we write one parameter after another into our array
-    // we can not use IgorTypeUnion here as the padding on 32bit
-    // (void* is 4, but a double 8) breaks the reading code in CallFunction.
-    memcpy(dest, &u, m_paramSizesInBytes[i]);
+      // we write one parameter after another into our array
+      // we can not use IgorTypeUnion here as the padding on 32bit
+      // (void* is 4, but a double 8) breaks the reading code in CallFunction.
+      memcpy(dest, &u, m_paramSizesInBytes[i]);
+    }
+
     dest += m_paramSizesInBytes[i];
   }
 }
 
 json CallFunctionParameterHandler::GetPassByRefInputArray()
 {
-  return ReadPassByRefParameters(0, INT_MAX);
-}
+  if(m_multipleReturnValueSyntax)
+  {
+    return ReadPassByRefParameters(m_numReturnValues, INT_MAX);
+  }
 
-unsigned char *CallFunctionParameterHandler::GetParameterValueStorage()
-{
-  return &m_values[0];
+  return ReadPassByRefParameters(0, INT_MAX);
 }
 
 json CallFunctionParameterHandler::GetReturnValues()
 {
+  if(m_multipleReturnValueSyntax)
+  {
+    return ReadPassByRefParameters(0, m_numReturnValues);
+  }
+
   json doc;
 
   doc["value"] = ExtractFromUnion(&m_retStorage, m_returnType);
@@ -165,6 +188,10 @@ json CallFunctionParameterHandler::GetReturnValues()
 
 void *CallFunctionParameterHandler::GetReturnValueStorage()
 {
+  if(m_multipleReturnValueSyntax)
+  {
+    return nullptr;
+  }
 
   return &m_retStorage;
 }
@@ -224,4 +251,9 @@ json CallFunctionParameterHandler::ReadPassByRefParameters(int first, int last)
   }
 
   return elems;
+}
+
+unsigned char *CallFunctionParameterHandler::GetParameterValueStorage()
+{
+  return &m_values[0];
 }
