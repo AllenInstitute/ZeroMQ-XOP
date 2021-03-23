@@ -330,6 +330,86 @@ Function ComplainsWithInvalidFuncSig1()
 	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_SIG)
 End
 
+Function ComplainsWithInvalidFuncSig2()
+
+	string msg
+	string replyMessage
+	variable errorValue
+
+	msg = "{\"version\" : 1, "                + \
+		  "\"CallFunction\" : {"              + \
+		  "\"name\" : \"TestFunctionInvalidSig2\","  + \
+		  "\"params\" : [0]}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_SIG)
+End
+
+Function ComplainsWithInvalidFuncSig3()
+
+	string msg
+	string replyMessage
+	variable errorValue
+
+	msg = "{\"version\" : 1, "                + \
+		  "\"CallFunction\" : {"              + \
+		  "\"name\" : \"TestFunctionInvalidSig3\","  + \
+		  "\"params\" : [0]}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_SIG)
+End
+
+Function ComplainsWithInvalidFuncSig4()
+
+	string msg
+	string replyMessage
+	variable errorValue
+
+	msg = "{\"version\" : 1, "                + \
+		  "\"CallFunction\" : {"              + \
+		  "\"name\" : \"TestFunctionWithIntParam1\","  + \
+		  "\"params\" : [0]}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_SIG)
+End
+
+Function ComplainsWithInvalidFuncSig5()
+
+	string msg
+	string replyMessage
+	variable errorValue
+
+	msg = "{\"version\" : 1, "                + \
+		  "\"CallFunction\" : {"              + \
+		  "\"name\" : \"TestFunctionWithIntParam2\","  + \
+		  "\"params\" : [0]}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_SIG)
+End
+
+Function ComplainsWithInvalidFuncSig6()
+
+	string msg
+	string replyMessage
+	variable errorValue
+
+	msg = "{\"version\" : 1, "                + \
+		  "\"CallFunction\" : {"              + \
+		  "\"name\" : \"TestFunctionWithIntParam3\","  + \
+		  "\"params\" : [0]}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_SIG)
+End
+
 Function ComplainsWithInvalidFuncRet2()
 
 	string msg
@@ -394,7 +474,7 @@ Function ComplainsWithTooLongFuncName()
 	CHECK_EQUAL_VAR(errorValue, REQ_NON_EXISTING_FUNCTION)
 End
 
-Function WorksWithFuncNoArgs()
+Function WorksWithFuncNoArgs1()
 
 	string msg
 	string replyMessage
@@ -403,6 +483,22 @@ Function WorksWithFuncNoArgs()
 	msg = "{\"version\"     : 1, "                    + \
 		  "\"CallFunction\" : {"                      + \
 		  "\"name\"         : \"TestFunctionNoArgs\"" + \
+		  "}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+End
+
+Function WorksWithFuncNoArgs2()
+
+	string msg
+	string replyMessage
+	variable errorValue
+
+	msg = "{\"version\"     : 1, "                    + \
+		  "\"CallFunction\" : {"                      + \
+		  "\"name\"         : \"TestFunctionOptionalStructArg\"" + \
 		  "}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
@@ -899,6 +995,21 @@ Function ComplainsWithFuncAndIntParam3()
 	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_SIG)
 End
 
+Function ComplainsWithFuncAndWaveByRefParam4()
+
+	string msg, replyMessage
+	variable errorValue
+
+	msg = "{\"version\"     : 1, "                         + \
+	      "\"CallFunction\" : {"                           + \
+	      "\"name\"         : \"TestFunctionPassByRef7\"," + \
+	      "\"params\" : [1]}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_SIG)
+End
+
 // IP7 style "double" parameters are accepted
 Function WorksWithFuncAndDoubleParam()
 
@@ -1057,6 +1168,26 @@ Function WorksWithFunctionsAndPassByRef3()
 	expected = "hi there"
 	actual   = wv[1]
 	CHECK_EQUAL_STR(expected, actual)
+End
+
+Function WorksWithFunctionsAndPassByRef6()
+
+	string msg, replyMessage
+	string expected, actual
+	variable errorValue, resultVariable
+
+	msg = "{\"version\"     : 1, "                   + \
+		  "\"CallFunction\" : {"                     + \
+		  "\"name\"         : \"TestFunctionPassByRef6\"," + \
+		  "\"params\" : []}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	ExtractReturnValue(replyMessage, var=resultVariable)
+	CHECK_EQUAL_VAR(42, resultVariable)
 End
 
 #ifdef MEMORY_LEAK_TESTING

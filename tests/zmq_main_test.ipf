@@ -352,8 +352,20 @@ Function/S TestFunctionStrVarStr(str1, var1, str2)
 	return str1 + "_" + num2str(var1) + "_" + str2
 End
 
+Function TestFunctionOptionalStructArg([s])
+	STRUCT WMBackgroundStruct &s
+End
+
 Function TestFunctionInvalidSig1(wv)
 	WAVE wv
+End
+
+Function TestFunctionInvalidSig2(num)
+	variable/C num
+End
+
+Function TestFunctionInvalidSig3(s)
+	STRUCT WMBackgroundStruct &s
 End
 
 Function/C TestFunctionInvalidRet2()
@@ -530,6 +542,20 @@ Function TestFunctionPassByRef5(str, var)
 
 	return 42
 End
+
+Function TestFunctionPassByRef6([s])
+	STRUCT WMBackgroundStruct &s
+
+	return 42
+End
+Function TestFunctionPassByRef7(WAVE& wv)
+
+	Make/FREE/D freeWave = {4711}
+	WAVE wv = freeWave
+
+	return 42
+End
+
 
 Structure WaveProperties
 	WAVE/T raw
