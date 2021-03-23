@@ -83,7 +83,6 @@ using LockGuard = std::lock_guard<std::recursive_mutex>;
 #endif
 
 #include <fmt/format.h>
-#include <fmt/printf.h>
 #include <fmt/ranges.h>
 
 using namespace fmt::literals; // NOLINT
