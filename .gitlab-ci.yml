@@ -16,9 +16,14 @@ download-xoptoolkit:
   stage: first
   tags:
     - docker, debian
+  cache:
+    key: xop-toolkit-8
+    paths:
+      - XOPSupport
   image:
     name: ${CI_REGISTRY}/internal/docker-utils
   script:
+    - if [[ -d XOPSupport ]]; then exit 0; fi
     - curl -L --user ${XOPTOOLKIT_USER}:${XOPTOOLKIT_PW} https://www.wavemetrics.net/ecomm/xop/XOPToolkit8.exe --output XOPToolkit8.exe
     - 7z x -y XOPToolkit8.exe
     - mv XOP\ Toolkit\ 8/IgorXOPs8/XOPSupport .
