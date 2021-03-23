@@ -54,6 +54,32 @@ json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
   }
 }
 
+IgorTypeUnion ConvertStringToIgorTypeUnion(std::string param, int igorType)
+{
+  igorType = ClearBit(igorType, FV_REF_TYPE);
+
+  IgorTypeUnion u = {};
+
+  switch(igorType)
+  {
+  case NT_FP64:
+    u.variable = ConvertStringToDouble(param);
+    break;
+  case HSTRING_TYPE:
+    u.stringHandle = WMNewHandle(param.size());
+    ASSERT(u.stringHandle != nullptr);
+    memcpy(*u.stringHandle, param.c_str(), param.size());
+    break;
+  case DATAFOLDER_TYPE:
+    u.dataFolderHandle = DeSerializeDataFolder(param.c_str());
+    break;
+  default:
+    ASSERT(0);
+  }
+
+  return u;
+}
+
 } // anonymous namespace
 
 CallFunctionParameterHandler::CallFunctionParameterHandler(
@@ -105,26 +131,7 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
   unsigned char *dest = GetParameterValueStorage();
   for(int i = 0; i < fip.numRequiredParameters; i++)
   {
-    const auto type = m_paramTypes[i] & ~FV_REF_TYPE;
-
-    IgorTypeUnion u;
-
-    switch(type)
-    {
-    case NT_FP64:
-      u.variable = ConvertStringToDouble(inputParams[i]);
-      break;
-    case HSTRING_TYPE:
-      u.stringHandle = WMNewHandle(inputParams[i].size());
-      ASSERT(u.stringHandle != nullptr);
-      memcpy(*u.stringHandle, inputParams[i].c_str(), inputParams[i].size());
-      break;
-    case DATAFOLDER_TYPE:
-      u.dataFolderHandle = DeSerializeDataFolder(inputParams[i].c_str());
-      break;
-    default:
-      ASSERT(0);
-    }
+    auto u = ConvertStringToIgorTypeUnion(inputParams[i], m_paramTypes[i]);
 
     // we write one parameter after another into our array
     // we can not use IgorTypeUnion here as the padding on 32bit
