@@ -319,8 +319,8 @@ ELSEIF(WIN32)
   TARGET_LINK_LIBRARIES(${libname} PRIVATE version.lib ${EXTRA_LIBS}
                         ${CMAKE_SOURCE_DIR}/../XOPSupport/IGOR${bitness}.lib
                         ${CMAKE_SOURCE_DIR}/../XOPSupport/VC/XOPSupport${bitness}.lib
-                        optimized ${installFolderLibZMQ}/lib/libzmq-v142-mt-4_2_3.lib
-                        debug ${installFolderLibZMQ}/lib/libzmq-v142-mt-gd-4_2_3.lib)
+                        optimized ${installFolderLibZMQ}/lib/libzmq-v142-mt-4_3_4.lib
+                        debug ${installFolderLibZMQ}/lib/libzmq-v142-mt-gd-4_3_4.lib)
 
   IF(MSVC)
 
@@ -403,11 +403,11 @@ IF(MSVC)
   INSTALL(FILES ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${libname}.pdb
           DESTINATION ${installFolder})
 
-  INSTALL(FILES ${installFolderLibZMQ}/bin/libzmq-v142-mt-gd-4_2_3.dll
+  INSTALL(FILES ${installFolderLibZMQ}/bin/libzmq-v142-mt-gd-4_3_4.dll
           DESTINATION ${installFolder}
           CONFIGURATIONS Debug)
 
-  INSTALL(FILES ${installFolderLibZMQ}/bin/libzmq-v142-mt-4_2_3.dll
+  INSTALL(FILES ${installFolderLibZMQ}/bin/libzmq-v142-mt-4_3_4.dll
           DESTINATION ${installFolder}
           CONFIGURATIONS Release)
 
