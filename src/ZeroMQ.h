@@ -46,7 +46,7 @@
 #pragma clang diagnostic ignored "-Wcovered-switch-default"
 #endif
 
-#include "json/src/json.hpp"
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 #ifdef MACIGOR64
@@ -84,6 +84,7 @@ using LockGuard = std::lock_guard<std::recursive_mutex>;
 
 #include <fmt/format.h>
 #include <fmt/printf.h>
+#include <fmt/ranges.h>
 
 using namespace fmt::literals; // NOLINT
 
@@ -95,6 +96,7 @@ using namespace fmt::literals; // NOLINT
 #pragma clang diagnostic pop
 #endif
 
+#include "cmake_config.h"
 #include "functions.h"
 #include "GlobalData.h"
 #include "CustomExceptions.h"
@@ -103,6 +105,7 @@ using namespace fmt::literals; // NOLINT
 #include "ConcurrentXOPNotice.h"
 #include "SocketWithMutex.h"
 #include "Errors.h"
+#include "git_version.h"
 
 // see also FunctionInfo XOPSupport function
 const int MAX_NUM_PARAMS        = 100;

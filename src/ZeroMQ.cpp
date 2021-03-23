@@ -37,7 +37,7 @@ extern "C" void XOPEntry()
       }
       break;
     case CLEANUP:
-      DebugOutput(fmt::sprintf("%s: CLEANUP\r", __func__));
+      DebugOutput(fmt::format("{}: CLEANUP\r", __func__));
       MessageHandler::Instance().StopHandler();
       GlobalData::Instance().CloseConnections();
       break;
@@ -45,8 +45,8 @@ extern "C" void XOPEntry()
   }
   catch(...)
   {
-    XOPNotice_ts(fmt::sprintf("%s: Caught exception. This must NOT happen!\r",
-                              __func__));
+    XOPNotice_ts(
+        fmt::format("{}: Caught exception. This must NOT happen!\r", __func__));
   }
 }
 
@@ -68,7 +68,7 @@ HOST_IMPORT int XOPMain(IORecHandle ioRecHandle)
 
     SetXOPType(RESIDENT | IDLE);
 
-    if(igorVersion < 701)
+    if(igorVersion < XOP_MINIMUM_IGORVERSION)
     {
       SetXOPResult(OLD_IGOR);
       return EXIT_FAILURE;

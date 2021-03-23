@@ -12,8 +12,8 @@
   {                                                                            \
     throw IgorException(                                                       \
         INTERNAL_ERROR,                                                        \
-        fmt::sprintf("The assertion in %s line %d file %s failed\r", __func__, \
-                     __LINE__, __FILE__));                                     \
+        fmt::format("The assertion in {} line {} file {} failed\r", __func__,  \
+                    __LINE__, __FILE__));                                      \
   }
 
 #define ZEROMQ_ASSERT(A)                                                       \
@@ -22,9 +22,9 @@
     auto err = zmq_errno();                                                    \
     throw IgorException(                                                       \
         INVALID_ARG,                                                           \
-        fmt::sprintf("The zmq library call in %s line %d file "                \
-                     "%s failed with errno=%d and msg=\"%s\"\r",               \
-                     __func__, __LINE__, __FILE__, err, zmq_strerror(err)));   \
+        fmt::format("The zmq library call in {} line {} file "                 \
+                    "{} failed with errno={} and msg=\"{}\"\r",                \
+                    __func__, __LINE__, __FILE__, err, zmq_strerror(err)));    \
   }
 
 class IgorException : public std::exception

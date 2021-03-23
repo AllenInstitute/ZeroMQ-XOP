@@ -23,8 +23,8 @@ RequestInterface::RequestInterface(std::string callerIdentity,
   try
   {
     auto doc = json::parse(payload);
-    DebugOutput(fmt::sprintf("%s: JSON Document is valid, data=%s.\r", __func__,
-                             doc.dump(-1)));
+    DebugOutput(fmt::format("{}: JSON Document is valid, data={}.\r", __func__,
+                            doc.dump(-1)));
     FillFromJSON(doc);
   }
   catch(const IgorException &)
@@ -122,17 +122,6 @@ void RequestInterface::FillFromJSON(json j)
 
   m_op = std::make_shared<CallFunctionOperation>(*it);
 
-  DebugOutput(fmt::sprintf("%s: Request Object could be created: %s\r",
-                           __func__, *this));
-}
-
-std::ostream &operator<<(std::ostream &out, RequestInterface req)
-{
-  fmt::fprintf(
-      out, "version=%d, callerIdentity=%s, messageId=%s, CallFunction: {%s}",
-      req.m_version, req.m_callerIdentity,
-      (req.m_messageId.empty() ? "(not provided)" : req.m_messageId),
-      *(req.m_op));
-
-  return out;
+  DebugOutput(fmt::format("{}: Request Object could be created: {}\r", __func__,
+                          *this));
 }

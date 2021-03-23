@@ -19,8 +19,8 @@ std::recursive_mutex threadShouldFinishMutex;
 
 void WorkerThread()
 {
-  DebugOutput(fmt::sprintf("%s: Begin WorkerThread() with thread_id=%d.\r",
-                           __func__, std::this_thread::get_id()));
+  DebugOutput(fmt::format("{}: Begin WorkerThread() with thread_id={}.\r",
+                          __func__, std::this_thread::get_id()));
 
   {
     // initialize to false
@@ -46,7 +46,7 @@ void WorkerThread()
         LockGuard lock(threadShouldFinishMutex);
         if(threadShouldFinish)
         {
-          DebugOutput(fmt::sprintf("%s: Exiting.\r", __func__));
+          DebugOutput(fmt::format("{}: Exiting.\r", __func__));
           break;
         }
       }
@@ -61,7 +61,7 @@ void WorkerThread()
 
       ZEROMQ_ASSERT(numBytes >= 0);
 
-      DebugOutput(fmt::sprintf("%s: numBytes=%d\r", __func__, numBytes));
+      DebugOutput(fmt::format("{}: numBytes={}\r", __func__, numBytes));
 
       const auto identity = CreateStringFromZMsg(&identityMsg);
 
@@ -83,19 +83,19 @@ void WorkerThread()
         rc               = ZeroMQServerSend(identity, reply.dump(4));
 
         DebugOutput(
-            fmt::sprintf("%s: ZeroMQSendAsServer returned %d\r", __func__, rc));
+            fmt::format("{}: ZeroMQSendAsServer returned {}\r", __func__, rc));
       }
     }
     catch(const std::exception &e)
     {
-      XOPNotice_ts(fmt::sprintf(
-          "%s: Caught std::exception with what=\"%s\". This must NOT happen!\r",
+      XOPNotice_ts(fmt::format(
+          "{}: Caught std::exception with what=\"{}\". This must NOT happen!\r",
           __func__, e.what()));
     }
     catch(...)
     {
-      XOPNotice_ts(fmt::sprintf("%s: Caught exception. This must NOT happen!\r",
-                                __func__));
+      XOPNotice_ts(fmt::format("{}: Caught exception. This must NOT happen!\r",
+                               __func__));
     }
   }
 
@@ -135,19 +135,19 @@ void CallAndReply(RequestInterfacePtr req) noexcept
       // handle host unreachable error
 
       DebugOutput(
-          fmt::sprintf("%s: ZeroMQSendAsServer returned %d\r", __func__, rc));
+          fmt::format("{}: ZeroMQSendAsServer returned {}\r", __func__, rc));
     }
     catch(const std::exception &e)
     {
-      XOPNotice_ts(fmt::sprintf(
-          "%s: Caught std::exception with what=\"%s\". This must NOT happen!\r",
+      XOPNotice_ts(fmt::format(
+          "{}: Caught std::exception with what=\"{}\". This must NOT happen!\r",
           __func__, e.what()));
     }
   }
   catch(...)
   {
-    XOPNotice_ts(fmt::sprintf("%s: Caught exception. This must NOT happen!\r",
-                              __func__));
+    XOPNotice_ts(
+        fmt::format("{}: Caught exception. This must NOT happen!\r", __func__));
   }
 }
 
@@ -162,14 +162,14 @@ void MessageHandler::StartHandler()
     throw IgorException(HANDLER_ALREADY_RUNNING);
   }
 
-  DebugOutput(fmt::sprintf("%s: Trying to start the handler.\r", __func__));
+  DebugOutput(fmt::format("{}: Trying to start the handler.\r", __func__));
 
   if(!GlobalData::Instance().HasBinds())
   {
     throw IgorException(HANDLER_NO_CONNECTION);
   }
 
-  DebugOutput(fmt::sprintf("%s: Before WorkerThread() start.\r", __func__));
+  DebugOutput(fmt::format("{}: Before WorkerThread() start.\r", __func__));
 
   auto t = std::thread(WorkerThread);
   m_thread.swap(t);
@@ -184,7 +184,7 @@ void MessageHandler::StopHandler()
     return;
   }
 
-  DebugOutput(fmt::sprintf("%s: Shutting down the handler.\r", __func__));
+  DebugOutput(fmt::format("{}: Shutting down the handler.\r", __func__));
 
   {
     LockGuard innerLock(threadShouldFinishMutex);

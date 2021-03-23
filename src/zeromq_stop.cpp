@@ -9,7 +9,7 @@ extern "C" int zeromq_stop(zeromq_stopParams *p)
 {
   BEGIN_OUTER_CATCH
 
-  DebugOutput(fmt::sprintf("%s:\r", __func__));
+  DebugOutput(fmt::format("{}:\r", __func__));
   MessageHandler::Instance().StopHandler();
   GlobalData::Instance().CloseConnections();
 

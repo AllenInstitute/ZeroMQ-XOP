@@ -13,14 +13,14 @@ extern "C" int zeromq_test_callfunction(zeromq_test_callfunctionParams *p)
   auto msg = GetStringFromHandle(p->msg);
   WMDisposeHandle(p->msg);
 
-  DebugOutput(fmt::sprintf("%s: input=%s\r", __func__, msg));
+  DebugOutput(fmt::format("{}: input={}\r", __func__, msg));
 
   auto retMessage = CallIgorFunctionFromMessage(msg);
 
   auto len = retMessage.size();
 
-  DebugOutput(fmt::sprintf("%s: len=%d, retMessage=%.255s\r", __func__, len,
-                           retMessage));
+  DebugOutput(fmt::format("{}: len={}, retMessage={:255s}\r", __func__, len,
+                          retMessage));
 
   p->result = WMNewHandle(len);
   ASSERT(p->result != nullptr);

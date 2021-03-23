@@ -13,12 +13,12 @@ resource 'vers' (1) {						/* XOP version info */
 resource 'vers' (2) {						/* Igor version info */
 	0x06, 0x20, release, 0x00, 0,			/* version bytes and country integer */
 	"7.01",
-	"(for Igor 7.01 or later)"
+	"(for Igor 8.00 or later)"
 };
 
 resource 'STR#' (1100) {					/* custom error messages */
 	{
-  "ZeroMQ requires Igor Pro 7.01 or later.",         // OLD_IGOR
+  "ZeroMQ requires Igor Pro 8.00 or later.",         // OLD_IGOR
   "Unhandled C++ exception.",                        // UNHANDLED_CPP_EXCEPTION
   "Unknown zeromq_set flag.",                        // UNKNOWN_SET_FLAG
   "Internal error, this should not happen!",         // INTERNAL_ERROR

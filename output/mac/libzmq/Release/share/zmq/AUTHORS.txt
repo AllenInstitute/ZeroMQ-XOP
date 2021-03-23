@@ -8,6 +8,7 @@ Copyright (c) 2011 VMware, Inc.
 Copyright (c) 2012 Spotify AB
 Copyright (c) 2013 Ericsson AB
 Copyright (c) 2014 AppDynamics Inc.
+Copyright (c) 2015 Google, Inc.
 Copyright (c) 2015-2016 Brocade Communications Systems Inc.
 
 Individual Contributors
@@ -70,6 +71,7 @@ Ken Steele
 Kouhei Sutou
 Laurent Alebarde
 Leonardo J. Consoni
+Lionel Flandrin
 Lourens Naudé
 Luca Boccassi
 Marc Rossi
@@ -99,6 +101,7 @@ Peter Bourgon
 Philip Kovacs
 Pieter Hintjens
 Piotr Trojanek
+Reza Ebrahimi
 Richard Newton
 Rik van der Heijden
 Robert G. Jakabosky

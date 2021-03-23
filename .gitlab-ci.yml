@@ -39,13 +39,14 @@ compile-libzmq-windows:
         - x86
         - x64
   rules:
-    - when: manual
     - if: '$ARCHITECTURE == "x64"'
       variables:
         GENERATOR_PLATFORM: "x64"
+      when: manual
     - if: '$ARCHITECTURE == "x86"'
       variables:
         GENERATOR_PLATFORM: "Win32"
+      when: manual
   script:
     - del /S /Q output
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCHITECTURE%

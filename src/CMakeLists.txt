@@ -169,6 +169,7 @@ ADD_CUSTOM_TARGET("XOP_Toolkit" SOURCES ${XOPTOOLKIT_SOURCES}
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/../XOPSupport)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${installFolderLibZMQ}/include)
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -318,8 +319,8 @@ ELSEIF(WIN32)
   TARGET_LINK_LIBRARIES(${libname} PRIVATE version.lib ${EXTRA_LIBS}
                         ${CMAKE_SOURCE_DIR}/../XOPSupport/IGOR${bitness}.lib
                         ${CMAKE_SOURCE_DIR}/../XOPSupport/VC/XOPSupport${bitness}.lib
-                        optimized ${installFolderLibZMQ}/lib/libzmq-v142-mt-4_2_3.lib
-                        debug ${installFolderLibZMQ}/lib/libzmq-v142-mt-gd-4_2_3.lib)
+                        optimized ${installFolderLibZMQ}/lib/libzmq-v142-mt-4_3_4.lib
+                        debug ${installFolderLibZMQ}/lib/libzmq-v142-mt-gd-4_3_4.lib)
 
   IF(MSVC)
 
@@ -348,11 +349,11 @@ ELSEIF(WIN32)
   ENDIF()
 ENDIF()
 
-# SET(JSON_BuildTests OFF CACHE INTERNAL "")
-# SET(JSON_Install OFF CACHE INTERNAL "")
-# ADD_SUBDIRECTORY(json)
-#
-# TARGET_LINK_LIBRARIES(${libname} PRIVATE nlohmann_json::nlohmann_json)
+SET(JSON_BuildTests OFF CACHE INTERNAL "")
+SET(JSON_Install OFF CACHE INTERNAL "")
+ADD_SUBDIRECTORY(json)
+
+TARGET_LINK_LIBRARIES(${libname} PRIVATE nlohmann_json::nlohmann_json)
 
 ADD_SUBDIRECTORY(fmt EXCLUDE_FROM_ALL)
 
@@ -402,11 +403,11 @@ IF(MSVC)
   INSTALL(FILES ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${libname}.pdb
           DESTINATION ${installFolder})
 
-  INSTALL(FILES ${installFolderLibZMQ}/bin/libzmq-v142-mt-gd-4_2_3.dll
+  INSTALL(FILES ${installFolderLibZMQ}/bin/libzmq-v142-mt-gd-4_3_4.dll
           DESTINATION ${installFolder}
           CONFIGURATIONS Debug)
 
-  INSTALL(FILES ${installFolderLibZMQ}/bin/libzmq-v142-mt-4_2_3.dll
+  INSTALL(FILES ${installFolderLibZMQ}/bin/libzmq-v142-mt-4_3_4.dll
           DESTINATION ${installFolder}
           CONFIGURATIONS Release)
 

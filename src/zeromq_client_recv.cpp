@@ -40,7 +40,7 @@ extern "C" int zeromq_client_recv(zeromq_client_recvParams *p)
 
     WriteZMsgIntoHandle(&(p->result), &payloadMsg);
 
-    DebugOutput(fmt::sprintf("%s: numBytes=%d\r", __func__, numBytes));
+    DebugOutput(fmt::format("{}: numBytes={}\r", __func__, numBytes));
     break;
   }
 

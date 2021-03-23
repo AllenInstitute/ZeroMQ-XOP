@@ -8,14 +8,14 @@
   SocketWithMutex A(GlobalData::Instance().ZMQClientSocket(),                  \
                     GlobalData::Instance().m_clientMutex);
 
-// DebugOutput(fmt::sprintf("%s: Trying to lock client socket\n", __func__));
+// DebugOutput(fmt::format("{}: Trying to lock client socket\n", __func__));
 
 /// @param A object name to create
 #define GET_SERVER_SOCKET(A)                                                   \
   SocketWithMutex A(GlobalData::Instance().ZMQServerSocket(),                  \
                     GlobalData::Instance().m_serverMutex);
 
-// DebugOutput(fmt::sprintf("%s: Trying to lock server socket\n", __func__));
+// DebugOutput(fmt::format("{}: Trying to lock server socket\n", __func__));
 
 class SocketWithMutex
 {
@@ -23,12 +23,12 @@ public:
   SocketWithMutex(void *s, std::recursive_mutex &mutex)
       : m_lock(mutex), m_plainSocket(s)
   {
-    // DebugOutput(fmt::sprintf("%s: Locking %p\n", __func__, m_plainSocket));
+    // DebugOutput(fmt::format("{}: Locking {}\n", __func__, m_plainSocket));
   }
 
   ~SocketWithMutex()
   {
-    // DebugOutput(fmt::sprintf("%s: Unlocking %p\n", __func__, m_plainSocket));
+    // DebugOutput(fmt::format("{}: Unlocking {}\n", __func__, m_plainSocket));
   }
 
   SocketWithMutex(const SocketWithMutex &) = delete;

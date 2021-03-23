@@ -1,11 +1,12 @@
-prefix=/Users/ci/work/builds/3s2PYmqh/2/mirror/zeromq-xop/output/mac/libzmq/Debug
-exec_prefix=${prefix}
-libdir=${prefix}/lib
-includedir=${prefix}/include
+prefix=/Users/ci/work/builds/3s2PYmqh/1/mirror/zeromq-xop/output/mac/libzmq/Debug
+exec_prefix=/Users/ci/work/builds/3s2PYmqh/1/mirror/zeromq-xop/output/mac/libzmq/Debug
+libdir=/Users/ci/work/builds/3s2PYmqh/1/mirror/zeromq-xop/output/mac/libzmq/Debug/lib
+includedir=/Users/ci/work/builds/3s2PYmqh/1/mirror/zeromq-xop/output/mac/libzmq/Debug/include
 
 Name: libzmq
 Description: 0MQ c++ library
-Version: 4.2.3
+Version: 4.3.4
 Libs: -L${libdir} -lzmq
 Libs.private: -lstdc++ 
+Requires.private: 
 Cflags: -I${includedir} 
