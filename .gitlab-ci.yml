@@ -16,9 +16,16 @@ download-xoptoolkit:
   stage: first
   tags:
     - docker, debian
+  cache:
+    key: xop-toolkit-8
+    paths:
+      - XOPSupport
+  variables:
+      GIT_SUBMODULE_STRATEGY: "none"
   image:
     name: ${CI_REGISTRY}/internal/docker-utils
   script:
+    - if [[ -d XOPSupport ]]; then exit 0; fi
     - curl -L --user ${XOPTOOLKIT_USER}:${XOPTOOLKIT_PW} https://www.wavemetrics.net/ecomm/xop/XOPToolkit8.exe --output XOPToolkit8.exe
     - 7z x -y XOPToolkit8.exe
     - mv XOP\ Toolkit\ 8/IgorXOPs8/XOPSupport .
@@ -30,6 +37,8 @@ compile-libzmq-windows:
   stage: first
   tags:
     - windows, shell
+  variables:
+      GIT_SUBMODULE_STRATEGY: "none"
   parallel:
     matrix:
       - CONFIG_TYPE:
@@ -65,6 +74,8 @@ compile-libzmq-macosx:
   when: manual
   tags:
     - macosx, xcode, catalina
+  variables:
+      GIT_SUBMODULE_STRATEGY: "none"
   parallel:
     matrix:
       - CONFIG_TYPE:
@@ -285,6 +296,8 @@ packaging:
     - debian, docker
   image:
     name: ${CI_REGISTRY}/internal/docker-utils:latest
+  variables:
+      GIT_SUBMODULE_STRATEGY: "none"
   script:
     - mkdir package
     - zip -r package/ZeroMQ-XOP-$(git describe --tags --always).zip CONTRIBUTING.md LICENSE.txt procedures help/*.ihf output/mac/xop/Release/*.zip output/win/*/xop/Release/*{.xop,.dll}
