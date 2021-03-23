@@ -20,7 +20,7 @@ public:
 
 private:
   json ReadPassByRefParameters(int first, int last);
-  unsigned char m_values[MAX_NUM_PARAMS * sizeof(double)];
+  unsigned char m_values[MAX_NUM_PARAMS * sizeof(double)] = {};
   std::vector<int> m_paramTypes;
   std::vector<CountInt> m_paramSizesInBytes;
   int m_numInputParams;
