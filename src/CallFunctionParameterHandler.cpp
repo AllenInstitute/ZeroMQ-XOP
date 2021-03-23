@@ -10,24 +10,29 @@ namespace
 
 std::string GetTypeStringForIgorType(int igorType)
 {
+  igorType = ClearBit(igorType, FV_REF_TYPE);
+
   switch(igorType)
   {
   case NT_FP64:
     return "variable";
   case HSTRING_TYPE:
     return "string";
-  case WAVE_TYPE:
-    return "wave";
   case DATAFOLDER_TYPE:
     return "dfref";
   default:
+    if(IsWaveType(igorType))
+    {
+      return "wave";
+    }
     ASSERT(0);
   }
 }
-
-json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
+json ExtractFromUnion(IgorTypeUnion *ret, int igorType)
 {
-  switch(returnType)
+  igorType = ClearBit(igorType, FV_REF_TYPE);
+
+  switch(igorType)
   {
   case NT_FP64:
     if(isfinite(ret->variable))
@@ -45,11 +50,13 @@ json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
     ret->stringHandle = nullptr;
     return std::move(result);
   }
-  case WAVE_TYPE:
-    return SerializeWave(ret->waveHandle);
   case DATAFOLDER_TYPE:
     return SerializeDataFolder(ret->dataFolderHandle);
   default:
+    if(IsWaveType(igorType))
+    {
+      return SerializeWave(ret->waveHandle);
+    }
     ASSERT(0);
   }
 }
@@ -84,7 +91,7 @@ IgorTypeUnion ConvertStringToIgorTypeUnion(std::string param, int igorType)
 
 CallFunctionParameterHandler::CallFunctionParameterHandler(
     StringVector inputParams, FunctionInfo fip)
-    : m_returnType(fip.returnType), m_hasPassByRefParams(false)
+    : m_returnType(fip.returnType)
 {
   ASSERT(sizeof(fip.parameterTypes) / sizeof(int) == MAX_NUM_PARAMS);
   ASSERT(fip.totalNumParameters < MAX_NUM_PARAMS);
@@ -105,8 +112,6 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
 
   for(int i = 0; i < fip.numRequiredParameters; i++)
   {
-    m_hasPassByRefParams |= (m_paramTypes[i] & FV_REF_TYPE) == FV_REF_TYPE;
-
     const auto type = m_paramTypes[i] & ~FV_REF_TYPE;
 
     switch(type)
@@ -138,37 +143,9 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
   }
 }
 
-json CallFunctionParameterHandler::GetPassByRefArray()
+json CallFunctionParameterHandler::GetPassByRefInputArray()
 {
-  unsigned char *src = GetParameterValueStorage();
-  IgorTypeUnion u;
-
-  std::vector<std::string> elems;
-  elems.reserve(m_paramTypes.size());
-
-  for(size_t i = 0; i < m_paramTypes.size(); i++)
-  {
-    switch(m_paramTypes[i])
-    {
-    case NT_FP64 | FV_REF_TYPE:
-      memcpy(&u, src, m_paramSizesInBytes[i]);
-      elems.push_back(To_stringHighRes(u.variable));
-      break;
-    case HSTRING_TYPE | FV_REF_TYPE:
-      memcpy(&u, src, m_paramSizesInBytes[i]);
-      elems.push_back(GetStringFromHandle(u.stringHandle));
-      break;
-    }
-
-    src += m_paramSizesInBytes[i];
-  }
-
-  return json(elems);
-}
-
-bool CallFunctionParameterHandler::HasPassByRefParameters()
-{
-  return m_hasPassByRefParams;
+  return ReadPassByRefParameters(0, INT_MAX);
 }
 
 unsigned char *CallFunctionParameterHandler::GetParameterValueStorage()
@@ -180,7 +157,7 @@ json CallFunctionParameterHandler::GetReturnValues()
 {
   json doc;
 
-  doc["value"] = ExtractReturnValueFromUnion(&m_retStorage, m_returnType);
+  doc["value"] = ExtractFromUnion(&m_retStorage, m_returnType);
   doc["type"]  = GetTypeStringForIgorType(m_returnType);
 
   return doc;
@@ -212,4 +189,39 @@ CallFunctionParameterHandler::~CallFunctionParameterHandler()
 
     src += m_paramSizesInBytes[i];
   }
+}
+
+json CallFunctionParameterHandler::ReadPassByRefParameters(int first, int last)
+{
+  unsigned char *src = GetParameterValueStorage();
+
+  json elems = {};
+
+  for(int i = 0; i < static_cast<int>(m_paramTypes.size()) && i < last; i++)
+  {
+    const auto igorType = m_paramTypes[i];
+
+    if(i >= first && IsBitSet(igorType, FV_REF_TYPE))
+    {
+      if(IsBitSet(igorType, NT_FP64) || IsBitSet(igorType, HSTRING_TYPE) ||
+         IsBitSet(igorType, DATAFOLDER_TYPE) || IsWaveType(igorType))
+      {
+        json doc;
+
+        doc["value"] = ExtractFromUnion(reinterpret_cast<IgorTypeUnion *>(src),
+                                        m_paramTypes[i]);
+        doc["type"]  = GetTypeStringForIgorType(m_paramTypes[i]);
+
+        elems.push_back(doc);
+      }
+      else
+      {
+        ASSERT(0);
+      }
+    }
+
+    src += m_paramSizesInBytes[i];
+  }
+
+  return elems;
 }

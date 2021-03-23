@@ -171,16 +171,13 @@ json CallFunctionOperation::Call() const
   doc["errorCode"] = {{"value", 0}};
   doc["result"]    = {p.GetReturnValues()};
 
-  // only serialize the pass-by-ref params if we have some
-  if(p.HasPassByRefParameters())
-  {
-    auto passByRef = p.GetPassByRefArray();
+  auto passByRef = p.GetPassByRefInputArray();
 
-    // we can have optional pass-by-ref structures which we don't support
-    if(!passByRef.empty())
-    {
-      doc["passByReference"] = passByRef;
-    }
+  // we can have optional pass-by-ref parameters like structures
+  // and in that case passByRef is empty
+  if(!passByRef.empty())
+  {
+    doc["passByReference"] = {passByRef};
   }
 
   return doc;

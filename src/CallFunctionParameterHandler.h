@@ -12,19 +12,17 @@ public:
   CallFunctionParameterHandler(StringVector params, FunctionInfo fip);
   ~CallFunctionParameterHandler();
 
-  bool HasPassByRefParameters();
-
   // Return a jsons style array for the pass-by-reference parameters
-  json GetPassByRefArray();
+  json GetPassByRefInputArray();
   json GetReturnValues();
   void *GetReturnValueStorage();
   unsigned char *GetParameterValueStorage();
 
 private:
+  json ReadPassByRefParameters(int first, int last);
   unsigned char m_values[MAX_NUM_PARAMS * sizeof(double)];
   std::vector<int> m_paramTypes;
   std::vector<CountInt> m_paramSizesInBytes;
-  bool m_hasPassByRefParams;
   int m_numInputParams;
   int m_returnType;
   IgorTypeUnion m_retStorage = {};
