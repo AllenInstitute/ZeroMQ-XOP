@@ -113,29 +113,29 @@ T *GetWaveDataPtr(waveHndl waveH)
 template <typename T, int withComma>
 struct WriteIntoStream
 {
-  void operator()(fmt::MemoryWriter &writer, T val)
+  void operator()(fmt::memory_buffer &buf, T val)
   {
     auto formatSpec = GetFormatString<T, withComma>()();
 
-    writer.write(formatSpec, val);
+    fmt::format_to(buf, formatSpec, val);
   }
 };
 
 template <int withComma>
 struct WriteIntoStream<double, withComma>
 {
-  void operator()(fmt::MemoryWriter &writer, double val)
+  void operator()(fmt::memory_buffer &buf, double val)
   {
     auto formatSpecNumber = GetFormatString<double, withComma>()();
     auto formatSpecString = GetFormatString<char *, withComma>()();
 
     if(std::isnan(val) || std::isinf(val))
     {
-      writer.write(formatSpecString, JSONQuote(std::to_string(val)));
+      fmt::format_to(buf, formatSpecString, JSONQuote(std::to_string(val)));
     }
     else
     {
-      writer.write(formatSpecNumber, val);
+      fmt::format_to(buf, formatSpecNumber, val);
     }
   }
 };
@@ -143,18 +143,18 @@ struct WriteIntoStream<double, withComma>
 template <int withComma>
 struct WriteIntoStream<float, withComma>
 {
-  void operator()(fmt::MemoryWriter &writer, float val)
+  void operator()(fmt::memory_buffer &buf, float val)
   {
     auto formatSpecNumber = GetFormatString<float, withComma>()();
     auto formatSpecString = GetFormatString<char *, withComma>()();
 
     if(std::isnan(val) || std::isinf(val))
     {
-      writer.write(formatSpecString, JSONQuote(std::to_string(val)));
+      fmt::format_to(buf, formatSpecString, JSONQuote(std::to_string(val)));
     }
     else
     {
-      writer.write(formatSpecNumber, val);
+      fmt::format_to(buf, formatSpecNumber, val);
     }
   }
 };
@@ -162,70 +162,70 @@ struct WriteIntoStream<float, withComma>
 template <int withComma>
 struct WriteIntoStream<char *, withComma>
 {
-  void operator()(fmt::MemoryWriter &writer, char *val)
+  void operator()(fmt::memory_buffer &buf, char *val)
   {
     auto formatSpec = GetFormatString<char *, withComma>()();
 
-    writer.write(formatSpec, JSONQuote(val));
+    fmt::format_to(buf, formatSpec, JSONQuote(val));
   }
 };
 
 template <int withComma>
 struct WriteIntoStream<std::string, withComma>
 {
-  void operator()(fmt::MemoryWriter &writer, std::string val)
+  void operator()(fmt::memory_buffer &buf, std::string val)
   {
     auto formatSpec = GetFormatString<char *, withComma>()();
 
-    writer.write(formatSpec, JSONQuote(val));
+    fmt::format_to(buf, formatSpec, JSONQuote(val));
   }
 };
 
 template <typename T>
-void OutputArray(fmt::MemoryWriter &writer, T *data, CountInt dataLength)
+void OutputArray(fmt::memory_buffer &buf, T *data, CountInt dataLength)
 {
   WriteIntoStream<T, 1> streamWriterWithComma;
   WriteIntoStream<T, 0> streamWriter;
 
-  writer << "[";
+  fmt::format_to(buf, "[");
 
   CountInt i;
   for(i = 0; i < dataLength - 1; i++)
   {
-    streamWriterWithComma(writer, *(data + i));
+    streamWriterWithComma(buf, *(data + i));
   }
 
-  streamWriter(writer, *(data + i));
+  streamWriter(buf, *(data + i));
 
-  writer << "]";
+  fmt::format_to(buf, "]");
 }
 
 template <typename T>
-void ToString(fmt::MemoryWriter &writer, waveHndl waveHandle, CountInt offset)
+void ToString(fmt::memory_buffer &buf, waveHndl waveHandle, CountInt offset)
 {
   auto dataLength = WavePoints(waveHandle);
 
   if(dataLength == 0)
   {
-    writer.write("[]");
+    fmt::format_to(buf, "[]");
     return;
   }
 
   T *data = GetWaveDataPtr<T>(waveHandle);
   data += offset;
 
-  OutputArray(writer, data, dataLength);
+  OutputArray(buf, data, dataLength);
 }
 
 template <>
-void ToString<char *>(fmt::MemoryWriter &writer, waveHndl waveHandle,
+void ToString<char *>(fmt::memory_buffer &buf, waveHndl waveHandle,
                       CountInt /* offset */)
 {
   const auto dataLength = WavePoints(waveHandle);
 
   if(dataLength == 0)
   {
-    writer.write("[]");
+    fmt::format_to(buf, "[]");
     return;
   }
 
@@ -239,60 +239,60 @@ void ToString<char *>(fmt::MemoryWriter &writer, waveHndl waveHandle,
   WriteIntoStream<char *, 1> streamWriterWithComma;
   WriteIntoStream<char *, 0> streamWriter;
 
-  writer << "[";
+  fmt::format_to(buf, "[");
 
   CountInt i;
   for(i = 0; i < dataLength - 1; i++)
   {
-    streamWriterWithComma(writer, data);
+    streamWriterWithComma(buf, data);
     data += strlen(data) + 1;
   }
 
-  streamWriter(writer, data);
+  streamWriter(buf, data);
 
-  writer << "]";
+  fmt::format_to(buf, "]");
 
   WMDisposeHandle(textHandle);
 }
 
 std::string WaveToStringImpl(int waveType, waveHndl waveHandle, CountInt offset)
 {
-  fmt::MemoryWriter writer;
+  fmt::memory_buffer buf;
 
   switch(waveType)
   {
   case NT_FP32:
-    ToString<float>(writer, waveHandle, offset);
+    ToString<float>(buf, waveHandle, offset);
     break;
   case NT_FP64:
-    ToString<double>(writer, waveHandle, offset);
+    ToString<double>(buf, waveHandle, offset);
     break;
   case NT_I8:
-    ToString<int8_t>(writer, waveHandle, offset);
+    ToString<int8_t>(buf, waveHandle, offset);
     break;
   case NT_I16:
-    ToString<int16_t>(writer, waveHandle, offset);
+    ToString<int16_t>(buf, waveHandle, offset);
     break;
   case NT_I32:
-    ToString<int32_t>(writer, waveHandle, offset);
+    ToString<int32_t>(buf, waveHandle, offset);
     break;
   case NT_I64:
-    ToString<int64_t>(writer, waveHandle, offset);
+    ToString<int64_t>(buf, waveHandle, offset);
     break;
   case NT_I8 | NT_UNSIGNED:
-    ToString<uint8_t>(writer, waveHandle, offset);
+    ToString<uint8_t>(buf, waveHandle, offset);
     break;
   case NT_I16 | NT_UNSIGNED:
-    ToString<uint16_t>(writer, waveHandle, offset);
+    ToString<uint16_t>(buf, waveHandle, offset);
     break;
   case NT_I32 | NT_UNSIGNED:
-    ToString<uint32_t>(writer, waveHandle, offset);
+    ToString<uint32_t>(buf, waveHandle, offset);
     break;
   case NT_I64 | NT_UNSIGNED:
-    ToString<uint64_t>(writer, waveHandle, offset);
+    ToString<uint64_t>(buf, waveHandle, offset);
     break;
   case TEXT_WAVE_TYPE:
-    ToString<char *>(writer, waveHandle, offset);
+    ToString<char *>(buf, waveHandle, offset);
     break;
   case WAVE_TYPE:
   case DATAFOLDER_TYPE:
@@ -300,7 +300,7 @@ std::string WaveToStringImpl(int waveType, waveHndl waveHandle, CountInt offset)
     ASSERT(0);
   }
 
-  return writer.str();
+  return to_string(buf);
 }
 
 std::string WaveToString(int waveType, waveHndl waveHandle)
@@ -346,10 +346,10 @@ std::string DimensionSizesToString(std::vector<CountInt> dimensionSizes)
     return "[0]";
   }
 
-  fmt::MemoryWriter writer;
-  OutputArray(writer, &dimensionSizes[0], dimensionSizes.size());
+  fmt::memory_buffer buf;
+  OutputArray(buf, &dimensionSizes[0], dimensionSizes.size());
 
-  return writer.str();
+  return to_string(buf);
 }
 
 void AddDataFullScaleIfSet(json &doc, waveHndl waveHandle)
@@ -369,10 +369,10 @@ void AddDataFullScaleIfSet(json &doc, waveHndl waveHandle)
     return;
   }
 
-  fmt::MemoryWriter writer;
-  OutputArray(writer, &entries[0], entries.size());
+  fmt::memory_buffer buf;
+  OutputArray(buf, &entries[0], entries.size());
 
-  doc["data"]["fullScale"] = json::parse(writer.str());
+  doc["data"]["fullScale"] = json::parse(to_string(buf));
 }
 
 void AddDataUnitIfSet(json &doc, waveHndl waveHandle)
@@ -407,15 +407,15 @@ void AddDimensionScalingIfSet(json &doc, waveHndl waveHandle,
 
   if(differentFromDefault)
   {
-    fmt::MemoryWriter writer;
+    fmt::memory_buffer buf;
 
-    OutputArray(writer, &offset[0], offset.size());
-    doc["dimension"]["offset"] = json::parse(writer.str());
+    OutputArray(buf, &offset[0], offset.size());
+    doc["dimension"]["offset"] = json::parse(to_string(buf));
 
-    writer.clear();
+    buf.clear();
 
-    OutputArray(writer, &delta[0], delta.size());
-    doc["dimension"]["delta"] = json::parse(writer.str());
+    OutputArray(buf, &delta[0], delta.size());
+    doc["dimension"]["delta"] = json::parse(to_string(buf));
   }
 }
 
@@ -442,10 +442,10 @@ void AddDimensionUnitsIfSet(json &doc, waveHndl waveHandle,
 
   if(differentFromDefault)
   {
-    fmt::MemoryWriter writer;
+    fmt::memory_buffer buf;
 
-    OutputArray(writer, &units[0], units.size());
-    doc["dimension"]["unit"] = json::parse(writer.str());
+    OutputArray(buf, &units[0], units.size());
+    doc["dimension"]["unit"] = json::parse(to_string(buf));
   }
 }
 
@@ -473,10 +473,10 @@ void AddDimensionLabelsFullIfSet(json &doc, waveHndl waveHandle,
 
   if(differentFromDefault)
   {
-    fmt::MemoryWriter writer;
+    fmt::memory_buffer buf;
 
-    OutputArray(writer, &labels[0], labels.size());
-    doc["dimension"]["label"]["full"] = json::parse(writer.str());
+    OutputArray(buf, &labels[0], labels.size());
+    doc["dimension"]["label"]["full"] = json::parse(to_string(buf));
   }
 }
 
@@ -510,10 +510,10 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
 
   if(differentFromDefault)
   {
-    fmt::MemoryWriter writer;
+    fmt::memory_buffer buf;
 
-    OutputArray(writer, &labels[0], labels.size());
-    doc["dimension"]["label"]["each"] = json::parse(writer.str());
+    OutputArray(buf, &labels[0], labels.size());
+    doc["dimension"]["label"]["each"] = json::parse(to_string(buf));
   }
 }
 
