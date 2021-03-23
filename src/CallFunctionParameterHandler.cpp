@@ -1,27 +1,92 @@
 #include "CallFunctionParameterHandler.h"
 #include "ZeroMQ.h"
+#include "SerializeWave.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-CallFunctionParameterHandler::CallFunctionParameterHandler(
-    StringVector params, int parameterTypes[MAX_NUM_PARAMS], int numParams)
-    : m_hasPassByRefParams(false)
+namespace
 {
-  ASSERT(numParams == static_cast<int>(params.size()));
 
-  if(numParams == 0)
+std::string GetTypeStringForIgorType(int igorType)
+{
+  switch(igorType)
+  {
+  case NT_FP64:
+    return "variable";
+  case HSTRING_TYPE:
+    return "string";
+  case WAVE_TYPE:
+    return "wave";
+  case DATAFOLDER_TYPE:
+    return "dfref";
+  default:
+    ASSERT(0);
+  }
+}
+
+json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
+{
+  switch(returnType)
+  {
+  case NT_FP64:
+    if(isfinite(ret->variable))
+    {
+      return json::parse(To_stringHighRes(ret->variable));
+    }
+    else
+    {
+      return To_stringHighRes(ret->variable);
+    }
+  case HSTRING_TYPE:
+  {
+    auto result = GetStringFromHandle(ret->stringHandle);
+    WMDisposeHandle(ret->stringHandle);
+    ret->stringHandle = nullptr;
+    return std::move(result);
+  }
+  case WAVE_TYPE:
+    if(ret->waveHandle)
+    {
+      auto type = WaveType(ret->waveHandle);
+      if(type & DATAFOLDER_TYPE || type & WAVE_TYPE)
+      {
+        throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
+      }
+    }
+    return SerializeWave(ret->waveHandle);
+  case DATAFOLDER_TYPE:
+    return SerializeDataFolder(ret->dataFolderHandle);
+  default:
+    ASSERT(0);
+  }
+}
+
+} // anonymous namespace
+
+CallFunctionParameterHandler::CallFunctionParameterHandler(
+    StringVector inputParams, FunctionInfo fip)
+    : m_returnType(fip.returnType), m_hasPassByRefParams(false)
+{
+  ASSERT(sizeof(fip.parameterTypes) / sizeof(int) == MAX_NUM_PARAMS);
+  ASSERT(fip.totalNumParameters < MAX_NUM_PARAMS);
+
+  m_numInputParams = static_cast<int>(fip.numRequiredParameters);
+  ASSERT(m_numInputParams == static_cast<int>(inputParams.size()));
+
+  if(m_numInputParams == 0)
   {
     return;
   }
 
-  m_paramSizesInBytes.resize(numParams);
-  m_paramTypes.resize(numParams);
-  std::copy(&parameterTypes[0], &parameterTypes[0] + numParams,
+  m_paramSizesInBytes.resize(fip.numRequiredParameters);
+  m_paramTypes.resize(fip.numRequiredParameters);
+  std::copy(std::begin(fip.parameterTypes),
+            std::begin(fip.parameterTypes) + fip.numRequiredParameters,
             m_paramTypes.begin());
 
   size_t arraySizeInBytes = 0;
-  for(int i = 0; i < numParams; i++)
+  for(int i = 0; i < fip.numRequiredParameters; i++)
   {
     m_hasPassByRefParams |= (m_paramTypes[i] & FV_REF_TYPE) == FV_REF_TYPE;
 
@@ -45,8 +110,8 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
     arraySizeInBytes += m_paramSizesInBytes[i];
   }
 
-  unsigned char *dest = GetValues();
-  for(int i = 0; i < numParams; i++)
+  unsigned char *dest = GetParameterValueStorage();
+  for(int i = 0; i < fip.numRequiredParameters; i++)
   {
     const auto type = m_paramTypes[i] & ~FV_REF_TYPE;
 
@@ -55,15 +120,15 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
     switch(type)
     {
     case NT_FP64:
-      u.variable = ConvertStringToDouble(params[i]);
+      u.variable = ConvertStringToDouble(inputParams[i]);
       break;
     case HSTRING_TYPE:
-      u.stringHandle = WMNewHandle(params[i].size());
+      u.stringHandle = WMNewHandle(inputParams[i].size());
       ASSERT(u.stringHandle != nullptr);
-      memcpy(*u.stringHandle, params[i].c_str(), params[i].size());
+      memcpy(*u.stringHandle, inputParams[i].c_str(), inputParams[i].size());
       break;
     case DATAFOLDER_TYPE:
-      u.dataFolderHandle = DeSerializeDataFolder(params[i].c_str());
+      u.dataFolderHandle = DeSerializeDataFolder(inputParams[i].c_str());
       break;
     default:
       ASSERT(0);
@@ -79,7 +144,7 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
 
 json CallFunctionParameterHandler::GetPassByRefArray()
 {
-  unsigned char *src = GetValues();
+  unsigned char *src = GetParameterValueStorage();
   IgorTypeUnion u;
 
   std::vector<std::string> elems;
@@ -110,9 +175,30 @@ bool CallFunctionParameterHandler::HasPassByRefParameters()
   return m_hasPassByRefParams;
 }
 
+unsigned char *CallFunctionParameterHandler::GetParameterValueStorage()
+{
+  return &m_values[0];
+}
+
+json CallFunctionParameterHandler::GetReturnValues()
+{
+  json doc;
+
+  doc["value"] = ExtractReturnValueFromUnion(&m_retStorage, m_returnType);
+  doc["type"]  = GetTypeStringForIgorType(m_returnType);
+
+  return doc;
+}
+
+void *CallFunctionParameterHandler::GetReturnValueStorage()
+{
+
+  return &m_retStorage;
+}
+
 CallFunctionParameterHandler::~CallFunctionParameterHandler()
 {
-  unsigned char *src = GetValues();
+  unsigned char *src = GetParameterValueStorage();
   IgorTypeUnion u;
 
   for(size_t i = 0; i < m_paramTypes.size(); i++)
