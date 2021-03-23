@@ -19,7 +19,7 @@ extern "C" int zeromq_test_callfunction(zeromq_test_callfunctionParams *p)
 
   auto len = retMessage.size();
 
-  DebugOutput(fmt::format("{}: len={}, retMessage={:255s}\r", __func__, len,
+  DebugOutput(fmt::format("{}: len={}, retMessage={:.255s}\r", __func__, len,
                           retMessage));
 
   p->result = WMNewHandle(len);

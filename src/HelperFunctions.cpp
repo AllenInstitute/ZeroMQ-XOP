@@ -237,7 +237,7 @@ std::string CallIgorFunctionFromMessage(std::string msg)
       req.CanBeProcessed();
       auto reply = req.Call();
 
-      DebugOutput(fmt::format("{}: Function return value is {:255s}\r",
+      DebugOutput(fmt::format("{}: Function return value is {:.255s}\r",
                               __func__, reply.dump(4)));
 
       return reply.dump(4);
