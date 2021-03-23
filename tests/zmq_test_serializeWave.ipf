@@ -117,7 +117,7 @@ End
 Function WorksWithInt64AndLargeValues()
 
 	string actual
-	Make/N=(5)/L wv = floor(2^(32+p))
+	Make/N=(5)/L/U wv = 1 << 63
 	actual = zeromq_test_serializeWave(wv)
 
 	STRUCT WaveProperties s
