@@ -103,7 +103,7 @@ void ToggleIPV6Support(bool enable);
 template <typename T, int withComma>
 struct GetFormatString
 {
-  std::string operator()()
+  std::string operator()() const
   {
     if(withComma)
     {
@@ -117,7 +117,7 @@ struct GetFormatString
 template <int withComma>
 struct GetFormatString<double, withComma>
 {
-  std::string operator()()
+  std::string operator()() const
   {
     static_assert(std::numeric_limits<double>::digits10 == 15,
                   "Unexpected double precision");
