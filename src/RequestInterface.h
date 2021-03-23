@@ -17,8 +17,9 @@ public:
   bool HasValidMessageId() const;
   std::string GetMessageId() const;
 
+  friend struct fmt::formatter<RequestInterface>;
+
 private:
-  friend std::ostream &operator<<(std::ostream &out, RequestInterface req);
   void FillFromJSON(json j);
 
   int m_version;
@@ -26,4 +27,18 @@ private:
   CallFunctionOperationPtr m_op;
 };
 
-std::ostream &operator<<(std::ostream &out, RequestInterface req);
+template <>
+struct fmt::formatter<RequestInterface> : fmt::formatter<std::string>
+{
+  // parse is inherited from formatter<std::string>.
+  template <typename FormatContext>
+  auto format(const RequestInterface &req, FormatContext &ctx)
+  {
+    return format_to(
+        ctx.out(),
+        "version={}, callerIdentity={}, messageId={}, CallFunction: {}",
+        req.m_version, req.m_callerIdentity,
+        (req.m_messageId.empty() ? "(not provided)" : req.m_messageId),
+        *(req.m_op));
+  }
+};

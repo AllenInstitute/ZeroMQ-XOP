@@ -37,7 +37,7 @@ extern "C" void XOPEntry()
       }
       break;
     case CLEANUP:
-      DebugOutput(fmt::sprintf("%s: CLEANUP\r", __func__));
+      DebugOutput(fmt::format("{}: CLEANUP\r", __func__));
       MessageHandler::Instance().StopHandler();
       GlobalData::Instance().CloseConnections();
       break;
@@ -45,8 +45,8 @@ extern "C" void XOPEntry()
   }
   catch(...)
   {
-    XOPNotice_ts(fmt::sprintf("%s: Caught exception. This must NOT happen!\r",
-                              __func__));
+    XOPNotice_ts(
+        fmt::format("{}: Caught exception. This must NOT happen!\r", __func__));
   }
 }
 

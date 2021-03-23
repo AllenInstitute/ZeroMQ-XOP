@@ -56,7 +56,7 @@ void *GlobalData::ZMQClientSocket()
   {
     LockGuard lock(m_clientMutex);
 
-    DebugOutput(fmt::sprintf("%s: Creating client socket\n", __func__));
+    DebugOutput(fmt::format("{}: Creating client socket\n", __func__));
 
     zmq_client_socket = zmq_socket(zmq_context, ZMQ_DEALER);
     ZEROMQ_ASSERT(zmq_client_socket != nullptr);
@@ -81,7 +81,7 @@ void *GlobalData::ZMQServerSocket()
   {
     LockGuard lock(m_serverMutex);
 
-    DebugOutput(fmt::sprintf("%s: Creating server socket\n", __func__));
+    DebugOutput(fmt::format("{}: Creating server socket\n", __func__));
 
     zmq_server_socket = zmq_socket(zmq_context, ZMQ_ROUTER);
     ZEROMQ_ASSERT(zmq_server_socket != nullptr);
@@ -104,7 +104,7 @@ void GlobalData::SetDebugFlag(bool val)
 {
   LockGuard lock(m_settingsMutex);
 
-  DebugOutput(fmt::sprintf("%s: new value=%d\r", __func__, val));
+  DebugOutput(fmt::format("{}: new value={}\r", __func__, val));
   m_debugging = val;
 };
 
@@ -117,7 +117,7 @@ void GlobalData::SetRecvBusyWaitingFlag(bool val)
 {
   LockGuard lock(m_settingsMutex);
 
-  DebugOutput(fmt::sprintf("%s: new value=%d\r", __func__, val));
+  DebugOutput(fmt::format("{}: new value={}\r", __func__, val));
   m_busyWaiting = val;
 }
 
@@ -131,7 +131,7 @@ void GlobalData::CloseConnections()
   if(HasClientSocket())
   {
     DebugOutput(
-        fmt::sprintf("%s: Connections=%d\r", __func__, m_connections.size()));
+        fmt::format("{}: Connections={}\r", __func__, m_connections.size()));
 
     try
     {
@@ -141,8 +141,8 @@ void GlobalData::CloseConnections()
       for(auto conn : m_connections)
       {
         auto rc = zmq_disconnect(socket.get(), conn.c_str());
-        DebugOutput(fmt::sprintf("%s: zmq_disconnect(%s) returned=%d\r",
-                                 __func__, conn, rc));
+        DebugOutput(fmt::format("{}: zmq_disconnect({}) returned={}\r",
+                                __func__, conn, rc));
         // ignore errors
       }
       m_connections.clear();
@@ -159,7 +159,7 @@ void GlobalData::CloseConnections()
 
   if(HasServerSocket())
   {
-    DebugOutput(fmt::sprintf("%s: Binds=%d\r", __func__, m_binds.size()));
+    DebugOutput(fmt::format("{}: Binds={}\r", __func__, m_binds.size()));
 
     try
     {
@@ -169,8 +169,8 @@ void GlobalData::CloseConnections()
       for(auto bind : m_binds)
       {
         auto rc = zmq_unbind(socket.get(), bind.c_str());
-        DebugOutput(fmt::sprintf("%s: zmq_unbind(%s) returned=%d\r", __func__,
-                                 bind, rc));
+        DebugOutput(fmt::format("{}: zmq_unbind({}) returned={}\r", __func__,
+                                bind, rc));
         // ignore errors
       }
       m_binds.clear();
@@ -204,8 +204,8 @@ void GlobalData::EnsureInteropProcFileAvailable()
 
   if(!exists)
   {
-    XOPNotice_ts(fmt::sprintf(
-        "The procedure file %s is required for ZeroMQ XOP.", procedure));
+    XOPNotice_ts(fmt::format(
+        "The procedure file {} is required for ZeroMQ XOP.", procedure));
     throw IgorException(MISSING_PROCEDURE_FILES);
   }
 }

@@ -65,49 +65,9 @@ json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
 
 } // anonymous namespace
 
-#ifdef MACIGOR
-
-namespace std
-{
-
-#endif
-
-std::ostream &operator<<(std::ostream &out, std::vector<std::string> vec)
-{
-  fmt::fprintf(out, "%s", "[");
-
-  for(auto it = vec.cbegin(); it != vec.cend(); it++)
-  {
-    if(std::distance(it, vec.cend()) > 1)
-    {
-      fmt::fprintf(out, "%s, ", *it);
-    }
-    else
-    {
-      fmt::fprintf(out, "%s", *it);
-    }
-  }
-
-  fmt::fprintf(out, "%s", "]");
-
-  return out;
-}
-
-#ifdef MACIGOR
-
-} // namespace std
-
-#endif
-
-std::ostream &operator<<(std::ostream &out, CallFunctionOperation op)
-{
-  fmt::fprintf(out, "name=%s, params=%s", op.m_name, op.m_params);
-  return out;
-}
-
 CallFunctionOperation::CallFunctionOperation(json j)
 {
-  DebugOutput(fmt::sprintf("%s: size=%d\r", __func__, j.size()));
+  DebugOutput(fmt::format("{}: size={}\r", __func__, j.size()));
 
   if(j.size() != 1 && j.size() != 2)
   {
@@ -168,12 +128,12 @@ CallFunctionOperation::CallFunctionOperation(json j)
   }
 
   DebugOutput(
-      fmt::sprintf("%s: CallFunction object could be created.\r", __func__));
+      fmt::format("{}: CallFunction object could be created.\r", __func__));
 }
 
 void CallFunctionOperation::CanBeProcessed() const
 {
-  DebugOutput(fmt::sprintf("%s: Data=%s.\r", __func__, *this));
+  DebugOutput(fmt::format("{}: Data={}.\r", __func__, *this));
 
   FunctionInfo fip;
   auto rc = GetFunctionInfo(m_name.c_str(), &fip);
@@ -237,12 +197,12 @@ void CallFunctionOperation::CanBeProcessed() const
     throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
   }
 
-  DebugOutput(fmt::sprintf("%s: Request Object can be processed.\r", __func__));
+  DebugOutput(fmt::format("{}: Request Object can be processed.\r", __func__));
 }
 
 json CallFunctionOperation::Call() const
 {
-  DebugOutput(fmt::sprintf("%s: Data=%s.\r", __func__, *this));
+  DebugOutput(fmt::format("{}: Data={}.\r", __func__, *this));
 
   FunctionInfo fip;
   auto rc = GetFunctionInfo(m_name.c_str(), &fip);
@@ -260,8 +220,8 @@ json CallFunctionOperation::Call() const
 
   auto functionAborted = SpinProcess();
 
-  DebugOutput(fmt::sprintf("%s: Call finished with functionAborted=%d\r",
-                           __func__, functionAborted));
+  DebugOutput(fmt::format("{}: Call finished with functionAborted={}\r",
+                          __func__, functionAborted));
 
   if(functionAborted)
   {

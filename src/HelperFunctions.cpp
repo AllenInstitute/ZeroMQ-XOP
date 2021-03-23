@@ -132,14 +132,14 @@ void ApplyFlags(double flags)
   {
     throw IgorException(
         UNKNOWN_SET_FLAG,
-        fmt::sprintf("zeromq_set: The flag value %g must positive.\r", flags));
+        fmt::format("zeromq_set: The flag value {} must positive.\r", flags));
   }
 
-  DebugOutput(fmt::sprintf("%s: ZMQ Library Version %d.%d.%d\r", __func__,
-                           ZMQ_VERSION_MAJOR, ZMQ_VERSION_MINOR,
-                           ZMQ_VERSION_PATCH));
+  DebugOutput(fmt::format("{}: ZMQ Library Version {}.{}.{}\r", __func__,
+                          ZMQ_VERSION_MAJOR, ZMQ_VERSION_MINOR,
+                          ZMQ_VERSION_PATCH));
 
-  DebugOutput(fmt::sprintf("%s: git revision %s\r", __func__, GIT_REVISION));
+  DebugOutput(fmt::format("{}: git revision {}\r", __func__, GIT_REVISION));
 
   if((val & ZeroMQ_SET_FLAGS::DEFAULT) == ZeroMQ_SET_FLAGS::DEFAULT)
   {
@@ -172,7 +172,7 @@ void ApplyFlags(double flags)
   {
     throw IgorException(
         UNKNOWN_SET_FLAG,
-        fmt::sprintf("zeromq_set: The flag %g is unknown.\r", flags));
+        fmt::format("zeromq_set: The flag {} is unknown.\r", flags));
   }
 }
 
@@ -183,7 +183,7 @@ std::string GetLastEndPoint(void *s)
   int rc         = zmq_getsockopt(s, ZMQ_LAST_ENDPOINT, buf, &bufSize);
   ZEROMQ_ASSERT(rc == 0);
 
-  DebugOutput(fmt::sprintf("%s: lastEndPoint=%s\r", __func__, buf));
+  DebugOutput(fmt::format("{}: lastEndPoint={}\r", __func__, buf));
   return std::string(buf);
 }
 
@@ -191,7 +191,7 @@ void ToggleIPV6Support(bool enable)
 {
   GET_CLIENT_SOCKET(clientSocket);
 
-  DebugOutput(fmt::sprintf("%s: enable=%d\r", __func__, enable));
+  DebugOutput(fmt::format("{}: enable={}\r", __func__, enable));
 
   const int val = enable;
   auto rc = zmq_setsockopt(clientSocket.get(), ZMQ_IPV6, &val, sizeof(val));
@@ -222,8 +222,8 @@ std::string CallIgorFunctionFromMessage(std::string msg)
       req.CanBeProcessed();
       auto reply = req.Call();
 
-      DebugOutput(fmt::sprintf("%s: Function return value is %.255s\r",
-                               __func__, reply.dump(4)));
+      DebugOutput(fmt::format("{}: Function return value is {:255s}\r",
+                              __func__, reply.dump(4)));
 
       return reply.dump(4);
     }
@@ -245,8 +245,8 @@ int ZeroMQClientSend(std::string payload)
   int rc;
   const auto payloadLength = payload.length();
 
-  DebugOutput(fmt::sprintf("%s: payloadLength=%d, socket=%p\r", __func__,
-                           payloadLength, socket.get()));
+  DebugOutput(fmt::format("{}: payloadLength={}, socket={}\r", __func__,
+                          payloadLength, socket.get()));
 
   // empty
   rc = zmq_send(socket.get(), nullptr, 0, ZMQ_SNDMORE);
@@ -256,7 +256,7 @@ int ZeroMQClientSend(std::string payload)
   rc = zmq_send(socket.get(), payload.c_str(), payloadLength, 0);
   ZEROMQ_ASSERT(rc > 0);
 
-  DebugOutput(fmt::sprintf("%s: rc=%d\r", __func__, rc));
+  DebugOutput(fmt::format("{}: rc={}\r", __func__, rc));
 
   return rc;
 }
@@ -267,8 +267,8 @@ int ZeroMQServerSend(std::string identity, std::string payload)
   int rc;
   const auto payloadLength = payload.length();
 
-  DebugOutput(fmt::sprintf("%s: payloadLength=%d, socket=%p\r", __func__,
-                           payloadLength, socket.get()));
+  DebugOutput(fmt::format("{}: payloadLength={}, socket={}\r", __func__,
+                          payloadLength, socket.get()));
 
   // identity
   rc = zmq_send(socket.get(), identity.c_str(), identity.length(), ZMQ_SNDMORE);
@@ -282,7 +282,7 @@ int ZeroMQServerSend(std::string identity, std::string payload)
   rc = zmq_send(socket.get(), payload.c_str(), payloadLength, 0);
   ZEROMQ_ASSERT(rc > 0);
 
-  DebugOutput(fmt::sprintf("%s: rc=%d\r", __func__, rc));
+  DebugOutput(fmt::format("{}: rc={}\r", __func__, rc));
 
   return rc;
 }

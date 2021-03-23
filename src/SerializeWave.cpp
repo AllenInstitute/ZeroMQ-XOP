@@ -104,7 +104,7 @@ T *GetWaveDataPtr(waveHndl waveH)
   if(ret != 0)
   {
     throw std::runtime_error(
-        fmt::sprintf("MDAccessNumericWaveData returned error %d", ret));
+        fmt::format("MDAccessNumericWaveData returned error {}", ret));
   }
 
   return reinterpret_cast<T *>(reinterpret_cast<char *>(*waveH) + dataOffset);
@@ -314,13 +314,13 @@ std::string WaveToString(int waveType, waveHndl waveHandle)
   }
 
   // WaveToStringImpl returns a JSON quoted string already
-  auto resultTemplate = R"({
-      "real"     : %s,
-      "imag"     : %s
-      }
+  auto resultTemplate = R"({{
+      "real"     : {},
+      "imag"     : {}
+      }}
    )";
 
-  return fmt::sprintf(
+  return fmt::format(
       resultTemplate, WaveToStringImpl(waveType, waveHandle, 0),
       WaveToStringImpl(waveType, waveHandle, WavePoints(waveHandle)));
 }
@@ -546,8 +546,8 @@ json SerializeWave(waveHndl waveHandle)
   const auto dimSizes       = GetDimensionSizes(waveHandle);
   const auto dimSizesString = DimensionSizesToString(dimSizes);
 
-  DebugOutput(fmt::sprintf(
-      "%s: waveType=%d, modDate=%d, type=%s, dimSizes=%s, rawData=%.255s\r",
+  DebugOutput(fmt::format(
+      "{}: waveType={}, modDate={}, type={}, dimSizes={}, rawData={:255s}\r",
       __func__, waveType, modDate, type, dimSizesString, rawData));
 
   json doc;

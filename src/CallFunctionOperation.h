@@ -12,12 +12,20 @@ public:
   void CanBeProcessed() const;
   json Call() const;
 
-private:
-  friend std::ostream &operator<<(std::ostream &out, CallFunctionOperation op);
+  friend struct fmt::formatter<CallFunctionOperation>;
 
+private:
   std::string m_name;
   std::vector<std::string> m_params;
 };
 
-std::ostream &operator<<(std::ostream &out, CallFunctionOperation op);
-std::ostream &operator<<(std::ostream &out, std::vector<std::string> vec);
+template <>
+struct fmt::formatter<CallFunctionOperation> : fmt::formatter<std::string>
+{
+  // parse is inherited from formatter<std::string>.
+  template <typename FormatContext>
+  auto format(CallFunctionOperation op, FormatContext &ctx)
+  {
+    return format_to(ctx.out(), "name={}, params={}", op.m_name, op.m_params);
+  }
+};
