@@ -457,3 +457,8 @@ bool IsConvertibleToDouble(const std::string &str)
 
   return *lastChar == '\0';
 }
+
+bool IsWaveType(int igorType)
+{
+  return IsBitSet(igorType, WAVE_TYPE);
+}

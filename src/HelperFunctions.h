@@ -156,3 +156,4 @@ void InitHandle(Handle *handle, size_t size);
 void WriteZMsgIntoHandle(Handle *handle, zmq_msg_t *msg);
 
 bool IsConvertibleToDouble(const std::string &str);
+bool IsWaveType(int igorType);
