@@ -26,7 +26,7 @@ Windows
 
 - Quit Igor Pro
 - Install the vcredist packages in "output/win"
-- Create the following shortcuts in "$HOME\\Documents\\WaveMetrics\\Igor Pro 7 User Files"
+- Create the following shortcuts in "$HOME\\Documents\\WaveMetrics\\Igor Pro 8 User Files"
 
   - In "Igor Procedures" a shortcut pointing to "procedures"
   - In "Igor Help Files" a shortcut pointing to "help"
@@ -40,7 +40,7 @@ MacOSX
 
 - Quit Igor Pro
 - Unzip the files in "output/mac"
-- Create the following symbolic links (symlinks) in "$HOME/Documents/WaveMetrics/Igor Pro 7 User Files"
+- Create the following symbolic links (symlinks) in "$HOME/Documents/WaveMetrics/Igor Pro 8 User Files"
 
   - In "Igor Procedures" a symlink pointing to "procedures"
   - In "Igor Help Files" a symlink pointing to "help"
@@ -57,23 +57,28 @@ Direction: World -> Igor Pro
 Call Igor Pro functions and return the result
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Supported parameter types:
+The following table lists all currently supported function parameter and return
+types. PRs adding support for new parameter/return types are welcome.
 
--  string (including pass-by-reference)
--  variable (including pass-by-reference)
--  datafolder reference
-
-Supported return types:
-
--  string
--  variable
--  wave (without wave reference waves or datafolder reference waves)
--  datafolder reference
-
-Current ``CallFunction`` limitations:
-
--  Filling in optional parameters is not supported.
--  Passing wave/structure parameters is not supported.
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|Type                    | by-value Parameter | by-ref Parameter | optional Parameter | Return value | Multiple return values|
++========================+====================+==================+====================+==============+=======================+
+|Variable aka double     |         •          |        •         |                    |       •      |           •           |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|Variable/C aka complex  |                    |                  |                    |              |                       |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|Int/int64/uint64/uint   |                    |                  |                    |              |                       |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|String                  |         •          |        •         |                    |       •      |           •           |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|Wave                    |                    |                  |                    |       •      |           •           |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|DFREF                   |         •          |        •         |                    |       •      |           •           |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|FUNCREF                 |                    |                  |                    |              |                       |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
+|STRUCT                  |                    |                  |                    |              |                       |
++------------------------+--------------------+------------------+--------------------+--------------+-----------------------+
 
 The Igor Pro function ``FooBar(string panelTitle, variable index)`` can
 be called by sending the following string
@@ -111,6 +116,7 @@ Possible responses:
       "errorCode" : {
        "value" : 0
       },
+      "messageID" : "my first message",
       "result" : {
         "type" : "variable",
         "value" : 4711
@@ -125,7 +131,8 @@ or
       "errorCode" : {
         "value" : 100,
         "msg" : "Function does not exist"
-      }
+      },
+      "messageID" : "my first message",
     }
 
 If the function has pass-by-reference parameters their results are
@@ -138,8 +145,14 @@ returned as
           "value": 0
       },
       "passByReference": [
-          "4711",
-          "hi there"
+        {
+            "type": "variable",
+            "value": 4711
+        },
+        {
+            "type": "string",
+            "value": "hi there"
+        }
       ],
       "result": {
           "type": "variable",
@@ -162,6 +175,38 @@ Functions can also return datafolder references
     }
 
 ``result.value`` can also be ``free`` or ``null``.
+
+Functions with multiple return values
+-------------------------------------
+
+Since Igor Pro 8 functions can return multiple values.
+
+.. code-block:: igorpro
+
+   Function [variable erroCode, string message] FooBarMRS()
+
+      return [42, "Hi there!"]
+   End
+
+The function ``FooBarMRS()`` will return the following message:
+
+.. code-block:: json
+
+   {
+       "errorCode": {
+           "value": 0
+       },
+       "result": [
+           {
+               "type": "variable",
+               "value": 42
+           },
+           {
+               "type": "string",
+               "value": "Hi there!"
+           }
+       ]
+   }
 
 Functions returning waves
 -------------------------
@@ -277,141 +322,103 @@ Sent JSON message
 +---------------------+--------------------------+-----------------------+-------------------------------------------------------+----------+
 | CallFunction.params | array of strings/numbers | holds strings/numbers | function parameters, conversion will be done eagerly. | No       |
 +---------------------+--------------------------+-----------------------+-------------------------------------------------------+----------+
+| messageID           | string                   | user settable         | will be returned in the reply message if present      | No       |
++---------------------+--------------------------+-----------------------+-------------------------------------------------------+----------+
 
 Received JSON message for operation ``CallFunction``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-+------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------+
-| Name                   | JSON type                | Description                                                                                                   |
-+========================+==========================+===============================================================================================================+
-| errorCode.value        | number                   | indicates the success/error of the operation, see :cpp:any:`REQ_SUCCESS`                                      |
-+------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------+
-| errorCode.msg          | string                   | human readable error message, only set if errorCode.value != 0                                                |
-+------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------+
-| return.type            | string                   | type of the function result, one of ``string``, ``variable``, ``wave`` or ``dfref``, only for errorCode.value |
-+------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------+
-| return.value           | number, string or object | function result, only for errorCode.value == 0                                                                |
-+------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------+
-| return.passByReference | array of strings         | Changed parameter values for pass-by-reference parameters.                                                    |
-|                        |                          | The fact that ``passByReference`` is an array of strings is an implementation detail and subject to change.   |
-+------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------+
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
+| Name                   | JSON type                | Description                                                                                                        |
++========================+==========================+====================================================================================================================+
+| errorCode.value        | number                   | indicates the success/error of the operation, see :cpp:any:`REQ_SUCCESS`                                           |
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
+| errorCode.msg          | string                   | human readable error message, only set if errorCode.value != 0                                                     |
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
+| return                 | object or array          | function result, will be an array when multiple return value syntax functions are called.                          |
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
+| -> type                | string                   | type of the function result, one of ``string``, ``variable``, ``wave`` or ``dfref``, only for errorCode.value == 0 |
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
+| -> value               | number, string or object | function result, only for errorCode.value == 0                                                                     |
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
+| passByReference        | array of objects         | Changed parameter values for pass-by-reference parameters.                                                         |
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
+| -> type                | string                   | type of the function result, one of ``string``, ``variable`` or ``dfref``                                          |
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
+| -> value               | number or string         | possibly changed input parameters, only for errorCode.value == 0                                                                     |
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
+| messageID              | string                   | message ID from the sent message. This entry is not present if the sent message did not contain a message id.      |
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
 
-Functions returning waves:
+Callers are encouraged to **always** check ``errorCode.value`` before processing the rest of the JSON.
+Functions returning waves will hold the wave data and metadata as object below ``value``. All strings are UTF8 encoded.
+The ``messageID`` allows to correlate responses with requests.
 
-- For now the wave data is always returned in a stringified version in
-  the reply message itself. Possible enhancement later: Return the
-  wave's raw data in binary format in a follow-up message (using zmq's
-  multipart message feature).
-- Data of text waves and the wave note are encoded in UTF-8.
-
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| Name                              | JSON type                | Description                                                                                                                               |
-+===================================+==========================+===========================================================================================================================================+
-| result.value.type                 | string                   | wave type; one of NT\_FP32, NT\_FP64, NT\_I8, NT\_I16, NT\_I32, NT\_I64, TEXT\_WAVE\_TYPE; or'ed with NT\_UNSIGNED or NT\_CMPLX if needed |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.dimension.size       | array of 1 to 4 numbers  | either "32-bit unsigned int" or "64-bit unsigned int" depending on Igor bitness. An empty wave has ``[0]``.                               |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.dimension.delta      | array of 1 to 4 numbers  | delta values for each dimension                                                                                                           |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.dimension.offset     | array of 1 to 4 numbers  | offset values for each dimension                                                                                                          |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.dimension.label.full | array of strings         | dimension labels for the full dimension                                                                                                   |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.dimension.label.each | array of strings         | dimension labels for each row/column/layer/chunk, colum-major format as ``result.value.data.raw``                                         |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.dimension.unit       | string                   | arbitrary string  denoting the unit. The contents are most likely SI with prefix, but this is not guaranteed.                             |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.date.modification    | number                   | time of last modification in seconds since unix epoch in UTC. 0 for free waves.                                                           |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.data.raw             | array of numbers/strings | column-major format, read it with ``np.array([5, 6, 7, 8, "-inf", 10]).reshape(3, 2, order='F')`` using Python.                           |
-|                                   |                          | For complex waves ``raw`` has two properties ``real`` and ``imag`` both holding arrays.                                                   |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.data.unit            | string                   | arbitrary strings denoting the unit. The contents are most likely SI with prefix, but this is not guaranteed.                             |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.data.fullScale       | array of numbers/strings | min and max of the data (non-authorative)                                                                                                 |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
-| result.value.note                 | string                   | wave note                                                                                                                                 |
-+-----------------------------------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------+
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Name                       | JSON type                | Description                                                                                                                                                               |
++============================+==========================+===========================================================================================================================================================================+
+| value.type                 | string                   | wave type; one of NT\_FP32, NT\_FP64, NT\_I8, NT\_I16, NT\_I32, NT\_I64, TEXT\_WAVE\_TYPE, WAVE\_TYPE or DATAFOLDER\_TYPE; or'ed with NT\_UNSIGNED or NT\_CMPLX if needed |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.dimension.size       | array of 1 to 4 numbers  | either "32-bit unsigned int" or "64-bit unsigned int" depending on Igor bitness. An empty wave has ``[0]``.                                                               |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.dimension.delta      | array of 1 to 4 numbers  | delta values for each dimension                                                                                                                                           |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.dimension.offset     | array of 1 to 4 numbers  | offset values for each dimension                                                                                                                                          |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.dimension.label.full | array of strings         | dimension labels for the full dimension                                                                                                                                   |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.dimension.label.each | array of strings         | dimension labels for each row/column/layer/chunk, colum-major format as ``result.value.data.raw``                                                                         |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.dimension.unit       | string                   | arbitrary string  denoting the unit. The contents are most likely SI with prefix, but this is not guaranteed.                                                             |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.date.modification    | number                   | time of last modification in seconds since unix epoch in UTC. 0 for free waves.                                                                                           |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.data.raw             | array of numbers/strings | column-major format, read it with ``np.array([5, 6, 7, 8, "-inf", 10]).reshape(3, 2, order='F')`` using Python.                                                           |
+|                            |                          | For complex waves ``raw`` has two properties ``real`` and ``imag`` both holding arrays. For wave reference waves this holds a new instance of a wave object or null.      |
+|                            |                          | For type equal ``WAVE_TYPE`` this holds an array with waves. Each array entry is an object with again ``values`` entries.                                                 |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.data.unit            | string                   | arbitrary strings denoting the unit. The contents are most likely SI with prefix, but this is not guaranteed.                                                             |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.data.fullScale       | array of numbers/strings | min and max of the data (non-authorative)                                                                                                                                 |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| value.note                 | string                   | wave note                                                                                                                                                                 |
++----------------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Compilation instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 Required additional software:
 
-- (Windows only) Visual Studio 2015
+- (Windows only) Visual Studio 2019
 - (MacOSX only) Xcode
-- `CMake <https://cmake.org>`__ version 3.8 or later
-- `XOPSupport Toolkit 7 <https://www.wavemetrics.com/products/xoptoolkit/xoptoolkit.htm>`__
+- `CMake <https://cmake.org>`__ version 3.15 or later
+- `XOPSupport Toolkit 8 <https://www.wavemetrics.com/products/xoptoolkit/xoptoolkit.htm>`__
 - `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`__
-
-Building libzmq
-~~~~~~~~~~~~~~~
-
-.. code-block:: sh
-
-    cd libzmq
-    mkdir build build-64
-
-    # WINDOWS
-    # {
-    # 32bit
-    cd build
-    cmake -G "Visual Studio 14 2015" ..
-    cmake --build . --config Release
-    ctest -C Release
-    # Import/static libs are in lib/release, dll in bin/release
-
-    # 64bit
-    cd build-64
-    cmake -G "Visual Studio 14 2015 Win64" ..
-    cmake --build . --config Release
-    ctest -C Release
-    # Import/static libs are in lib/release, dll in bin/release
-    # }
-
-    # MACOSX
-    # {
-    # 32bit
-    cd build
-    cmake -DCMAKE_OSX_ARCHITECTURES=i386 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 ..
-    cmake --build . --config Release
-    ctest -C Release
-    # static libs are in lib
-
-    # 64bit
-    mkdir build-64
-    cd build-64
-    cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 ..
-    cmake --build . --config Release
-    ctest -C Release
-    # static libs are in lib
-    # }
 
 Building and installing the ZeroMQ.xop
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+See also ``.gitlab.ci.yml`` for up-do-date build instructions.
 
 .. code-block:: sh
 
    # Windows
    # {
    # Install cmake from www.cmake.org
-   # Install Visual Studio 2015 Community
-   # Open a Visual Studio 2015 command prompt
+   # Install Visual Studio 2019 Community
+   # Open a Visual Studio 2019 command prompt
    cd Packages/ZeroMQ/src
-   mkdir build build-64
-   cmake -G "Visual Studio 14 2015" ..
+   md build build-64
+   cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE=Release ..
    cmake --build . --config Release --target install
    cd ..
-   cmake -G "Visual Studio 14 2015 Win64" ..
+   cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release ..
    cmake --build . --config Release --target install
    # }
 
    # MacOSX
    # {
-   cmake -DCMAKE_OSX_ARCHITECTURES=i386 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -G Xcode ..
-   cmake --build . --config Release --target install
-   cd ..
-   cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -G Xcode ..
+   cmake -G Xcode -DCMAKE_BUILD_TYPE=Release ..
    cmake --build . --config Release --target install
    # }
 
@@ -423,17 +430,6 @@ Running the test suite
 - Open Packages/ZeroMQ/tests/RunTests.pxp
 - Execute in Igor ``run()``
 - The test suite always passes *without* errors
-
-Running clang-tidy on MacOSX
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- Install `Homebrew <https://brew.sh>`__
-- ``brew install llvm``
-- Create compilation database
-
-  - ``mkdir clang-tidy; cd clang-tidy``
-  - ``cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=10.9 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..``
-  - ``cmake --build . --target clang-tidy``
 
 ZeroMQ XOP implementation details
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
