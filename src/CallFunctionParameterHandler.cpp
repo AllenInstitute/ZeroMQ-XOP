@@ -103,7 +103,6 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
             std::begin(fip.parameterTypes) + fip.numRequiredParameters,
             m_paramTypes.begin());
 
-  size_t arraySizeInBytes = 0;
   for(int i = 0; i < fip.numRequiredParameters; i++)
   {
     m_hasPassByRefParams |= (m_paramTypes[i] & FV_REF_TYPE) == FV_REF_TYPE;
@@ -124,8 +123,6 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
     default:
       ASSERT(0);
     }
-
-    arraySizeInBytes += m_paramSizesInBytes[i];
   }
 
   unsigned char *dest = GetParameterValueStorage();
