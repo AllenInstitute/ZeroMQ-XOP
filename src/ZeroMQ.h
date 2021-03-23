@@ -46,7 +46,7 @@
 #pragma clang diagnostic ignored "-Wcovered-switch-default"
 #endif
 
-#include "json/src/json.hpp"
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 #ifdef MACIGOR64
