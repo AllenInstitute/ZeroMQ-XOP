@@ -51,11 +51,27 @@ json ExtractFromUnion(IgorTypeUnion *ret, int igorType)
     return std::move(result);
   }
   case DATAFOLDER_TYPE:
-    return SerializeDataFolder(ret->dataFolderHandle);
+  {
+    auto result = SerializeDataFolder(ret->dataFolderHandle);
+    if(ret->dataFolderHandle != nullptr)
+    {
+      ReleaseDataFolder(&ret->dataFolderHandle);
+      ret->dataFolderHandle = nullptr;
+    }
+    return std::move(result);
+  }
   default:
     if(IsWaveType(igorType))
     {
-      return SerializeWave(ret->waveHandle);
+      auto result = SerializeWave(ret->waveHandle);
+
+      if(ret->waveHandle != nullptr)
+      {
+        ReleaseWave(&ret->waveHandle);
+        ret->waveHandle = nullptr;
+      }
+
+      return std::move(result);
     }
     ASSERT(0);
   }
