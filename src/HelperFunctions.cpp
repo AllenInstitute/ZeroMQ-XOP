@@ -447,3 +447,13 @@ void WriteZMsgIntoHandle(Handle *handle, zmq_msg_t *msg)
     memcpy(**handle, rawData, numBytes);
   }
 }
+
+bool IsConvertibleToDouble(const std::string &str)
+{
+  char *lastChar;
+  // avoid unused return value warning
+  auto val = std::strtod(str.c_str(), &lastChar);
+  (void) val;
+
+  return *lastChar == '\0';
+}

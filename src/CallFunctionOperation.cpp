@@ -113,10 +113,7 @@ void CallFunctionOperation::CanBeProcessed() const
 
     if((fip.parameterTypes[i] & NT_FP64) == NT_FP64)
     {
-      char *lastChar;
-      std::strtod(m_params[i].c_str(), &lastChar);
-
-      if(*lastChar != '\0')
+      if(!IsConvertibleToDouble(m_params[i]))
       {
         throw RequestInterfaceException(REQ_INVALID_PARAM_FORMAT);
       }
