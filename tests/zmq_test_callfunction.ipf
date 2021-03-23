@@ -1393,3 +1393,24 @@ Function WorksWithPassingMessageIDAndRep()
 	actual   = ExtractMessageID(replyMessage)
 	CHECK_EQUAL_STR(expected, actual, case_sensitive=1)
 End
+
+Function WorksWithLongNames()
+	string msg, replyMessage
+	variable errorValue, resultVariable
+	string expected, actual
+
+	msg = "{\"version\"     : 1, "                         + \
+		  "\"CallFunction\" : {"                           + \
+		  "\"name\"         : \"ReturnWaveWithLongNames\"" + \
+		  "}}"
+
+	replyMessage = zeromq_test_callfunction(msg)
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	STRUCT WaveProperties s
+	ExtractReturnValue(replyMessage, wvProp=s)
+	WAVE wv = ReturnWaveWithLongNames()
+	CompareWaveWithSerialized(wv, s)
+End

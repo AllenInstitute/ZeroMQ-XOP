@@ -557,6 +557,15 @@ Function TestFunctionPassByRef7(WAVE& wv)
 End
 
 
+Function/WAVE ReturnWaveWithLongNames()
+
+	Make/O/N=1 AVeryLongNameOnlyAllowedWithIgorProEight
+	WAVE wv = AVeryLongNameOnlyAllowedWithIgorProEight
+	SetDimLabel 0, 0, AVeryLongLabelOnlyAllowedWithIgorProEight, wv
+
+	return wv
+End
+
 Structure WaveProperties
 	WAVE/T raw
 	WAVE dimensions
