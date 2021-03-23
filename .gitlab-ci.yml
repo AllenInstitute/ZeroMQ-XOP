@@ -20,6 +20,8 @@ download-xoptoolkit:
     key: xop-toolkit-8
     paths:
       - XOPSupport
+  variables:
+      GIT_SUBMODULE_STRATEGY: "none"
   image:
     name: ${CI_REGISTRY}/internal/docker-utils
   script:
@@ -35,6 +37,8 @@ compile-libzmq-windows:
   stage: first
   tags:
     - windows, shell
+  variables:
+      GIT_SUBMODULE_STRATEGY: "none"
   parallel:
     matrix:
       - CONFIG_TYPE:
@@ -70,6 +74,8 @@ compile-libzmq-macosx:
   when: manual
   tags:
     - macosx, xcode, catalina
+  variables:
+      GIT_SUBMODULE_STRATEGY: "none"
   parallel:
     matrix:
       - CONFIG_TYPE:
@@ -290,6 +296,8 @@ packaging:
     - debian, docker
   image:
     name: ${CI_REGISTRY}/internal/docker-utils:latest
+  variables:
+      GIT_SUBMODULE_STRATEGY: "none"
   script:
     - mkdir package
     - zip -r package/ZeroMQ-XOP-$(git describe --tags --always).zip CONTRIBUTING.md LICENSE.txt procedures help/*.ihf output/mac/xop/Release/*.zip output/win/*/xop/Release/*{.xop,.dll}
