@@ -889,7 +889,7 @@ Function WorksWithFuncReturnFreeWave()
 	CompareWaveWithSerialized(wv, s)
 End
 
-Function ComplainsWithFuncReturnWaveWave()
+Function WorksWithFuncReturnWaveWave()
 
 	string msg, replyMessage,  expected
 	variable errorValue
@@ -901,12 +901,15 @@ Function ComplainsWithFuncReturnWaveWave()
 		  "}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
-
 	errorValue = ExtractErrorValue(replyMessage)
-	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_RET)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	ExtractReturnValue(replyMessage, wvProp=s)
+	WAVE wv = TestFunctionReturnWaveWave()
+	CompareWaveWithSerialized(wv, s)
 End
 
-Function ComplainsWithFuncReturnDFWave()
+Function WorksWithFuncReturnDFWave()
 
 	string msg, replyMessage,  expected
 	variable errorValue
@@ -919,7 +922,11 @@ Function ComplainsWithFuncReturnDFWave()
 
 	replyMessage = zeromq_test_callfunction(msg)
 	errorValue = ExtractErrorValue(replyMessage)
-	CHECK_EQUAL_VAR(errorValue, REQ_UNSUPPORTED_FUNC_RET)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	ExtractReturnValue(replyMessage, wvProp=s)
+	WAVE wv = TestFunctionReturnDFWave()
+	CompareWaveWithSerialized(wv, s)
 End
 
 #ifdef MEMORY_LEAK_TESTING

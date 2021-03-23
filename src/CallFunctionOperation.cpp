@@ -106,6 +106,11 @@ void CallFunctionOperation::CanBeProcessed() const
   // check passed parameters
   for(auto i = 0; i < numParamsSupplied; i += 1)
   {
+    if((fip.parameterTypes[i] & NT_CMPLX) == NT_CMPLX)
+    {
+      throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
+    }
+
     if((fip.parameterTypes[i] & NT_FP64) == NT_FP64)
     {
       char *lastChar;

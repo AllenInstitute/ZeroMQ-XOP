@@ -46,14 +46,6 @@ json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
     return std::move(result);
   }
   case WAVE_TYPE:
-    if(ret->waveHandle)
-    {
-      auto type = WaveType(ret->waveHandle);
-      if(type & DATAFOLDER_TYPE || type & WAVE_TYPE)
-      {
-        throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
-      }
-    }
     return SerializeWave(ret->waveHandle);
   case DATAFOLDER_TYPE:
     return SerializeDataFolder(ret->dataFolderHandle);

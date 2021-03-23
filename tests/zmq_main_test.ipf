@@ -278,21 +278,9 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave,
 
 	if(!ParamIsDefault(passByRefWave))
 		FindValue/TXOP=4/TEXT="passByReference" T_TokenText
-		firstPassByRefRow = V_value
-		CHECK_NEQ_VAR(firstPassByRefRow,-1)
-		Redimension/N=(W_TokenSize[firstPassByRefRow + 1]) passByRefWave
-
-		FindValue/TXOP=4/TEXT="result" T_TokenText
-		CHECK_NEQ_VAR(lastPassByRefRow, -1)
-
-		idx = 0
-		lastPassByRefRow = V_Value
-		for(i = firstPassByRefRow; i < lastPassByRefRow; i += 1)
-			if(!cmpstr(T_TokenText[i], "value"))
-				passByRefWave[idx] = T_TokenText[i + 1]
-				idx++
-			endif
-		endfor
+	  CHECK_NEQ_VAR(V_value,-1)
+	  Redimension/N=(W_TokenSize[V_value + 1]) passByRefWave
+	  passByRefWave[] = T_TokenText[V_value + 2 + p]
 	endif
 
 	if(!ParamIsDefault(resultWave))
@@ -398,14 +386,16 @@ End
 
 Function/WAVE TestFunctionReturnWaveWave()
 
-	Make/FREE/WAVE data
+	Make/FREE/D content = {3, 4}
+
+	Make/FREE/WAVE data = {content}
 
 	return data
 End
 
 Function/WAVE TestFunctionReturnDFWave()
 
-	Make/FREE/DF data
+	Make/FREE/DF data = {NewFreeDataFolder()}
 
 	return data
 End
