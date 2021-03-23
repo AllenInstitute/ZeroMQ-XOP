@@ -58,6 +58,21 @@ void DebugOutput(std::string str)
   }
 }
 
+bool IsBitSet(int val, int bit)
+{
+  return (val & bit) == bit;
+}
+
+int ClearBit(int val, int bit)
+{
+  return val & ~bit;
+}
+
+int SetBit(int val, int bit)
+{
+  return val | bit;
+}
+
 template <>
 bool lockToIntegerRange<bool>(double val)
 {

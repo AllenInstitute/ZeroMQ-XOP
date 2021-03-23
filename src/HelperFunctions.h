@@ -3,6 +3,10 @@
 #include <sstream>
 #include <iomanip>
 
+bool IsBitSet(int val, int bit);
+int ClearBit(int val, int bit);
+int SetBit(int val, int bit);
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
