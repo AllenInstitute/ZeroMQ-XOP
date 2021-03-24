@@ -534,3 +534,30 @@ int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues)
 {
   return UsesMultipleReturnValueSyntax(fip) ? numReturnValues : 0;
 }
+
+// Removes any leading and trailing whitespace and replaces \r with \n
+std::string CleanupString(std::string str)
+{
+  if(str.empty())
+  {
+    return str;
+  }
+
+  constexpr auto ws = " \n\r\t";
+
+  size_t end = str.find_last_not_of(ws);
+  if(end != std::string::npos)
+    str.resize(end + 1);
+
+  size_t start = str.find_first_not_of(ws);
+  if(start != std::string::npos)
+    str = str.substr(start);
+
+  for(auto &c : str)
+  {
+    if(c == '\r')
+      c = '\n';
+  }
+
+  return str;
+}

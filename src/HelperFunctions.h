@@ -163,3 +163,4 @@ bool UsesMultipleReturnValueSyntax(FunctionInfo fip);
 int GetNumberOfReturnValues(FunctionInfo fip);
 int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues);
 int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues);
+std::string CleanupString(std::string str);
