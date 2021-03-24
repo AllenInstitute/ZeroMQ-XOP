@@ -696,8 +696,8 @@ Function ParseSerializedWave(replyMessage, s)
 
 		SplitString/E="\"size\":\[([[:digit:]]*),?([[:digit:]]*),?([[:digit:]]*),?([[:digit:]]*),?\]" dimLine, size0, size1, size2, size3
 		CHECK(V_Flag >= 1)
-		Make/N=(4)/I/FREE dimensions = {str2num(size0), str2num(size1), str2num(size2), str2num(size3)}
-		dimensions[] = dimensions[p] == -1 ? 0 : dimensions[p]
+		Make/N=(4)/FREE dimensions = {str2num(size0), str2num(size1), str2num(size2), str2num(size3)}
+		dimensions[] = numtype(dimensions[p]) == 2 ? 0 : dimensions[p]
 		WAVE s.dimensions = dimensions
 	endif
 
@@ -809,8 +809,8 @@ Function CompareWaveWithSerialized(wv, s)
 	REQUIRE(WaveExists(s.raw))
 
 	// dimensions
-	Make/FREE/N=(4)/I dims = DimSize(wv, p)
-	CHECK_EQUAL_WAVES(dims, s.dimensions)
+	Make/FREE/N=(4) dims = DimSize(wv, p)
+	CHECK_EQUAL_WAVES(dims, s.dimensions, tol = 0.1)
 
 	if(s.modificationDate == 0)
 		CHECK_EQUAL_VAR(ModDate(wv), s.modificationDate)

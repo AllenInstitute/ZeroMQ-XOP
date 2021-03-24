@@ -1405,8 +1405,8 @@ Function WorksWithMultipleReturnValues2()
 	ParseSerializedWave(replyMessage, s)
 	Make/FREE/T refWave = num2str(p)
 	CHECK_EQUAL_WAVES(refWave, s.raw)
-	Make/FREE/I dims = {128, 0, 0, 0}
-	CHECK_EQUAL_WAVES(dims, s.dimensions)
+	Make/FREE dims = {128, 0, 0, 0}
+	CHECK_EQUAL_WAVES(dims, s.dimensions, tol = 0.1)
 End
 
 Function WorksWithMultipleReturnValues3()
