@@ -277,6 +277,13 @@ std::string CallIgorFunctionFromReqInterface(RequestInterfacePtr req)
       reply[MESSAGEID_KEY] = req->GetMessageId();
     }
 
+    const auto history = req->GetHistoryDuringOperation();
+
+    if(!history.empty())
+    {
+      reply[HISTORY_KEY] = history;
+    }
+
     return reply.dump(4);
   }
 }

@@ -16,6 +16,7 @@ public:
   std::string GetCallerIdentity() const;
   bool HasValidMessageId() const;
   std::string GetMessageId() const;
+  std::string GetHistoryDuringOperation() const;
 
   friend struct fmt::formatter<RequestInterface>;
 

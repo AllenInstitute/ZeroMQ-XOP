@@ -335,6 +335,8 @@ Received JSON message for operation ``CallFunction``
 +------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
 | errorCode.msg          | string                   | human readable error message, only set if errorCode.value != 0                                                     |
 +------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
+| history                | string                   | Igor Pro history ouputted during function execution, only set if errorCode.value != 0                              |
++------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
 | return                 | object or array          | function result, will be an array when multiple return value syntax functions are called.                          |
 +------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
 | -> type                | string                   | type of the function result, one of ``string``, ``variable``, ``wave`` or ``dfref``, only for errorCode.value == 0 |

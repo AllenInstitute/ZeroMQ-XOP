@@ -10,13 +10,17 @@ class CallFunctionOperation
 public:
   explicit CallFunctionOperation(json j);
   void CanBeProcessed() const;
-  json Call() const;
+  json Call();
 
   friend struct fmt::formatter<CallFunctionOperation>;
+
+  // Return the Igor history outputted during the function call
+  std::string GetHistoryDuringCall() const;
 
 private:
   std::string m_name;
   std::vector<std::string> m_params;
+  std::string m_historyDuringCall;
 };
 
 template <>

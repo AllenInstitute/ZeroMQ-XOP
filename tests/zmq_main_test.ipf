@@ -519,6 +519,7 @@ Function FunctionToCall()
 End
 
 Function TestFunctionAbort1()
+	print "TestFunctionAbort1: abort message"
 	Abort
 End
 

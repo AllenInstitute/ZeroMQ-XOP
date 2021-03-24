@@ -992,7 +992,7 @@ Function WorksWithFuncAndDoubleParam()
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 End
 
-Function RunFlakyAbortChecks(string msg)
+Function/S RunFlakyAbortChecks(string msg)
 
 	string replyMessage
 	variable errorValue, i
@@ -1008,7 +1008,7 @@ Function RunFlakyAbortChecks(string msg)
 			endif
 
 			CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
-			return NaN
+			return replyMessage
 		endtry
 	endfor
 
@@ -1017,14 +1017,20 @@ End
 
 Function WorksWithFunctionsWhichAbort1()
 
-	string msg
+	string msg, replyMessage
+	variable pos
 
 	msg = "{\"version\"     : 1, "                    + \
 	      "\"CallFunction\" : {"                      + \
 	      "\"name\"         : \"TestFunctionAbort1\"" + \
 	      "}}"
 
-	RunFlakyAbortChecks(msg)
+	replyMessage = RunFlakyAbortChecks(msg)
+	pos = strsearch(replyMessage, "\"history\"", 0)
+	CHECK(pos >= 0)
+
+	pos = strsearch(replyMessage, "TestFunctionAbort1: abort message", 0)
+	CHECK(pos >= 0)
 End
 
 Function WorksWithFunctionsWhichAbort2()

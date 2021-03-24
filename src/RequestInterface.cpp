@@ -76,6 +76,12 @@ bool RequestInterface::HasValidMessageId() const
   return IsValidMessageId(m_messageId);
 }
 
+std::string RequestInterface::GetHistoryDuringOperation() const
+{
+  ASSERT(m_op);
+  return m_op->GetHistoryDuringCall();
+}
+
 void RequestInterface::FillFromJSON(json j)
 {
   auto it = j.find("version");
