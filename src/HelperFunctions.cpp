@@ -228,14 +228,35 @@ double ConvertStringToDouble(std::string str)
 
 std::string CallIgorFunctionFromMessage(std::string msg)
 {
+  std::shared_ptr<RequestInterface> req;
   try
   {
     try
     {
-      RequestInterface req(msg);
+      req = std::make_shared<RequestInterface>(msg);
+    }
+    catch(const std::bad_alloc &)
+    {
+      throw RequestInterfaceException(REQ_OUT_OF_MEMORY);
+    }
+  }
+  catch(const IgorException &e)
+  {
+    const json reply = e;
+    return reply.dump(4);
+  }
 
-      req.CanBeProcessed();
-      auto reply = req.Call();
+  return CallIgorFunctionFromReqInterface(req);
+}
+
+std::string CallIgorFunctionFromReqInterface(RequestInterfacePtr req)
+{
+  try
+  {
+    try
+    {
+      req->CanBeProcessed();
+      auto reply = req->Call();
 
       DebugOutput(fmt::format("{}: Function return value is {:.255s}\r",
                               __func__, reply.dump(4)));
@@ -249,7 +270,13 @@ std::string CallIgorFunctionFromMessage(std::string msg)
   }
   catch(const IgorException &e)
   {
-    const json reply = e;
+    json reply = e;
+
+    if(req->HasValidMessageId())
+    {
+      reply[MESSAGEID_KEY] = req->GetMessageId();
+    }
+
     return reply.dump(4);
   }
 }
