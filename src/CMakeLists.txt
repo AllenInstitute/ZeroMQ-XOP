@@ -401,6 +401,14 @@ CONFIGURE_FILE(git_version.cpp.in git_version.cpp @ONLY)
 CONFIGURE_FILE(cmake_config.h.in cmake_config.h @ONLY)
 
 IF(MSVC)
+  IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    SET(CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY TRUE)
+    SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
+  ENDIF()
+
+  SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${installFolder})
+  INCLUDE(InstallRequiredSystemLibraries)
+
   INSTALL(TARGETS ${libname}
           RUNTIME
           DESTINATION ${installFolder})
