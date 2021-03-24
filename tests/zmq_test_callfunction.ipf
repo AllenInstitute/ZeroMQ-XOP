@@ -1050,63 +1050,65 @@ Function WorksWithFuncAndDoubleParam()
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 End
 
+Function RunFlakyAbortChecks(string msg)
+
+	string replyMessage
+	variable errorValue, i
+
+	for(i = 0; i < 100; i += 1)
+		try
+			replyMessage = zeromq_test_callfunction(msg)
+		catch
+			errorValue = ExtractErrorValue(replyMessage)
+
+			if(errorValue == REQ_SUCCESS)
+				continue
+			endif
+
+			CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+			return NaN
+		endtry
+	endfor
+
+	FAIL()
+End
+
 Function WorksWithFunctionsWhichAbort1()
 
-	string msg, replyMessage, expected
-	variable errorValue, err
+	string msg
 
-	msg = "{\"version\"     : 1, "                   + \
-		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"TestFunctionAbort1\"" + \
-		  "}}"
+	msg = "{\"version\"     : 1, "                    + \
+	      "\"CallFunction\" : {"                      + \
+	      "\"name\"         : \"TestFunctionAbort1\"" + \
+	      "}}"
 
-	try
-		replyMessage = zeromq_test_callfunction(msg)
-	catch
-	endtry
-
-	errorValue = ExtractErrorValue(replyMessage)
-	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+	RunFlakyAbortChecks(msg)
 End
 
 Function WorksWithFunctionsWhichAbort2()
 
-	string msg, replyMessage, expected
-	variable errorValue, err
+	string msg
 
-	msg = "{\"version\"     : 1, "                   + \
-		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"TestFunctionAbort2\"" + \
-		  "}}"
+	msg = "{\"version\"     : 1, "                    + \
+	      "\"CallFunction\" : {"                      + \
+	      "\"name\"         : \"TestFunctionAbort2\"" + \
+	      "}}"
 
-	try
-		replyMessage = zeromq_test_callfunction(msg)
-	catch
-	endtry
-
-	errorValue = ExtractErrorValue(replyMessage)
-	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+	RunFlakyAbortChecks(msg)
 End
 
-// Works with functions which Abort and have pass by ref parameters
-Function WorksWithFunctionsAndPassByRef4()
+Function WorksWithFunctionsWhichAbort3AndHavePassByRefParams()
 
 	string msg, replyMessage
 	string expected, actual
-	variable errorValue, resultVariable
+	variable errorValue, resultVariable, i
 
-	msg = "{\"version\"     : 1, "                   + \
-		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"TestFunctionPassByRef4\"," + \
-		  "\"params\" : [123, \"nothing\"]}}"
+	msg = "{\"version\"     : 1, "                         + \
+	      "\"CallFunction\" : {"                           + \
+	      "\"name\"         : \"TestFunctionPassByRef4\"," + \
+	      "\"params\" : [123, \"nothing\"]}}"
 
-	try
-		replyMessage = zeromq_test_callfunction(msg)
-	catch
-	endtry
-
-	errorValue = ExtractErrorValue(replyMessage)
-	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+	RunFlakyAbortChecks(msg)
 End
 
 Function WorksWithFunctionsAndPassByRef1()
@@ -1115,10 +1117,10 @@ Function WorksWithFunctionsAndPassByRef1()
 	variable expected, actual
 	variable errorValue, resultVariable
 
-	msg = "{\"version\"     : 1, "                   + \
-		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"TestFunctionPassByRef1\"," + \
-		  "\"params\" : [1]}}"
+	msg = "{\"version\"     : 1, "                         + \
+	      "\"CallFunction\" : {"                           + \
+	      "\"name\"         : \"TestFunctionPassByRef1\"," + \
+	      "\"params\" : [1]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
 
