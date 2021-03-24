@@ -19,8 +19,7 @@ std::recursive_mutex threadShouldFinishMutex;
 
 void WorkerThread()
 {
-  DebugOutput(fmt::format("{}: Begin WorkerThread() with thread_id={}.\r",
-                          __func__, std::this_thread::get_id()));
+  DebugOutput(fmt::format("{}: Begin WorkerThread().\r", __func__));
 
   {
     // initialize to false

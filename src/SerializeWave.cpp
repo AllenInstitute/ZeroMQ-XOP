@@ -1,4 +1,6 @@
 #include "ZeroMQ.h"
+#include "SerializeWave.h"
+
 #include <algorithm>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
@@ -181,6 +183,28 @@ struct WriteIntoStream<std::string, withComma>
   }
 };
 
+template <int withComma>
+struct WriteIntoStream<waveHndl, withComma>
+{
+  void operator()(fmt::memory_buffer &buf, waveHndl val)
+  {
+    auto formatSpec = GetFormatString<waveHndl, withComma>()();
+
+    fmt::format_to(buf, formatSpec, SerializeWave(val).dump(4));
+  }
+};
+
+template <int withComma>
+struct WriteIntoStream<DataFolderHandle, withComma>
+{
+  void operator()(fmt::memory_buffer &buf, DataFolderHandle val)
+  {
+    auto formatSpec = GetFormatString<std::string, withComma>()();
+
+    fmt::format_to(buf, formatSpec, JSONQuote(SerializeDataFolder(val)));
+  }
+};
+
 template <typename T>
 void OutputArray(fmt::memory_buffer &buf, T *data, CountInt dataLength)
 {
@@ -295,7 +319,11 @@ std::string WaveToStringImpl(int waveType, waveHndl waveHandle, CountInt offset)
     ToString<char *>(buf, waveHandle, offset);
     break;
   case WAVE_TYPE:
+    ToString<waveHndl>(buf, waveHandle, offset);
+    break;
   case DATAFOLDER_TYPE:
+    ToString<DataFolderHandle>(buf, waveHandle, offset);
+    break;
   default:
     ASSERT(0);
   }
@@ -547,7 +575,7 @@ json SerializeWave(waveHndl waveHandle)
   const auto dimSizesString = DimensionSizesToString(dimSizes);
 
   DebugOutput(fmt::format(
-      "{}: waveType={}, modDate={}, type={}, dimSizes={}, rawData={:255s}\r",
+      "{}: waveType={}, modDate={}, type={}, dimSizes={}, rawData={:.255s}\r",
       __func__, waveType, modDate, type, dimSizesString, rawData));
 
   json doc;

@@ -16,6 +16,11 @@ OPTION(SANITIZER "Enable sanitizer instrumentation" OFF)
 OPTION(MSVC_RUNTIME_DYNAMIC "Link dynamically against the MSVC runtime library" OFF)
 OPTION(WARNINGS_AS_ERRORS "Error out on compiler warnings" OFF)
 
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE "Debug")
+  MESSAGE(STATUS "CMAKE_BUILD_TYPE is not set, setting to CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}.")
+ENDIF()
+
 SET(XOP_MINIMUM_IGORVERSION 800)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/CreateLaunchers/cmake")
@@ -396,6 +401,14 @@ CONFIGURE_FILE(git_version.cpp.in git_version.cpp @ONLY)
 CONFIGURE_FILE(cmake_config.h.in cmake_config.h @ONLY)
 
 IF(MSVC)
+  IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    SET(CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY TRUE)
+    SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
+  ENDIF()
+
+  SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${installFolder})
+  INCLUDE(InstallRequiredSystemLibraries)
+
   INSTALL(TARGETS ${libname}
           RUNTIME
           DESTINATION ${installFolder})

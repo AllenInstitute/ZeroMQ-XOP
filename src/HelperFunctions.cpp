@@ -58,6 +58,21 @@ void DebugOutput(std::string str)
   }
 }
 
+bool IsBitSet(int val, int bit)
+{
+  return (val & bit) == bit;
+}
+
+int ClearBit(int val, int bit)
+{
+  return val & ~bit;
+}
+
+int SetBit(int val, int bit)
+{
+  return val | bit;
+}
+
 template <>
 bool lockToIntegerRange<bool>(double val)
 {
@@ -222,7 +237,7 @@ std::string CallIgorFunctionFromMessage(std::string msg)
       req.CanBeProcessed();
       auto reply = req.Call();
 
-      DebugOutput(fmt::format("{}: Function return value is {:255s}\r",
+      DebugOutput(fmt::format("{}: Function return value is {:.255s}\r",
                               __func__, reply.dump(4)));
 
       return reply.dump(4);
@@ -431,4 +446,64 @@ void WriteZMsgIntoHandle(Handle *handle, zmq_msg_t *msg)
     ZEROMQ_ASSERT(rawData != nullptr);
     memcpy(**handle, rawData, numBytes);
   }
+}
+
+bool IsConvertibleToDouble(const std::string &str)
+{
+  char *lastChar;
+  // avoid unused return value warning
+  auto val = std::strtod(str.c_str(), &lastChar);
+  (void) val;
+
+  return *lastChar == '\0';
+}
+
+bool IsWaveType(int igorType)
+{
+  return IsBitSet(igorType, WAVE_TYPE);
+}
+
+bool UsesMultipleReturnValueSyntax(FunctionInfo fip)
+{
+  return fip.returnType == FV_NORETURN_TYPE;
+}
+
+int GetNumberOfReturnValues(FunctionInfo fip)
+{
+  // old return value syntax with only one
+  if(!UsesMultipleReturnValueSyntax(fip))
+  {
+    return 1;
+  }
+
+  // multiple return value syntax
+  // all return values are internally pass-by-ref parameters
+  // these are before all other parameters
+
+  // find the first non-pass-by-ref parameter
+  auto it = std::find_if(
+      std::begin(fip.parameterTypes),
+      std::begin(fip.parameterTypes) + fip.numRequiredParameters,
+      [](int paramType) { return !IsBitSet(paramType, FV_REF_TYPE); });
+
+  // all parameters before `it` are considered return values
+  // this does not catch cases where the first input parameter is a
+  // pass-by-ref-parameter we currently don't support these cases
+  return static_cast<int>(std::distance(std::begin(fip.parameterTypes), it));
+}
+
+int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues)
+{
+  // old return value syntax with only one
+  if(!UsesMultipleReturnValueSyntax(fip))
+  {
+    return static_cast<int>(fip.numRequiredParameters);
+  }
+
+  return static_cast<int>(fip.numRequiredParameters) - numReturnValues;
+}
+
+int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues)
+{
+  return UsesMultipleReturnValueSyntax(fip) ? numReturnValues : 0;
 }

@@ -6,65 +6,6 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-namespace
-{
-
-std::string GetTypeStringForIgorType(int igorType)
-{
-  switch(igorType)
-  {
-  case NT_FP64:
-    return "variable";
-  case HSTRING_TYPE:
-    return "string";
-  case WAVE_TYPE:
-    return "wave";
-  case DATAFOLDER_TYPE:
-    return "dfref";
-  default:
-    ASSERT(0);
-  }
-}
-
-json ExtractReturnValueFromUnion(IgorTypeUnion *ret, int returnType)
-{
-  switch(returnType)
-  {
-  case NT_FP64:
-    if(isfinite(ret->variable))
-    {
-      return json::parse(To_stringHighRes(ret->variable));
-    }
-    else
-    {
-      return To_stringHighRes(ret->variable);
-    }
-  case HSTRING_TYPE:
-  {
-    auto result = GetStringFromHandle(ret->stringHandle);
-    WMDisposeHandle(ret->stringHandle);
-    ret->stringHandle = nullptr;
-    return std::move(result);
-  }
-  case WAVE_TYPE:
-    if(ret->waveHandle)
-    {
-      auto type = WaveType(ret->waveHandle);
-      if(type & DATAFOLDER_TYPE || type & WAVE_TYPE)
-      {
-        throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
-      }
-    }
-    return SerializeWave(ret->waveHandle);
-  case DATAFOLDER_TYPE:
-    return SerializeDataFolder(ret->dataFolderHandle);
-  default:
-    ASSERT(0);
-  }
-}
-
-} // anonymous namespace
-
 CallFunctionOperation::CallFunctionOperation(json j)
 {
   DebugOutput(fmt::format("{}: size={}\r", __func__, j.size()));
@@ -149,52 +90,103 @@ void CallFunctionOperation::CanBeProcessed() const
     throw RequestInterfaceException(REQ_NON_EXISTING_FUNCTION);
   }
 
+  DebugOutput(
+      fmt::format("{}: func return value is ={}.\r", __func__, fip.returnType));
+
   ASSERT(rc == 0);
+
+  const auto numReturnValues = GetNumberOfReturnValues(fip);
+  const auto numInputParams  = GetNumberOfInputParameters(fip, numReturnValues);
+  const auto multipleReturnValueSyntax = UsesMultipleReturnValueSyntax(fip);
 
   const auto numParamsSupplied = static_cast<int>(m_params.size());
 
-  if(numParamsSupplied < fip.numRequiredParameters)
+  DebugOutput(fmt::format(
+      "{}: Multiple return value syntax={}, Number of return values={}, Number "
+      "of required input parameters = {}, Number of parmeters supplied = {}\r",
+      __func__, multipleReturnValueSyntax, numReturnValues, numInputParams,
+      numParamsSupplied));
+
+  if(numParamsSupplied < numInputParams)
   {
     throw RequestInterfaceException(REQ_TOO_FEW_FUNCTION_PARAMS);
   }
-  else if(numParamsSupplied > fip.numRequiredParameters)
+  else if(numParamsSupplied > numInputParams)
   {
     throw RequestInterfaceException(REQ_TOO_MANY_FUNCTION_PARAMS);
   }
 
-  // check passed parameters
+  const auto firstInputParamIndex =
+      GetFirstInputParameterIndex(fip, numReturnValues);
+
+  // check passed input parameters
   for(auto i = 0; i < numParamsSupplied; i += 1)
   {
-    if((fip.parameterTypes[i] & NT_FP64) == NT_FP64)
-    {
-      char *lastChar;
-      std::strtod(m_params[i].c_str(), &lastChar);
+    auto igorType = fip.parameterTypes[firstInputParamIndex + i];
 
-      if(*lastChar != '\0')
+    if(IsBitSet(igorType, NT_FP64))
+    {
+      if(!IsConvertibleToDouble(m_params[i]))
       {
         throw RequestInterfaceException(REQ_INVALID_PARAM_FORMAT);
       }
-
-      continue;
     }
-
-    if((fip.parameterTypes[i] & HSTRING_TYPE) == HSTRING_TYPE)
-    {
-      continue;
-    }
-
-    if((fip.parameterTypes[i] & DATAFOLDER_TYPE) == DATAFOLDER_TYPE)
-    {
-      continue;
-    }
-
-    throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
   }
 
+  // check the function signature
+
+  // 1: return values
   if(fip.returnType != NT_FP64 && fip.returnType != HSTRING_TYPE &&
-     fip.returnType != WAVE_TYPE && fip.returnType != DATAFOLDER_TYPE)
+     fip.returnType != WAVE_TYPE && fip.returnType != DATAFOLDER_TYPE &&
+     fip.returnType != FV_NORETURN_TYPE)
   {
     throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
+  }
+
+  for(auto i = 0; i < fip.numRequiredParameters; i += 1)
+  {
+    auto igorType = fip.parameterTypes[i];
+
+    // 2: output parameter (aka multiple return value)
+    if(i < firstInputParamIndex)
+    {
+      if(IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX))
+      {
+        continue;
+      }
+      else if(IsBitSet(igorType, HSTRING_TYPE))
+      {
+        continue;
+      }
+      else if(IsBitSet(igorType, DATAFOLDER_TYPE))
+      {
+        continue;
+      }
+      else if(IsWaveType(igorType))
+      {
+        continue;
+      }
+
+      throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
+    }
+    else
+    {
+      // 3: input parameter
+      if(IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX))
+      {
+        continue;
+      }
+      else if(IsBitSet(igorType, HSTRING_TYPE))
+      {
+        continue;
+      }
+      else if(IsBitSet(igorType, DATAFOLDER_TYPE))
+      {
+        continue;
+      }
+
+      throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
+    }
   }
 
   DebugOutput(fmt::format("{}: Request Object can be processed.\r", __func__));
@@ -208,14 +200,10 @@ json CallFunctionOperation::Call() const
   auto rc = GetFunctionInfo(m_name.c_str(), &fip);
   ASSERT(rc == 0);
 
-  ASSERT(sizeof(fip.parameterTypes) / sizeof(int) == MAX_NUM_PARAMS);
-  ASSERT(fip.totalNumParameters < MAX_NUM_PARAMS);
+  CallFunctionParameterHandler p(m_params, fip);
 
-  IgorTypeUnion retStorage = {};
-  CallFunctionParameterHandler p(m_params, fip.parameterTypes,
-                                 fip.numRequiredParameters);
-
-  rc = CallFunction(&fip, static_cast<void *>(p.GetValues()), &retStorage);
+  rc = CallFunction(&fip, p.GetParameterValueStorage(),
+                    p.GetReturnValueStorage());
   ASSERT(rc == 0);
 
   auto functionAborted = SpinProcess();
@@ -230,20 +218,15 @@ json CallFunctionOperation::Call() const
 
   json doc;
   doc["errorCode"] = {{"value", 0}};
-  doc["result"]    = {
-      {"type", GetTypeStringForIgorType(fip.returnType)},
-      {"value", ExtractReturnValueFromUnion(&retStorage, fip.returnType)}};
+  doc["result"]    = {p.GetReturnValues()};
 
-  // only serialize the pass-by-ref params if we have some
-  if(p.HasPassByRefParameters())
+  auto passByRef = p.GetPassByRefInputArray();
+
+  // we can have optional pass-by-ref parameters like structures
+  // and in that case passByRef is empty
+  if(!passByRef.empty())
   {
-    auto passByRef = p.GetPassByRefArray();
-
-    // we can have optional pass-by-ref structures which we don't support
-    if(!passByRef.empty())
-    {
-      doc["passByReference"] = passByRef;
-    }
+    doc["passByReference"] = {passByRef};
   }
 
   return doc;

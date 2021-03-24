@@ -2,7 +2,21 @@
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
 #pragma IgorVersion=8.0
 
+#include "unit-testing"
+
 #include "::procedures:ZeroMQ_Interop"
+
+#include ":zmq_bind"
+#include ":zmq_connect"
+#include ":zmq_main_test"
+#include ":zmq_memory_leaks"
+#include ":zmq_set"
+#include ":zmq_start_handler"
+#include ":zmq_stop"
+#include ":zmq_stop_handler"
+#include ":zmq_test_callfunction"
+#include ":zmq_test_interop"
+#include ":zmq_test_serializeWave"
 
 Constant TCP_V4 = 4
 Constant TCP_V6 = 6
@@ -124,9 +138,10 @@ Function TEST_CASE_END_OVERRIDE(name)
 End
 
 // JSONSimple returns the following types in W_TokenType
-// 1: object
-// 3: string
 // 0: number
+// 1: object
+// 2: array
+// 3: string
 
 Function ExtractErrorValue(replyMessage)
 	string replyMessage
@@ -193,14 +208,17 @@ Function/S ExtractMessageID(replyMessage)
 	return T_TokenText[V_value + 1]
 End
 
-Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave])
+Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave, resultWave])
 	string replyMessage
 	variable &var
 	string &str
 	string &dfr
 	STRUCT WaveProperties &wvProp
 	WAVE/T passByRefWave
+	WAVE/T resultWave
 
+	variable lastPassByRefRow, firstPassByRefRow
+	variable i, idx, resultRow
 	string actual, expected
 	string type = ""
 
@@ -227,19 +245,27 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 		type = "wave"
 	elseif(!ParamIsDefault(passByRefWave))
 		// do nothing
+	elseif(!ParamIsDefault(resultWave))
+		// do nothing
 	else
 		FAIL()
 	endif
+	WAVE W_TokenType
+
+	Duplicate/O T_TokenText, root:T_TokenText
+	Duplicate/O W_TokenSize, root:W_TokenSize
+	Duplicate/O W_TokenType, root:W_TokenType
 
 	actual   = T_TokenText[1]
 	expected = "errorCode"
 	CHECK_EQUAL_STR(actual, expected)
 
 	FindValue/TXOP=4/TEXT="result" T_TokenText
-	CHECK_NEQ_VAR(V_value,-1)
-	CHECK_EQUAL_VAR(W_TokenType[V_Value + 1], 1)
+	resultRow = V_Value
+	REQUIRE_NEQ_VAR(resultRow, -1)
+	CHECK(W_TokenType[resultRow + 1] == 1 || W_TokenType[resultRow + 1] == 2)
 
-	FindValue/TXOP=4/TEXT="type" T_TokenText
+	FindValue/TXOP=4/TEXT="type"/S=(resultRow) T_TokenText
 	CHECK_NEQ_VAR(V_value,-1)
 
 	if(strlen(type) > 0)
@@ -258,15 +284,43 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave]
 		ParseSerializedWave(replyMessage, wvProp)
 	elseif(!ParamIsDefault(passByRefWave))
 		// do nothing
+	elseif(!ParamIsDefault(resultWave))
+		// do nothing
 	else
 		FAIL()
 	endif
 
 	if(!ParamIsDefault(passByRefWave))
 		FindValue/TXOP=4/TEXT="passByReference" T_TokenText
-		CHECK_NEQ_VAR(V_value,-1)
-		Redimension/N=(W_TokenSize[V_value + 1]) passByRefWave
-		passByRefWave[] = T_TokenText[V_value + 2 + p]
+		firstPassByRefRow = V_value
+		CHECK_NEQ_VAR(firstPassByRefRow,-1)
+		Redimension/N=(W_TokenSize[firstPassByRefRow + 1]) passByRefWave
+
+		FindValue/TXOP=4/TEXT="result" T_TokenText
+		CHECK_NEQ_VAR(lastPassByRefRow, -1)
+
+		idx = 0
+		lastPassByRefRow = V_Value
+		for(i = firstPassByRefRow; i < lastPassByRefRow; i += 1)
+			if(!cmpstr(T_TokenText[i], "value"))
+				passByRefWave[idx] = T_TokenText[i + 1]
+				idx++
+			endif
+		endfor
+	endif
+
+	if(!ParamIsDefault(resultWave))
+		lastPassByRefRow = DimSize(T_TokenText, 0) - 1
+
+		Redimension/N=(W_TokenSize[resultRow + 1]) resultWave
+
+		idx = 0
+		for(i = resultRow; i <= lastPassByRefRow; i += 1)
+			if(!cmpstr(T_TokenText[i], "value"))
+				resultWave[idx] = T_TokenText[i + 1]
+				idx++
+			endif
+		endfor
 	endif
 End
 
@@ -312,13 +366,29 @@ Function/S TestFunctionStrVarStr(str1, var1, str2)
 	return str1 + "_" + num2str(var1) + "_" + str2
 End
 
+Function TestFunctionOptionalStructArg([s])
+	STRUCT WMBackgroundStruct &s
+End
+
 Function TestFunctionInvalidSig1(wv)
 	WAVE wv
+End
+
+Function TestFunctionInvalidSig2(num)
+	variable/C num
+End
+
+Function TestFunctionInvalidSig3(s)
+	STRUCT WMBackgroundStruct &s
 End
 
 Function/C TestFunctionInvalidRet2()
 
 	return cmplx(0, 1)
+End
+
+Function [STRUCT WMBackgroundStruct s] TestFunctionInvalidRet3()
+
 End
 
 Function/WAVE TestFunctionReturnNullWave()
@@ -346,23 +416,34 @@ End
 
 Function/WAVE TestFunctionReturnWaveWave()
 
-	Make/FREE/WAVE data
+	Make/FREE/D content = {3, 4}
+
+	Make/FREE/WAVE data = {content}
 
 	return data
 End
 
 Function/WAVE TestFunctionReturnDFWave()
 
-	Make/FREE/DF data
+	Make/FREE/DF data = {NewFreeDataFolder()}
 
 	return data
 End
 
 Function/WAVE TestFunctionReturnLargeFreeWave()
 
-	Make/N=(10^5)/R/FREE data = p
+	Make/N=(NUM_BYTES_LEAK_TESTING)/B/FREE data = p
 
 	return data
+End
+
+Function/DF TestFunctionReturnLargeDataFolder()
+
+	DFREF dfr = NewFreeDataFolder()
+	WAVE largeWave = TestFunctionReturnLargeFreeWave()
+	MoveWave largeWave, dfr
+
+	return dfr
 End
 
 Function/DF TestFunctionReturnNullDFR()
@@ -484,26 +565,100 @@ Function TestFunctionPassByRef5(str, var)
 	string& str
 	variable& var
 
-	var = 10e5
+	var = NUM_BYTES_LEAK_TESTING
 	str = ""
 	str = PadString(str, var, 0x20)
 
 	return 42
 End
 
+Function TestFunctionPassByRef6([s])
+	STRUCT WMBackgroundStruct &s
+
+	return 42
+End
+Function TestFunctionPassByRef7(WAVE& wv)
+
+	Make/FREE/D freeWave = {4711}
+	WAVE wv = freeWave
+
+	return 42
+End
+
+
+Function/WAVE ReturnWaveWithLongNames()
+
+	Make/O/N=1 AVeryLongNameOnlyAllowedWithIgorProEight
+	WAVE wv = AVeryLongNameOnlyAllowedWithIgorProEight
+	SetDimLabel 0, 0, AVeryLongLabelOnlyAllowedWithIgorProEight, wv
+
+	return wv
+End
+
+Function [variable result, string str, variable var] TestFunctionMultipleReturnValuesValid1()
+
+	result = 123
+	str    = "Hi there!"
+	var    = NaN
+End
+
+Function [WAVE wv] TestFunctionMultipleReturnValuesValid2()
+
+	Make/FREE wv = p
+End
+
+Function [DFREF dfr] TestFunctionMultipleReturnValuesValid3()
+
+	DFREF dfr = root:Packages
+End
+
+Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid4(variable inputVar, string inputStr)
+
+	outputVar = 23 + inputVar
+	outputStr = inputStr + "!!"
+End
+
+Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid5()
+
+End
+
+Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid6(variable inputVar, string& inputStr)
+
+	outputVar = 23 + inputVar
+	outputStr = inputStr + "!!"
+
+	inputStr  = "dummy text"
+End
+
 Structure WaveProperties
 	WAVE/T raw
-	WAVE/T dimensions
+	WAVE dimensions
 	string type
 	variable modificationDate
 EndStructure
+
+Function FindLastEntry(WAVE/T wv, string entry)
+
+	variable index = -1
+
+	// @todo ip9-only: use /R from FindValue
+	for(;;)
+		FindValue/S=(index + 1)/TXOP=4/TEXT=entry wv
+
+		if(V_Value == -1)
+			return index
+		endif
+
+		index = V_Value
+	endfor
+End
 
 Function ParseSerializedWave(replyMessage, s)
 	string& replyMessage
 	STRUCT WaveProperties &s
 
-	variable numTokens, start
-	string expected, actual, typeLine, type, dimLine, size0, size1, size2, size3
+	variable numTokens, start, index
+	string expected, actual, typeLines, typeLine, type, dimLine, size0, size1, size2, size3
 
 	CHECK_PROPER_STR(replyMessage)
 
@@ -516,30 +671,34 @@ Function ParseSerializedWave(replyMessage, s)
 	REQUIRE(WaveExists(W_TokenSize))
 
 	// "type": "NT_FP32"
-	typeLine = GrepList(replyMessage, "\"type\": \".*_.*\"", 0, "\n")
-	if(strlen(typeLine) > 0)
+	typeLines = GrepList(replyMessage, "\"type\": \".*_.*\"", 0, "\n")
+	if(strlen(typeLines) > 0)
+		// we want to use the last value
+		typeLine = StringFromList(ItemsInList(typeLines, "\n") - 1, typeLines, "\n")
 		SplitString/E="[[:space:]]\"type\": \"(.*)\"" typeLine, type
 		CHECK_EQUAL_VAR(V_Flag, 1)
 		s.type = type
 	endif
 
-	FindValue/TXOP=4/TEXT="modification" T_TokenText
-	if(V_Value != -1)
-		s.modificationDate = str2num(T_TokenText[V_Value + 1])
+	index = FindLastEntry(T_TokenText, "modification")
+
+	if(index != -1)
+		s.modificationDate = str2num(T_TokenText[index + 1])
 	else
 		s.modificationDate = NaN
 	endif
 
-	FindValue/TXOP=4/TEXT="dimension" T_TokenText
-	if(V_value != -1)
-		dimLine = ReplaceString(" ", trimString(T_TokenText[V_Value + 1], 2), "")
+	index = FindLastEntry(T_TokenText, "dimension")
+	if(index != -1)
+
+		dimLine = ReplaceString(" ", trimString(T_TokenText[index + 1], 2), "")
 		string/g root:str = dimLine
 
 		SplitString/E="\"size\":\[([[:digit:]]*),?([[:digit:]]*),?([[:digit:]]*),?([[:digit:]]*),?\]" dimLine, size0, size1, size2, size3
 		CHECK(V_Flag >= 1)
-		Make/N=(4)/I/FREE dimensions = {str2num(size0), str2num(size1), str2num(size2), str2num(size3)}
-		dimensions[] = dimensions[p] == -1 ? 0 : dimensions[p]
-		WAVE/T s.dimensions = dimensions
+		Make/N=(4)/FREE dimensions = {str2num(size0), str2num(size1), str2num(size2), str2num(size3)}
+		dimensions[] = numtype(dimensions[p]) == 2 ? 0 : dimensions[p]
+		WAVE s.dimensions = dimensions
 	endif
 
 	FindValue/TXOP=4/TEXT="real" T_TokenText
@@ -615,13 +774,20 @@ Function/S GetWaveTypeString(wv)
 			result = "NT_I64"
 			break
 		case 0:
-			result = "TEXT_WAVE_TYPE"
-			break
-		case WAVE_WAVE:
-			result = "WAVE_TYPE"
-			break
-		case DATAFOLDER_WAVE:
-			result = "DATAFOLDER_TYPE"
+			switch(WaveType(wv, 1))
+				case 2:
+					result = "TEXT_WAVE_TYPE"
+					break
+				case 3:
+					result = "DATAFOLDER_TYPE"
+					break
+				case 4:
+					result = "WAVE_TYPE"
+					break
+				default:
+					FAIL()
+					break
+			endswitch
 			break
 		default:
 			FAIL()
@@ -643,8 +809,8 @@ Function CompareWaveWithSerialized(wv, s)
 	REQUIRE(WaveExists(s.raw))
 
 	// dimensions
-	Make/FREE/N=(4)/I dims = DimSize(wv, p)
-	CHECK_EQUAL_WAVES(dims, s.dimensions)
+	Make/FREE/N=(4) dims = DimSize(wv, p)
+	CHECK_EQUAL_WAVES(dims, s.dimensions, tol = 0.1)
 
 	if(s.modificationDate == 0)
 		CHECK_EQUAL_VAR(ModDate(wv), s.modificationDate)
@@ -664,12 +830,25 @@ Function CompareWaveWithSerialized(wv, s)
 	if(sum(dims) == 0)
 		CHECK_EQUAL_VAR(numpnts(s.raw), 0)
 	else
-		if(!type) // textWave
-			Make/FREE/N=(numPoints)/T convWaveText
-			// work around JSONSimple bug
-			convWaveText[] = ReplaceString("\\\"", s.raw[p], "\"")
-			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWaveText
-			CHECK_EQUAL_WAVES(wv, convWaveText, mode=WAVE_DATA)
+		if(!type) // non-numeric wave
+			switch(WaveType(wv, 1))
+				case 1: // numeric
+					FAIL()
+				case 2: // text
+					Make/FREE/N=(numPoints)/T convWaveText
+					// work around JSONSimple bug
+					convWaveText[] = ReplaceString("\\\"", s.raw[p], "\"")
+					Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWaveText
+					CHECK_EQUAL_WAVES(wv, convWaveText, mode=WAVE_DATA)
+					break
+				case 3: // dfref wave
+				case 4: // wave wave
+					// no additional checks
+					break
+				default:
+					FAIL()
+			endswitch
+
 		elseif(type & COMPLEX_WAVE)
 			Make/FREE/N=(numPoints/2)/Y=(type)/C convWaveComplex
 			convWaveComplex[] = cmplx(str2num(s.raw[p]), str2num(s.raw[numPoints / 2 + p]))
@@ -679,7 +858,7 @@ Function CompareWaveWithSerialized(wv, s)
 			Make/FREE/N=(numPoints)/Y=(type) convWave
 			convWave[] = str2num(s.raw[p])
 			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWave
-			// workaround IP9 when converting text to numbers
+			// workaround IP9 bug when converting text containing NaN to numbers
 			CHECK_EQUAL_WAVES(wv, convWave, mode=WAVE_DATA, tol = 1e-15)
 		endif
 	endif
@@ -718,9 +897,6 @@ Function/WAVE TestFunctionReturnExistingWave()
 	return bigWave
 End
 
-// define MEMORY_LEAK_TESTING for testing against memory leaks
-// these tests tend to be flaky, so they are not enabled by default
-
 // Entry point for UTF
 Function run()
 	return RunWithOpts()
@@ -752,6 +928,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	// sorted list
 	list = AddListItem("zmq_bind.ipf", list, ";", inf)
 	list = AddListItem("zmq_connect.ipf", list, ";", inf)
+	list = AddListItem("zmq_memory_leaks.ipf", list, ";", inf)
 	list = AddListItem("zmq_set.ipf", list, ";", inf)
 	list = AddListItem("zmq_start_handler.ipf", list, ";", inf)
 	list = AddListItem("zmq_stop.ipf", list, ";", inf)

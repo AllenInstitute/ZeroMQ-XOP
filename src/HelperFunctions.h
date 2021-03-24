@@ -3,6 +3,10 @@
 #include <sstream>
 #include <iomanip>
 
+bool IsBitSet(int val, int bit);
+int ClearBit(int val, int bit);
+int SetBit(int val, int bit);
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
@@ -99,7 +103,7 @@ void ToggleIPV6Support(bool enable);
 template <typename T, int withComma>
 struct GetFormatString
 {
-  std::string operator()()
+  std::string operator()() const
   {
     if(withComma)
     {
@@ -113,7 +117,7 @@ struct GetFormatString
 template <int withComma>
 struct GetFormatString<double, withComma>
 {
-  std::string operator()()
+  std::string operator()() const
   {
     static_assert(std::numeric_limits<double>::digits10 == 15,
                   "Unexpected double precision");
@@ -150,3 +154,11 @@ std::string CreateStringFromZMsg(zmq_msg_t *msg);
 
 void InitHandle(Handle *handle, size_t size);
 void WriteZMsgIntoHandle(Handle *handle, zmq_msg_t *msg);
+
+bool IsConvertibleToDouble(const std::string &str);
+bool IsWaveType(int igorType);
+
+bool UsesMultipleReturnValueSyntax(FunctionInfo fip);
+int GetNumberOfReturnValues(FunctionInfo fip);
+int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues);
+int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues);
