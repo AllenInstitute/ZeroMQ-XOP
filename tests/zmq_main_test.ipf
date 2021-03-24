@@ -2,7 +2,21 @@
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
 #pragma IgorVersion=8.0
 
+#include "unit-testing"
+
 #include "::procedures:ZeroMQ_Interop"
+
+#include ":zmq_bind"
+#include ":zmq_connect"
+#include ":zmq_main_test"
+#include ":zmq_memory_leaks"
+#include ":zmq_set"
+#include ":zmq_start_handler"
+#include ":zmq_stop"
+#include ":zmq_stop_handler"
+#include ":zmq_test_callfunction"
+#include ":zmq_test_interop"
+#include ":zmq_test_serializeWave"
 
 Constant TCP_V4 = 4
 Constant TCP_V6 = 6
