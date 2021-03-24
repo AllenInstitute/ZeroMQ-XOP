@@ -66,6 +66,7 @@ ENDIF()
 SET(COVERAGE_SOURCES
   CallFunctionOperation.cpp
   CallFunctionParameterHandler.cpp
+  HistoryGrabber.cpp
   MessageHandler.cpp
   RequestInterface.cpp
   RequestInterfaceException.cpp
@@ -114,6 +115,7 @@ SET(HEADERS
   functions.h
   GlobalData.h
   HelperFunctions.h
+  HistoryGrabber.h
   IgorTypeUnion.h
   MessageHandler.h
   RequestInterface.h

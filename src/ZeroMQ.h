@@ -109,6 +109,7 @@ using namespace fmt::literals; // NOLINT
 // see also FunctionInfo XOPSupport function
 const int MAX_NUM_PARAMS        = 100;
 const std::string MESSAGEID_KEY = "messageID";
+const std::string HISTORY_KEY   = "history";
 
 /* Prototypes */
 HOST_IMPORT int XOPMain(IORecHandle ioRecHandle);

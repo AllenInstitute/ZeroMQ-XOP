@@ -109,32 +109,8 @@ void CallAndReply(RequestInterfacePtr req) noexcept
   {
     try
     {
-      try
-      {
-        req->CanBeProcessed();
-        auto reply = req->Call();
-        ZeroMQServerSend(req->GetCallerIdentity(), reply.dump(4));
-      }
-      catch(const std::bad_alloc &)
-      {
-        throw RequestInterfaceException(REQ_OUT_OF_MEMORY);
-      }
-    }
-    catch(const IgorException &e)
-    {
-      json reply = e;
-
-      if(req->HasValidMessageId())
-      {
-        reply[MESSAGEID_KEY] = req->GetMessageId();
-      }
-
-      auto rc = ZeroMQServerSend(req->GetCallerIdentity(), reply.dump(4));
-
-      // handle host unreachable error
-
-      DebugOutput(
-          fmt::format("{}: ZeroMQSendAsServer returned {}\r", __func__, rc));
+      auto message = CallIgorFunctionFromReqInterface(req);
+      ZeroMQServerSend(req->GetCallerIdentity(), message);
     }
     catch(const std::exception &e)
     {

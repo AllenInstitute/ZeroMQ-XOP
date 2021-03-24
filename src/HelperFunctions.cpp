@@ -228,14 +228,35 @@ double ConvertStringToDouble(std::string str)
 
 std::string CallIgorFunctionFromMessage(std::string msg)
 {
+  std::shared_ptr<RequestInterface> req;
   try
   {
     try
     {
-      RequestInterface req(msg);
+      req = std::make_shared<RequestInterface>(msg);
+    }
+    catch(const std::bad_alloc &)
+    {
+      throw RequestInterfaceException(REQ_OUT_OF_MEMORY);
+    }
+  }
+  catch(const IgorException &e)
+  {
+    const json reply = e;
+    return reply.dump(4);
+  }
 
-      req.CanBeProcessed();
-      auto reply = req.Call();
+  return CallIgorFunctionFromReqInterface(req);
+}
+
+std::string CallIgorFunctionFromReqInterface(RequestInterfacePtr req)
+{
+  try
+  {
+    try
+    {
+      req->CanBeProcessed();
+      auto reply = req->Call();
 
       DebugOutput(fmt::format("{}: Function return value is {:.255s}\r",
                               __func__, reply.dump(4)));
@@ -249,7 +270,20 @@ std::string CallIgorFunctionFromMessage(std::string msg)
   }
   catch(const IgorException &e)
   {
-    const json reply = e;
+    json reply = e;
+
+    if(req->HasValidMessageId())
+    {
+      reply[MESSAGEID_KEY] = req->GetMessageId();
+    }
+
+    const auto history = req->GetHistoryDuringOperation();
+
+    if(!history.empty())
+    {
+      reply[HISTORY_KEY] = history;
+    }
+
     return reply.dump(4);
   }
 }
@@ -506,4 +540,31 @@ int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues)
 int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues)
 {
   return UsesMultipleReturnValueSyntax(fip) ? numReturnValues : 0;
+}
+
+// Removes any leading and trailing whitespace and replaces \r with \n
+std::string CleanupString(std::string str)
+{
+  if(str.empty())
+  {
+    return str;
+  }
+
+  constexpr auto ws = " \n\r\t";
+
+  size_t end = str.find_last_not_of(ws);
+  if(end != std::string::npos)
+    str.resize(end + 1);
+
+  size_t start = str.find_first_not_of(ws);
+  if(start != std::string::npos)
+    str = str.substr(start);
+
+  for(auto &c : str)
+  {
+    if(c == '\r')
+      c = '\n';
+  }
+
+  return str;
 }

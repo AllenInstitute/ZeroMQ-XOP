@@ -2,6 +2,7 @@
 #include "CallFunctionOperation.h"
 #include "CallFunctionParameterHandler.h"
 #include "SerializeWave.h"
+#include "HistoryGrabber.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -192,7 +193,7 @@ void CallFunctionOperation::CanBeProcessed() const
   DebugOutput(fmt::format("{}: Request Object can be processed.\r", __func__));
 }
 
-json CallFunctionOperation::Call() const
+json CallFunctionOperation::Call()
 {
   DebugOutput(fmt::format("{}: Data={}.\r", __func__, *this));
 
@@ -201,6 +202,8 @@ json CallFunctionOperation::Call() const
   ASSERT(rc == 0);
 
   CallFunctionParameterHandler p(m_params, fip);
+
+  HistoryGrabber histGrabber;
 
   rc = CallFunction(&fip, p.GetParameterValueStorage(),
                     p.GetReturnValueStorage());
@@ -213,6 +216,7 @@ json CallFunctionOperation::Call() const
 
   if(functionAborted)
   {
+    m_historyDuringCall = histGrabber.GetHistoryUntilNow();
     throw RequestInterfaceException(REQ_FUNCTION_ABORTED);
   }
 
@@ -230,4 +234,9 @@ json CallFunctionOperation::Call() const
   }
 
   return doc;
+}
+
+std::string CallFunctionOperation::GetHistoryDuringCall() const
+{
+  return m_historyDuringCall;
 }

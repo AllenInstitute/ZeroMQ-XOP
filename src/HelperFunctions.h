@@ -141,6 +141,7 @@ std::string To_stringHighRes(const T val)
 
 double ConvertStringToDouble(std::string str);
 std::string CallIgorFunctionFromMessage(std::string msg);
+std::string CallIgorFunctionFromReqInterface(RequestInterfacePtr req);
 
 int ZeroMQClientSend(std::string payload);
 int ZeroMQServerSend(std::string identity, std::string payload);
@@ -162,3 +163,4 @@ bool UsesMultipleReturnValueSyntax(FunctionInfo fip);
 int GetNumberOfReturnValues(FunctionInfo fip);
 int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues);
 int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues);
+std::string CleanupString(std::string str);
