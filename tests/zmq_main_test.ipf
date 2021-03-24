@@ -418,9 +418,18 @@ End
 
 Function/WAVE TestFunctionReturnLargeFreeWave()
 
-	Make/N=(10^5)/R/FREE data = p
+	Make/N=(NUM_BYTES_LEAK_TESTING)/B/FREE data = p
 
 	return data
+End
+
+Function/DF TestFunctionReturnLargeDataFolder()
+
+	DFREF dfr = NewFreeDataFolder()
+	WAVE largeWave = TestFunctionReturnLargeFreeWave()
+	MoveWave largeWave, dfr
+
+	return dfr
 End
 
 Function/DF TestFunctionReturnNullDFR()
@@ -542,7 +551,7 @@ Function TestFunctionPassByRef5(str, var)
 	string& str
 	variable& var
 
-	var = 10e5
+	var = NUM_BYTES_LEAK_TESTING
 	str = ""
 	str = PadString(str, var, 0x20)
 
@@ -874,9 +883,6 @@ Function/WAVE TestFunctionReturnExistingWave()
 	return bigWave
 End
 
-// define MEMORY_LEAK_TESTING for testing against memory leaks
-// these tests tend to be flaky, so they are not enabled by default
-
 // Entry point for UTF
 Function run()
 	return RunWithOpts()
@@ -908,6 +914,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	// sorted list
 	list = AddListItem("zmq_bind.ipf", list, ";", inf)
 	list = AddListItem("zmq_connect.ipf", list, ";", inf)
+	list = AddListItem("zmq_memory_leaks.ipf", list, ";", inf)
 	list = AddListItem("zmq_set.ipf", list, ";", inf)
 	list = AddListItem("zmq_start_handler.ipf", list, ";", inf)
 	list = AddListItem("zmq_stop.ipf", list, ";", inf)

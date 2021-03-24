@@ -809,38 +809,6 @@ Function WorksWithFuncStrArg1()
 	CHECK_EQUAL_STR(resultString, expected)
 End
 
-#ifdef MEMORY_LEAK_TESTING
-
-Function DoesNotHaveMemLeaksReturnString()
-	variable i, errorValue, memBefore, memAfter
-
-	string replyMessage
-	string contents = ""
-
-	zeromq_set(ZeroMQ_SET_FLAGS_DEFAULT)
-
-	contents = PadString(contents, 1e6, 0x20)
-
-	string msg = "{\"version\"     : 1, "         + \
-	"\"CallFunction\" : {"                        + \
-	"\"name\"         : \"TestFunction1StrArg\"," + \
-	"\"params\"       : [\"" + contents + "\"]}}"
-
-	memBefore = NumberByKey("USEDPHYSMEM", IgorInfo(0))
-
-	for(i = 0; i < 50; i++)
-		replyMessage = zeromq_test_callfunction(msg)
-		errorValue = ExtractErrorValue(replyMessage)
-		CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
-	endfor
-
-	memAfter = NumberByKey("USEDPHYSMEM", IgorInfo(0))
-
-	CHECK(memAfter < memBefore * 1.15)
-End
-
-#endif
-
 Function WorksWithFuncNullWaveReturn()
 
 	string msg
@@ -943,32 +911,6 @@ Function WorksWithFuncReturnDFWave()
 	WAVE wv = TestFunctionReturnDFWave()
 	CompareWaveWithSerialized(wv, s)
 End
-
-#ifdef MEMORY_LEAK_TESTING
-
-Function DoesNotHaveMemLeaksReturnWave()
-	variable i, errorValue, memBefore, memAfter
-
-	string replyMessage
-	STRUCT WaveProperties s
-
-	string msg = "{\"version\"     : 1, "               + \
-	"\"CallFunction\" : {"                              + \
-	"\"name\"         : \"TestFunctionReturnLargeFreeWave\"" + \
-	"}}"
-
-	memBefore = NumberByKey("USEDPHYSMEM", IgorInfo(0))
-
-	for(i = 0; i < 10; i++)
-		replyMessage = zeromq_test_callfunction(msg)
-	endfor
-
-	memAfter = NumberByKey("USEDPHYSMEM", IgorInfo(0))
-
-	CHECK(memAfter < memBefore * 1.05)
-End
-
-#endif
 
 Function ComplainsWithFuncAndIntParam1()
 
@@ -1214,35 +1156,6 @@ Function WorksWithFunctionsAndPassByRef6()
 	ExtractReturnValue(replyMessage, var=resultVariable)
 	CHECK_EQUAL_VAR(42, resultVariable)
 End
-
-#ifdef MEMORY_LEAK_TESTING
-
-Function DoesNotHaveMemLeaksPassByRefStr()
-	variable i, errorValue, memBefore, memAfter
-
-	string replyMessage, msg
-
-	zeromq_set(ZeroMQ_SET_FLAGS_DEFAULT)
-
-	msg = "{\"version\"     : 1, "                         + \
-		  "\"CallFunction\" : {"                           + \
-		  "\"name\"         : \"TestFunctionPassByRef5\"," + \
-		  "\"params\" : [\"nothing\", 123]}}"
-
-	memBefore = NumberByKey("USEDPHYSMEM", IgorInfo(0))
-
-	for(i = 0; i < 50; i++)
-		replyMessage = zeromq_test_callfunction(msg)
-		errorValue = ExtractErrorValue(replyMessage)
-		CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
-	endfor
-
-	memAfter = NumberByKey("USEDPHYSMEM", IgorInfo(0))
-
-	CHECK(memAfter < memBefore * 1.05)
-End
-
-#endif
 
 Function WorksWithReturningNullDFR()
 
