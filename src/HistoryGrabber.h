@@ -10,7 +10,7 @@ class HistoryGrabber
 {
 public:
   HistoryGrabber();
-  std::string GetHistoryUntilNow();
+  std::string GetHistoryUntilNow() const;
 
 private:
   int m_startLine{0};

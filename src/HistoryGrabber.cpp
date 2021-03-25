@@ -7,13 +7,14 @@ HistoryGrabber::HistoryGrabber() : m_startLine(HistoryLines())
 {
 }
 
-std::string HistoryGrabber::GetHistoryUntilNow()
+std::string HistoryGrabber::GetHistoryUntilNow() const
 {
   const auto endLine = HistoryLines();
 
   DebugOutput(fmt::format("{}: called\r", __func__));
 
-  TULoc startLoc{}, endLoc{};
+  TULoc startLoc{};
+  TULoc endLoc{};
 
   // -1 because HistoryLines() points
   // after the last paragraph with data

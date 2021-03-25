@@ -2,6 +2,8 @@
 #include "SerializeWave.h"
 
 #include <algorithm>
+#include <cmath>
+#include <utility>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -9,7 +11,7 @@
 namespace
 {
 
-std::string JSONQuote(std::string str)
+std::string JSONQuote(const std::string &str)
 {
   return json(str).dump();
 }
@@ -27,7 +29,7 @@ TickCountInt ConvertToUnixEpochUTC(TickCountInt secs)
   short year       = 1970;
   short month      = 1;
   short dayOfMonth = 1;
-  double offset;
+  double offset    = std::numeric_limits<double>::quiet_NaN();
 
   auto rc = DateToIgorDateInSeconds(1, &year, &month, &dayOfMonth, &offset);
   ASSERT(rc == 0);
@@ -99,7 +101,7 @@ std::string GetWaveTypeString(int waveType)
 template <typename T>
 T *GetWaveDataPtr(waveHndl waveH)
 {
-  BCInt dataOffset;
+  BCInt dataOffset     = 0;
   const int accessMode = kMDWaveAccessMode0;
   const int ret = MDAccessNumericWaveData(waveH, accessMode, &dataOffset);
 
@@ -175,7 +177,7 @@ struct WriteIntoStream<char *, withComma>
 template <int withComma>
 struct WriteIntoStream<std::string, withComma>
 {
-  void operator()(fmt::memory_buffer &buf, std::string val)
+  void operator()(fmt::memory_buffer &buf, const std::string &val)
   {
     auto formatSpec = GetFormatString<char *, withComma>()();
 
@@ -213,7 +215,7 @@ void OutputArray(fmt::memory_buffer &buf, T *data, CountInt dataLength)
 
   fmt::format_to(buf, "[");
 
-  CountInt i;
+  CountInt i = 0;
   for(i = 0; i < dataLength - 1; i++)
   {
     streamWriterWithComma(buf, *(data + i));
@@ -265,7 +267,7 @@ void ToString<char *>(fmt::memory_buffer &buf, waveHndl waveHandle,
 
   fmt::format_to(buf, "[");
 
-  CountInt i;
+  CountInt i = 0;
   for(i = 0; i < dataLength - 1; i++)
   {
     streamWriterWithComma(buf, data);
@@ -342,7 +344,7 @@ std::string WaveToString(int waveType, waveHndl waveHandle)
   }
 
   // WaveToStringImpl returns a JSON quoted string already
-  auto resultTemplate = R"({{
+  const auto *resultTemplate = R"({{
       "real"     : {},
       "imag"     : {}
       }}
@@ -368,7 +370,7 @@ std::vector<CountInt> GetDimensionSizes(waveHndl waveHandle)
 
 std::string DimensionSizesToString(std::vector<CountInt> dimensionSizes)
 {
-  if(dimensionSizes.size() == 0)
+  if(dimensionSizes.empty())
   {
     // special case an empty wave
     return "[0]";
@@ -417,12 +419,13 @@ void AddDataUnitIfSet(json &doc, waveHndl waveHandle)
 }
 
 void AddDimensionScalingIfSet(json &doc, waveHndl waveHandle,
-                              std::vector<CountInt> dimSizes)
+                              const std::vector<CountInt> &dimSizes)
 {
   const auto numDimensions  = dimSizes.size();
   auto differentFromDefault = false;
 
-  std::vector<double> offset(numDimensions), delta(numDimensions);
+  std::vector<double> offset(numDimensions);
+  std::vector<double> delta(numDimensions);
 
   for(size_t i = 0; i < numDimensions; i++)
   {
@@ -448,7 +451,7 @@ void AddDimensionScalingIfSet(json &doc, waveHndl waveHandle,
 }
 
 void AddDimensionUnitsIfSet(json &doc, waveHndl waveHandle,
-                            std::vector<CountInt> dimSizes)
+                            const std::vector<CountInt> &dimSizes)
 {
   const auto numDimensions  = dimSizes.size();
   auto differentFromDefault = false;
@@ -478,7 +481,7 @@ void AddDimensionUnitsIfSet(json &doc, waveHndl waveHandle,
 }
 
 void AddDimensionLabelsFullIfSet(json &doc, waveHndl waveHandle,
-                                 std::vector<CountInt> dimSizes)
+                                 const std::vector<CountInt> &dimSizes)
 {
   const auto numDimensions  = dimSizes.size();
   auto differentFromDefault = false;
@@ -547,7 +550,7 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
 
 void AddWaveNoteIfSet(json &doc, waveHndl waveHandle)
 {
-  auto handle = WaveNoteCopy(waveHandle);
+  auto *handle = WaveNoteCopy(waveHandle);
 
   if(handle == nullptr)
   {

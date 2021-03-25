@@ -8,17 +8,15 @@ extern "C" int zeromq_client_recv(zeromq_client_recvParams *p)
 {
   BEGIN_OUTER_CATCH
 
-  int numBytes, rc;
   zmq_msg_t payloadMsg;
-
-  rc = zmq_msg_init(&payloadMsg);
+  int rc = zmq_msg_init(&payloadMsg);
   ZEROMQ_ASSERT(rc == 0);
 
   auto wait = GlobalData::Instance().GetRecvBusyWaitingFlag();
 
   for(;;)
   {
-    numBytes = ZeroMQClientReceive(&payloadMsg);
+    int numBytes = ZeroMQClientReceive(&payloadMsg);
 
     if(numBytes == -1 && zmq_errno() == EAGAIN) // timeout
     {

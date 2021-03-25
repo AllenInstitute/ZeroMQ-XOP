@@ -37,7 +37,7 @@ void SetDimensionLabels(waveHndl h, int Dimension,
 
   for(size_t k = 0; k < dimLabels.size(); k++)
   {
-    if(dimLabels[k].size() == 0)
+    if(dimLabels[k].empty())
     {
       // Empty string.  Skip.
       continue;
@@ -50,7 +50,7 @@ void SetDimensionLabels(waveHndl h, int Dimension,
   }
 }
 
-void DebugOutput(std::string str)
+void DebugOutput(const std::string &str)
 {
   if(GlobalData::Instance().GetDebugFlag())
   {
@@ -218,15 +218,15 @@ void ToggleIPV6Support(bool enable)
   ZEROMQ_ASSERT(rc == 0);
 }
 
-double ConvertStringToDouble(std::string str)
+double ConvertStringToDouble(const std::string &str)
 {
-  char *lastChar;
-  auto val = std::strtod(str.c_str(), &lastChar);
+  char *lastChar = nullptr;
+  auto val       = std::strtod(str.c_str(), &lastChar);
   ASSERT(*lastChar == '\0');
   return val;
 }
 
-std::string CallIgorFunctionFromMessage(std::string msg)
+std::string CallIgorFunctionFromMessage(const std::string &msg)
 {
   std::shared_ptr<RequestInterface> req;
   try
@@ -249,7 +249,7 @@ std::string CallIgorFunctionFromMessage(std::string msg)
   return CallIgorFunctionFromReqInterface(req);
 }
 
-std::string CallIgorFunctionFromReqInterface(RequestInterfacePtr req)
+std::string CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
 {
   try
   {
@@ -288,17 +288,16 @@ std::string CallIgorFunctionFromReqInterface(RequestInterfacePtr req)
   }
 }
 
-int ZeroMQClientSend(std::string payload)
+int ZeroMQClientSend(const std::string &payload)
 {
   GET_CLIENT_SOCKET(socket);
-  int rc;
   const auto payloadLength = payload.length();
 
   DebugOutput(fmt::format("{}: payloadLength={}, socket={}\r", __func__,
                           payloadLength, socket.get()));
 
   // empty
-  rc = zmq_send(socket.get(), nullptr, 0, ZMQ_SNDMORE);
+  int rc = zmq_send(socket.get(), nullptr, 0, ZMQ_SNDMORE);
   ZEROMQ_ASSERT(rc == 0);
 
   // payload
@@ -310,17 +309,17 @@ int ZeroMQClientSend(std::string payload)
   return rc;
 }
 
-int ZeroMQServerSend(std::string identity, std::string payload)
+int ZeroMQServerSend(const std::string &identity, const std::string &payload)
 {
   GET_SERVER_SOCKET(socket);
-  int rc;
   const auto payloadLength = payload.length();
 
   DebugOutput(fmt::format("{}: payloadLength={}, socket={}\r", __func__,
                           payloadLength, socket.get()));
 
   // identity
-  rc = zmq_send(socket.get(), identity.c_str(), identity.length(), ZMQ_SNDMORE);
+  int rc =
+      zmq_send(socket.get(), identity.c_str(), identity.length(), ZMQ_SNDMORE);
   ZEROMQ_ASSERT(rc > 0);
 
   // empty
@@ -409,8 +408,9 @@ std::string SerializeDataFolder(DataFolderHandle dataFolderHandle)
     return "null";
   }
 
-  DataFolderHandle root, parent;
-  auto rc = GetRootDataFolder(0, &root);
+  DataFolderHandle root   = nullptr;
+  DataFolderHandle parent = nullptr;
+  auto rc                 = GetRootDataFolder(0, &root);
   ASSERT(rc == 0);
 
   if(root != dataFolderHandle &&
@@ -434,14 +434,14 @@ std::string SerializeDataFolder(DataFolderHandle dataFolderHandle)
   return folder;
 }
 
-DataFolderHandle DeSerializeDataFolder(std::string path)
+DataFolderHandle DeSerializeDataFolder(const std::string &path)
 {
   if(path.size() >= MAXCMDLEN)
   {
     throw RequestInterfaceException(REQ_INVALID_PARAM_FORMAT);
   }
 
-  DataFolderHandle dataFolderHandle;
+  DataFolderHandle dataFolderHandle = nullptr;
   auto rc = GetNamedDataFolder(nullptr, path.c_str(), &dataFolderHandle);
   ASSERT(rc == 0);
 
@@ -476,7 +476,7 @@ void WriteZMsgIntoHandle(Handle *handle, zmq_msg_t *msg)
 
   if(numBytes > 0)
   {
-    auto rawData = zmq_msg_data(msg);
+    auto *rawData = zmq_msg_data(msg);
     ZEROMQ_ASSERT(rawData != nullptr);
     memcpy(**handle, rawData, numBytes);
   }
@@ -484,7 +484,7 @@ void WriteZMsgIntoHandle(Handle *handle, zmq_msg_t *msg)
 
 bool IsConvertibleToDouble(const std::string &str)
 {
-  char *lastChar;
+  char *lastChar = nullptr;
   // avoid unused return value warning
   auto val = std::strtod(str.c_str(), &lastChar);
   (void) val;
@@ -497,12 +497,12 @@ bool IsWaveType(int igorType)
   return IsBitSet(igorType, WAVE_TYPE);
 }
 
-bool UsesMultipleReturnValueSyntax(FunctionInfo fip)
+bool UsesMultipleReturnValueSyntax(const FunctionInfo &fip)
 {
   return fip.returnType == FV_NORETURN_TYPE;
 }
 
-int GetNumberOfReturnValues(FunctionInfo fip)
+int GetNumberOfReturnValues(const FunctionInfo &fip)
 {
   // old return value syntax with only one
   if(!UsesMultipleReturnValueSyntax(fip))
@@ -515,7 +515,7 @@ int GetNumberOfReturnValues(FunctionInfo fip)
   // these are before all other parameters
 
   // find the first non-pass-by-ref parameter
-  auto it = std::find_if(
+  auto *it = std::find_if(
       std::begin(fip.parameterTypes),
       std::begin(fip.parameterTypes) + fip.numRequiredParameters,
       [](int paramType) { return !IsBitSet(paramType, FV_REF_TYPE); });
@@ -526,7 +526,7 @@ int GetNumberOfReturnValues(FunctionInfo fip)
   return static_cast<int>(std::distance(std::begin(fip.parameterTypes), it));
 }
 
-int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues)
+int GetNumberOfInputParameters(const FunctionInfo &fip, int numReturnValues)
 {
   // old return value syntax with only one
   if(!UsesMultipleReturnValueSyntax(fip))
@@ -537,7 +537,7 @@ int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues)
   return static_cast<int>(fip.numRequiredParameters) - numReturnValues;
 }
 
-int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues)
+int GetFirstInputParameterIndex(const FunctionInfo &fip, int numReturnValues)
 {
   return UsesMultipleReturnValueSyntax(fip) ? numReturnValues : 0;
 }
@@ -554,16 +554,22 @@ std::string CleanupString(std::string str)
 
   size_t end = str.find_last_not_of(ws);
   if(end != std::string::npos)
+  {
     str.resize(end + 1);
+  }
 
   size_t start = str.find_first_not_of(ws);
   if(start != std::string::npos)
+  {
     str = str.substr(start);
+  }
 
   for(auto &c : str)
   {
     if(c == '\r')
+    {
       c = '\n';
+    }
   }
 
   return str;

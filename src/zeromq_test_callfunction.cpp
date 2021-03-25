@@ -1,6 +1,6 @@
 #include "ZeroMQ.h"
-#include "RequestInterface.h"
 #include "CallFunctionOperation.h"
+#include "RequestInterface.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.

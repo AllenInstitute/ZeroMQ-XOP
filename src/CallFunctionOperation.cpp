@@ -1,8 +1,8 @@
 #include "ZeroMQ.h"
 #include "CallFunctionOperation.h"
 #include "CallFunctionParameterHandler.h"
-#include "SerializeWave.h"
 #include "HistoryGrabber.h"
+#include "SerializeWave.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -86,7 +86,7 @@ void CallFunctionOperation::CanBeProcessed() const
     throw RequestInterfaceException(REQ_PROC_NOT_COMPILED);
   }
   // non existing function
-  else if(rc == EXPECTED_FUNCTION_NAME)
+  if(rc == EXPECTED_FUNCTION_NAME)
   {
     throw RequestInterfaceException(REQ_NON_EXISTING_FUNCTION);
   }
@@ -112,7 +112,7 @@ void CallFunctionOperation::CanBeProcessed() const
   {
     throw RequestInterfaceException(REQ_TOO_FEW_FUNCTION_PARAMS);
   }
-  else if(numParamsSupplied > numInputParams)
+  if(numParamsSupplied > numInputParams)
   {
     throw RequestInterfaceException(REQ_TOO_MANY_FUNCTION_PARAMS);
   }

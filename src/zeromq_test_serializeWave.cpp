@@ -1,8 +1,8 @@
 #include "ZeroMQ.h"
-#include "RequestInterface.h"
 #include "CallFunctionOperation.h"
-#include <string>
+#include "RequestInterface.h"
 #include "SerializeWave.h"
+#include <string>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.

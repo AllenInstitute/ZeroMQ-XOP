@@ -8,8 +8,9 @@
 class RequestInterface
 {
 public:
-  explicit RequestInterface(std::string identity, std::string payload);
-  explicit RequestInterface(std::string payload);
+  explicit RequestInterface(std::string callerIdentity,
+                            const std::string &payload);
+  explicit RequestInterface(const std::string &payload);
   void CanBeProcessed() const;
   json Call() const;
 
@@ -23,7 +24,7 @@ public:
 private:
   void FillFromJSON(json j);
 
-  int m_version;
+  int m_version{};
   std::string m_callerIdentity, m_messageId;
   CallFunctionOperationPtr m_op;
 };

@@ -45,11 +45,6 @@ GlobalData::GlobalData() : m_debugging(false), m_busyWaiting(true)
   ZEROMQ_ASSERT(zmq_context != nullptr);
 }
 
-GlobalData::~GlobalData()
-{
-  // deleting the context is not necessary here.
-}
-
 void *GlobalData::ZMQClientSocket()
 {
   if(!zmq_client_socket)
@@ -108,7 +103,7 @@ void GlobalData::SetDebugFlag(bool val)
   m_debugging = val;
 };
 
-bool GlobalData::GetDebugFlag()
+bool GlobalData::GetDebugFlag() const
 {
   return m_debugging;
 }
@@ -121,7 +116,7 @@ void GlobalData::SetRecvBusyWaitingFlag(bool val)
   m_busyWaiting = val;
 }
 
-bool GlobalData::GetRecvBusyWaitingFlag()
+bool GlobalData::GetRecvBusyWaitingFlag() const
 {
   return m_busyWaiting;
 }
@@ -138,7 +133,7 @@ void GlobalData::CloseConnections()
       // client
       GET_CLIENT_SOCKET(socket);
 
-      for(auto conn : m_connections)
+      for(const auto &conn : m_connections)
       {
         auto rc = zmq_disconnect(socket.get(), conn.c_str());
         DebugOutput(fmt::format("{}: zmq_disconnect({}) returned={}\r",
@@ -166,7 +161,7 @@ void GlobalData::CloseConnections()
       // server
       GET_SERVER_SOCKET(socket);
 
-      for(auto bind : m_binds)
+      for(const auto &bind : m_binds)
       {
         auto rc = zmq_unbind(socket.get(), bind.c_str());
         DebugOutput(fmt::format("{}: zmq_unbind({}) returned={}\r", __func__,
@@ -217,7 +212,7 @@ bool GlobalData::HasBinds()
   return !m_binds.empty();
 }
 
-void GlobalData::AddToListOfBinds(std::string localPoint)
+void GlobalData::AddToListOfBinds(const std::string &localPoint)
 {
   LockGuard lock(m_serverMutex);
 
@@ -231,7 +226,7 @@ bool GlobalData::HasConnections()
   return !m_connections.empty();
 }
 
-void GlobalData::AddToListOfConnections(std::string remotePoint)
+void GlobalData::AddToListOfConnections(const std::string &remotePoint)
 {
   LockGuard lock(m_clientMutex);
 

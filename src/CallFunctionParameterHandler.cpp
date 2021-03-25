@@ -1,6 +1,6 @@
 #include "CallFunctionParameterHandler.h"
-#include "ZeroMQ.h"
 #include "SerializeWave.h"
+#include "ZeroMQ.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -77,7 +77,8 @@ json ExtractFromUnion(IgorTypeUnion *ret, int igorType)
   }
 }
 
-IgorTypeUnion ConvertStringToIgorTypeUnion(std::string param, int igorType)
+IgorTypeUnion ConvertStringToIgorTypeUnion(const std::string &param,
+                                           int igorType)
 {
   igorType = ClearBit(igorType, FV_REF_TYPE);
 
@@ -94,7 +95,7 @@ IgorTypeUnion ConvertStringToIgorTypeUnion(std::string param, int igorType)
     memcpy(*u.stringHandle, param.c_str(), param.size());
     break;
   case DATAFOLDER_TYPE:
-    u.dataFolderHandle = DeSerializeDataFolder(param.c_str());
+    u.dataFolderHandle = DeSerializeDataFolder(param);
     break;
   default:
     ASSERT(0);
@@ -215,7 +216,7 @@ void *CallFunctionParameterHandler::GetReturnValueStorage()
 CallFunctionParameterHandler::~CallFunctionParameterHandler()
 {
   unsigned char *src = GetParameterValueStorage();
-  IgorTypeUnion u;
+  IgorTypeUnion u{};
 
   for(size_t i = 0; i < m_paramTypes.size(); i++)
   {

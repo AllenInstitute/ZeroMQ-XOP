@@ -2,8 +2,8 @@
 #include "MessageHandler.h"
 #include "RequestInterface.h"
 
-#include <thread>
 #include <chrono>
+#include <thread>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -27,10 +27,10 @@ void WorkerThread()
     threadShouldFinish = false;
   }
 
-  zmq_msg_t identityMsg, payloadMsg;
-  int rc;
+  zmq_msg_t identityMsg;
+  zmq_msg_t payloadMsg;
 
-  rc = zmq_msg_init(&identityMsg);
+  int rc = zmq_msg_init(&identityMsg);
   ZEROMQ_ASSERT(rc == 0);
 
   rc = zmq_msg_init(&payloadMsg);
@@ -103,7 +103,7 @@ void WorkerThread()
   zmq_msg_close(&payloadMsg);
 }
 
-void CallAndReply(RequestInterfacePtr req) noexcept
+void CallAndReply(const RequestInterfacePtr &req) noexcept
 {
   try
   {
