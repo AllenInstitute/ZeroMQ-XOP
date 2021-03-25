@@ -16,8 +16,7 @@ extern "C" int zeromq_server_bind(zeromq_server_bindParams *p)
   const auto rc = zmq_bind(socket.get(), localPoint.c_str());
   ZEROMQ_ASSERT(rc == 0);
 
-  DebugOutput(
-      fmt::format("{}: localPoint={}, rc={}\r", __func__, localPoint, rc));
+  DEBUG_OUTPUT("localPoint={}, rc={}", localPoint, rc);
   GlobalData::Instance().AddToListOfBinds(GetLastEndPoint(socket.get()));
 
   END_OUTER_CATCH

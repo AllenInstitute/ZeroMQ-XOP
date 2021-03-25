@@ -132,8 +132,7 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
 
   for(int i = 0; i < fip.numRequiredParameters; i++)
   {
-    DebugOutput(fmt::format("{}: Parameter={} with type {:X}\r", __func__, i,
-                            m_paramTypes[i]));
+    DEBUG_OUTPUT("Parameter={} with type {:X}", i, m_paramTypes[i]);
 
     const auto type = ClearBit(m_paramTypes[i], FV_REF_TYPE);
 

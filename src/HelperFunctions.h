@@ -81,8 +81,6 @@ std::string GetStringFromHandle(Handle strHandle);
 void SetDimensionLabels(waveHndl h, int Dimension,
                         const std::vector<std::string> &dimLabels);
 
-void DebugOutput(const std::string &str);
-
 void ApplyFlags(double flags);
 
 namespace ZeroMQ_SET_FLAGS
@@ -164,3 +162,31 @@ int GetNumberOfReturnValues(const FunctionInfo &fip);
 int GetNumberOfInputParameters(const FunctionInfo &fip, int numReturnValues);
 int GetFirstInputParameterIndex(const FunctionInfo &fip, int numReturnValues);
 std::string CleanupString(std::string str);
+
+// Straight from the fmt documentation
+// https://fmt.dev/latest/api.html#argument-lists
+
+enum class OutputMode
+{
+  Debug,
+  Emergency
+};
+
+void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
+          fmt::format_args args);
+
+template <typename S, typename... Args>
+void xop_logging(OutputMode mode, const char *func, int line, const S &format,
+                 Args &&...args)
+{
+  vlog(mode, func, line, format,
+       fmt::make_args_checked<Args...>(format, args...));
+}
+
+#define EMERGENCY_OUTPUT(format, ...)                                          \
+  xop_logging(OutputMode::Emergency, __func__, __LINE__, FMT_STRING(format),   \
+              ##__VA_ARGS__)
+
+#define DEBUG_OUTPUT(format, ...)                                              \
+  xop_logging(OutputMode::Debug, __func__, __LINE__, FMT_STRING(format),       \
+              ##__VA_ARGS__)

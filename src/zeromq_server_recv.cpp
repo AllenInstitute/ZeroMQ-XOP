@@ -48,8 +48,8 @@ extern "C" int zeromq_server_recv(zeromq_server_recvParams *p)
     auto identity = CreateStringFromZMsg(&identityMsg);
     auto msg      = CreateStringFromZMsg(&payloadMsg);
 
-    DebugOutput(fmt::format("{}: numBytes={}, identity={}, msg={:.255s}\r",
-                            __func__, numBytes, identity, msg));
+    DEBUG_OUTPUT("numBytes={}, identity={}, msg={:.255s}", numBytes, identity,
+                 msg);
     break;
   }
 

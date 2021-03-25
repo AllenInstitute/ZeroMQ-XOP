@@ -254,7 +254,9 @@ IF(APPLE)
   TARGET_COMPILE_OPTIONS(${libname} PRIVATE -Weverything $<$<BOOL:${WARNINGS_AS_ERRORS}>:-Werror> -Wno-global-constructors -Wno-padded
                          -Wno-documentation-unknown-command -Wno-c++98-compat-pedantic -Wno-c++98-compat
                          -Wno-reserved-id-macro -Wno-deprecated -Wno-parentheses -Wno-unused-function
-# The following warning exclusion is a workaround for a warning popping up in the external fmt libary
+                         # ignore __VA_ARGS__ problem with no elements, see https://stackoverflow.com/a/11172679
+                         -Wno-gnu-zero-variadic-macro-arguments
+                         # The following warning exclusion is a workaround for a warning popping up in the external fmt libary
                          -Wno-undef)
   TARGET_COMPILE_DEFINITIONS(${libname} PRIVATE TARGET_OS_MAC)
   TARGET_COMPILE_DEFINITIONS(${libname} PRIVATE $<$<CONFIG:DEBUG>:_DEBUG>)

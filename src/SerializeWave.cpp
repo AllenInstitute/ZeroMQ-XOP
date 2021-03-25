@@ -577,9 +577,9 @@ json SerializeWave(waveHndl waveHandle)
   const auto dimSizes       = GetDimensionSizes(waveHandle);
   const auto dimSizesString = DimensionSizesToString(dimSizes);
 
-  DebugOutput(fmt::format(
-      "{}: waveType={}, modDate={}, type={}, dimSizes={}, rawData={:.255s}\r",
-      __func__, waveType, modDate, type, dimSizesString, rawData));
+  DEBUG_OUTPUT(
+      "waveType={}, modDate={}, type={}, dimSizes={}, rawData={:.255s}",
+      waveType, modDate, type, dimSizesString, rawData);
 
   json doc;
   doc["type"]                 = type;

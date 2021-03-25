@@ -11,8 +11,6 @@ std::string HistoryGrabber::GetHistoryUntilNow() const
 {
   const auto endLine = HistoryLines();
 
-  DebugOutput(fmt::format("{}: called\r", __func__));
-
   TULoc startLoc{};
   TULoc endLoc{};
 
@@ -29,15 +27,14 @@ std::string HistoryGrabber::GetHistoryUntilNow() const
   {
     WMDisposeHandle(historyHandle);
 
-    DebugOutput(
-        fmt::format("{}: HistoryFetchText returned {}\r", __func__, rc));
+    DEBUG_OUTPUT("HistoryFetchText returned {}", rc);
     return {};
   }
 
   auto history = GetStringFromHandle(historyHandle);
   WMDisposeHandle(historyHandle);
 
-  DebugOutput(fmt::format("{}: History ={}\r", __func__, history));
+  DEBUG_OUTPUT("History ={}", history);
 
   return CleanupString(history);
 }

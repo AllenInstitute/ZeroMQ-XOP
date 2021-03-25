@@ -35,7 +35,7 @@ const char *IgorException::what() const noexcept
 
 int IgorException::HandleException() const
 {
-  XOPNotice_ts(what());
+  EMERGENCY_OUTPUT("{}", what());
 
   return m_errorCode;
 }
@@ -52,8 +52,8 @@ void to_json(json &j, const IgorException &e)
 
 int HandleException(const std::exception &e)
 {
-  XOPNotice_ts("Encountered unhandled C++ exception during XOP execution.\r");
-  XOPNotice_ts(std::string(e.what()) + CR_STR);
+  EMERGENCY_OUTPUT(
+      "Encountered unhandled C++ exception during XOP execution: {}", e.what());
 
   return UNHANDLED_CPP_EXCEPTION;
 }

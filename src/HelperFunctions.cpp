@@ -50,14 +50,6 @@ void SetDimensionLabels(waveHndl h, int Dimension,
   }
 }
 
-void DebugOutput(const std::string &str)
-{
-  if(GlobalData::Instance().GetDebugFlag())
-  {
-    XOPNotice_ts("DEBUG: " + str);
-  }
-}
-
 bool IsBitSet(int val, int bit)
 {
   return (val & bit) == bit;
@@ -150,11 +142,10 @@ void ApplyFlags(double flags)
         fmt::format("zeromq_set: The flag value {} must positive.\r", flags));
   }
 
-  DebugOutput(fmt::format("{}: ZMQ Library Version {}.{}.{}\r", __func__,
-                          ZMQ_VERSION_MAJOR, ZMQ_VERSION_MINOR,
-                          ZMQ_VERSION_PATCH));
+  DEBUG_OUTPUT("ZMQ Library Version {}.{}.{}", ZMQ_VERSION_MAJOR,
+               ZMQ_VERSION_MINOR, ZMQ_VERSION_PATCH);
 
-  DebugOutput(fmt::format("{}: git revision {}\r", __func__, GIT_REVISION));
+  DEBUG_OUTPUT("git revision {}", GIT_REVISION);
 
   if((val & ZeroMQ_SET_FLAGS::DEFAULT) == ZeroMQ_SET_FLAGS::DEFAULT)
   {
@@ -198,7 +189,7 @@ std::string GetLastEndPoint(void *s)
   int rc         = zmq_getsockopt(s, ZMQ_LAST_ENDPOINT, buf, &bufSize);
   ZEROMQ_ASSERT(rc == 0);
 
-  DebugOutput(fmt::format("{}: lastEndPoint={}\r", __func__, buf));
+  DEBUG_OUTPUT("lastEndPoint={}", buf);
   return std::string(buf);
 }
 
@@ -206,7 +197,7 @@ void ToggleIPV6Support(bool enable)
 {
   GET_CLIENT_SOCKET(clientSocket);
 
-  DebugOutput(fmt::format("{}: enable={}\r", __func__, enable));
+  DEBUG_OUTPUT("enable={}", enable);
 
   const int val = enable;
   auto rc = zmq_setsockopt(clientSocket.get(), ZMQ_IPV6, &val, sizeof(val));
@@ -258,8 +249,7 @@ std::string CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
       req->CanBeProcessed();
       auto reply = req->Call();
 
-      DebugOutput(fmt::format("{}: Function return value is {:.255s}\r",
-                              __func__, reply.dump(4)));
+      DEBUG_OUTPUT("Function return value is {:.255s}", reply.dump(4));
 
       return reply.dump(4);
     }
@@ -293,8 +283,7 @@ int ZeroMQClientSend(const std::string &payload)
   GET_CLIENT_SOCKET(socket);
   const auto payloadLength = payload.length();
 
-  DebugOutput(fmt::format("{}: payloadLength={}, socket={}\r", __func__,
-                          payloadLength, socket.get()));
+  DEBUG_OUTPUT("payloadLength={}, socket={}", payloadLength, socket.get());
 
   // empty
   int rc = zmq_send(socket.get(), nullptr, 0, ZMQ_SNDMORE);
@@ -304,7 +293,7 @@ int ZeroMQClientSend(const std::string &payload)
   rc = zmq_send(socket.get(), payload.c_str(), payloadLength, 0);
   ZEROMQ_ASSERT(rc > 0);
 
-  DebugOutput(fmt::format("{}: rc={}\r", __func__, rc));
+  DEBUG_OUTPUT("rc={}", rc);
 
   return rc;
 }
@@ -314,8 +303,7 @@ int ZeroMQServerSend(const std::string &identity, const std::string &payload)
   GET_SERVER_SOCKET(socket);
   const auto payloadLength = payload.length();
 
-  DebugOutput(fmt::format("{}: payloadLength={}, socket={}\r", __func__,
-                          payloadLength, socket.get()));
+  DEBUG_OUTPUT("payloadLength={}, socket={}", payloadLength, socket.get());
 
   // identity
   int rc =
@@ -330,7 +318,7 @@ int ZeroMQServerSend(const std::string &identity, const std::string &payload)
   rc = zmq_send(socket.get(), payload.c_str(), payloadLength, 0);
   ZEROMQ_ASSERT(rc > 0);
 
-  DebugOutput(fmt::format("{}: rc={}\r", __func__, rc));
+  DEBUG_OUTPUT("rc={}", rc);
 
   return rc;
 }
@@ -573,4 +561,38 @@ std::string CleanupString(std::string str)
   }
 
   return str;
+}
+
+template <>
+struct fmt::formatter<OutputMode> : fmt::formatter<std::string>
+{
+  // parse is inherited from formatter<std::string>.
+  template <typename FormatContext>
+  auto format(OutputMode mode, FormatContext &ctx)
+  {
+    std::string name;
+    switch(mode)
+    {
+    case OutputMode::Debug:
+      name = "Debug";
+      break;
+    case OutputMode::Emergency:
+      name = "Emergency";
+      break;
+    }
+
+    return formatter<std::string>::format(name, ctx);
+  }
+};
+
+void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
+          fmt::format_args args)
+{
+  if(mode == OutputMode::Debug && !GlobalData::Instance().GetDebugFlag())
+  {
+    return;
+  }
+
+  const auto header = fmt::format(FMT_STRING("{} {}:L{}: "), mode, func, line);
+  XOPNotice_ts(header + fmt::vformat(format, args) + CR_STR);
 }
