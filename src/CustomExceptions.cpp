@@ -8,18 +8,13 @@
 // IgorException
 //--------------------------------------------------------------
 
-#ifdef WINIGOR
-IgorException::IgorException() : m_errorCode(UNHANDLED_CPP_EXCEPTION)
-{
-}
-#endif
-
-IgorException::IgorException(int errorCode) : m_errorCode(errorCode)
+IgorException::IgorException(int errorCode)
+    : m_errorCode(errorCode), m_message("")
 {
 }
 
-IgorException::IgorException(int errorCode, std::string errorMessage)
-    : m_errorCode(errorCode), m_message(std::move(errorMessage))
+IgorException::IgorException(int errorCode, const std::string &errorMessage)
+    : m_errorCode(errorCode), m_message(errorMessage)
 {
 }
 
@@ -30,7 +25,12 @@ IgorException::~IgorException()
 
 const char *IgorException::what() const noexcept
 {
-  return m_message.c_str();
+  return m_message.what();
+}
+
+int IgorException::GetErrorCode() const
+{
+  return m_errorCode;
 }
 
 int IgorException::HandleException() const
@@ -43,7 +43,7 @@ int IgorException::HandleException() const
 // Allow to serialize IgorExceptions to JSON
 void to_json(json &j, const IgorException &e)
 {
-  j["errorCode"] = json{{"value", e.m_errorCode}, {"msg", e.what()}};
+  j["errorCode"] = json{{"value", e.GetErrorCode()}, {"msg", e.what()}};
 }
 
 //--------------------------------------------------------------
