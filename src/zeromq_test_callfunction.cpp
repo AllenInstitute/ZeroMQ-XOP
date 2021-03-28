@@ -1,6 +1,6 @@
 #include "ZeroMQ.h"
-#include "RequestInterface.h"
 #include "CallFunctionOperation.h"
+#include "RequestInterface.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -13,14 +13,13 @@ extern "C" int zeromq_test_callfunction(zeromq_test_callfunctionParams *p)
   auto msg = GetStringFromHandle(p->msg);
   WMDisposeHandle(p->msg);
 
-  DebugOutput(fmt::format("{}: input={}\r", __func__, msg));
+  DEBUG_OUTPUT("input={}", msg);
 
   auto retMessage = CallIgorFunctionFromMessage(msg);
 
   auto len = retMessage.size();
 
-  DebugOutput(fmt::format("{}: len={}, retMessage={:.255s}\r", __func__, len,
-                          retMessage));
+  DEBUG_OUTPUT("len={}, retMessage={:.255s}", len, retMessage);
 
   p->result = WMNewHandle(len);
   ASSERT(p->result != nullptr);

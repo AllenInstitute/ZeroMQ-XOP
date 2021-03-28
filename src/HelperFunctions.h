@@ -81,8 +81,6 @@ std::string GetStringFromHandle(Handle strHandle);
 void SetDimensionLabels(waveHndl h, int Dimension,
                         const std::vector<std::string> &dimLabels);
 
-void DebugOutput(std::string str);
-
 void ApplyFlags(double flags);
 
 namespace ZeroMQ_SET_FLAGS
@@ -139,17 +137,17 @@ std::string To_stringHighRes(const T val)
   return fmt::format(fmt, val);
 }
 
-double ConvertStringToDouble(std::string str);
-std::string CallIgorFunctionFromMessage(std::string msg);
-std::string CallIgorFunctionFromReqInterface(RequestInterfacePtr req);
+double ConvertStringToDouble(const std::string &str);
+std::string CallIgorFunctionFromMessage(const std::string &msg);
+std::string CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req);
 
-int ZeroMQClientSend(std::string payload);
-int ZeroMQServerSend(std::string identity, std::string payload);
+int ZeroMQClientSend(const std::string &payload);
+int ZeroMQServerSend(const std::string &identity, const std::string &payload);
 int ZeroMQClientReceive(zmq_msg_t *payloadMsg);
 int ZeroMQServerReceive(zmq_msg_t *identityMsg, zmq_msg_t *payloadMsg);
 
 std::string SerializeDataFolder(DataFolderHandle dataFolderHandle);
-DataFolderHandle DeSerializeDataFolder(std::string path);
+DataFolderHandle DeSerializeDataFolder(const std::string &path);
 
 std::string CreateStringFromZMsg(zmq_msg_t *msg);
 
@@ -159,8 +157,36 @@ void WriteZMsgIntoHandle(Handle *handle, zmq_msg_t *msg);
 bool IsConvertibleToDouble(const std::string &str);
 bool IsWaveType(int igorType);
 
-bool UsesMultipleReturnValueSyntax(FunctionInfo fip);
-int GetNumberOfReturnValues(FunctionInfo fip);
-int GetNumberOfInputParameters(FunctionInfo fip, int numReturnValues);
-int GetFirstInputParameterIndex(FunctionInfo fip, int numReturnValues);
+bool UsesMultipleReturnValueSyntax(const FunctionInfo &fip);
+int GetNumberOfReturnValues(const FunctionInfo &fip);
+int GetNumberOfInputParameters(const FunctionInfo &fip, int numReturnValues);
+int GetFirstInputParameterIndex(const FunctionInfo &fip, int numReturnValues);
 std::string CleanupString(std::string str);
+
+// Straight from the fmt documentation
+// https://fmt.dev/latest/api.html#argument-lists
+
+enum class OutputMode
+{
+  Debug,
+  Emergency
+};
+
+void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
+          fmt::format_args args);
+
+template <typename S, typename... Args>
+void xop_logging(OutputMode mode, const char *func, int line, const S &format,
+                 Args &&...args)
+{
+  vlog(mode, func, line, format,
+       fmt::make_args_checked<Args...>(format, args...));
+}
+
+#define EMERGENCY_OUTPUT(format, ...)                                          \
+  xop_logging(OutputMode::Emergency, __func__, __LINE__, FMT_STRING(format),   \
+              ##__VA_ARGS__)
+
+#define DEBUG_OUTPUT(format, ...)                                              \
+  xop_logging(OutputMode::Debug, __func__, __LINE__, FMT_STRING(format),       \
+              ##__VA_ARGS__)

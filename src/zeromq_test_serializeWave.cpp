@@ -1,8 +1,8 @@
 #include "ZeroMQ.h"
-#include "RequestInterface.h"
 #include "CallFunctionOperation.h"
-#include <string>
+#include "RequestInterface.h"
 #include "SerializeWave.h"
+#include <string>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -12,11 +12,9 @@ extern "C" int zeromq_test_serializeWave(zeromq_test_serializeWaveParams *p)
 {
   BEGIN_OUTER_CATCH
 
-  DebugOutput(fmt::format("{}\r", __func__));
-
   const auto str = SerializeWave(p->wv).dump(4);
 
-  DebugOutput(fmt::format("{}: output={:.255s}\r", __func__, str));
+  DEBUG_OUTPUT("output={:.255s}", str);
 
   auto len  = str.size();
   p->result = WMNewHandle(len);

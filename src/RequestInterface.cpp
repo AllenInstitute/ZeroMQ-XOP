@@ -1,5 +1,8 @@
-#include "RequestInterface.h"
 #include "CallFunctionOperation.h"
+#include "RequestInterface.h"
+#include "ZeroMQ.h"
+
+#include <utility>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -9,7 +12,7 @@ namespace
 
 const size_t MAX_MESSAGEID_LENGTH = 255;
 
-bool IsValidMessageId(std::string messageId)
+bool IsValidMessageId(const std::string &messageId)
 {
   return messageId.length() != 0 && messageId.length() <= MAX_MESSAGEID_LENGTH;
 }
@@ -17,14 +20,13 @@ bool IsValidMessageId(std::string messageId)
 } // anonymous namespace
 
 RequestInterface::RequestInterface(std::string callerIdentity,
-                                   std::string payload)
-    : m_callerIdentity(callerIdentity)
+                                   const std::string &payload)
+    : m_callerIdentity(std::move(callerIdentity))
 {
   try
   {
     auto doc = json::parse(payload);
-    DebugOutput(fmt::format("{}: JSON Document is valid, data={}.\r", __func__,
-                            doc.dump(-1)));
+    DEBUG_OUTPUT("JSON Document is valid, data={}", doc.dump(-1));
     FillFromJSON(doc);
   }
   catch(const IgorException &)
@@ -37,7 +39,7 @@ RequestInterface::RequestInterface(std::string callerIdentity,
   }
 }
 
-RequestInterface::RequestInterface(std::string payload)
+RequestInterface::RequestInterface(const std::string &payload)
     : RequestInterface("", payload)
 {
 }
@@ -128,6 +130,5 @@ void RequestInterface::FillFromJSON(json j)
 
   m_op = std::make_shared<CallFunctionOperation>(*it);
 
-  DebugOutput(fmt::format("{}: Request Object could be created: {}\r", __func__,
-                          *this));
+  DEBUG_OUTPUT("Request Object could be created: {}", *this);
 }

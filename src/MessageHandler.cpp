@@ -2,8 +2,8 @@
 #include "MessageHandler.h"
 #include "RequestInterface.h"
 
-#include <thread>
 #include <chrono>
+#include <thread>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -19,7 +19,7 @@ std::recursive_mutex threadShouldFinishMutex;
 
 void WorkerThread()
 {
-  DebugOutput(fmt::format("{}: Begin WorkerThread().\r", __func__));
+  DEBUG_OUTPUT("Begin");
 
   {
     // initialize to false
@@ -27,10 +27,10 @@ void WorkerThread()
     threadShouldFinish = false;
   }
 
-  zmq_msg_t identityMsg, payloadMsg;
-  int rc;
+  zmq_msg_t identityMsg;
+  zmq_msg_t payloadMsg;
 
-  rc = zmq_msg_init(&identityMsg);
+  int rc = zmq_msg_init(&identityMsg);
   ZEROMQ_ASSERT(rc == 0);
 
   rc = zmq_msg_init(&payloadMsg);
@@ -45,7 +45,7 @@ void WorkerThread()
         LockGuard lock(threadShouldFinishMutex);
         if(threadShouldFinish)
         {
-          DebugOutput(fmt::format("{}: Exiting.\r", __func__));
+          DEBUG_OUTPUT("Exiting");
           break;
         }
       }
@@ -60,7 +60,7 @@ void WorkerThread()
 
       ZEROMQ_ASSERT(numBytes >= 0);
 
-      DebugOutput(fmt::format("{}: numBytes={}\r", __func__, numBytes));
+      DEBUG_OUTPUT("numBytes={}", numBytes);
 
       const auto identity = CreateStringFromZMsg(&identityMsg);
 
@@ -81,20 +81,18 @@ void WorkerThread()
         const json reply = e;
         rc               = ZeroMQServerSend(identity, reply.dump(4));
 
-        DebugOutput(
-            fmt::format("{}: ZeroMQSendAsServer returned {}\r", __func__, rc));
+        DEBUG_OUTPUT("ZeroMQSendAsServer returned {}", rc);
       }
     }
     catch(const std::exception &e)
     {
-      XOPNotice_ts(fmt::format(
-          "{}: Caught std::exception with what=\"{}\". This must NOT happen!\r",
-          __func__, e.what()));
+      EMERGENCY_OUTPUT(
+          "Caught std::exception with what = \"{}\". This must NOT happen!",
+          e.what());
     }
     catch(...)
     {
-      XOPNotice_ts(fmt::format("{}: Caught exception. This must NOT happen!\r",
-                               __func__));
+      EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
     }
   }
 
@@ -103,7 +101,7 @@ void WorkerThread()
   zmq_msg_close(&payloadMsg);
 }
 
-void CallAndReply(RequestInterfacePtr req) noexcept
+void CallAndReply(const RequestInterfacePtr &req) noexcept
 {
   try
   {
@@ -114,15 +112,14 @@ void CallAndReply(RequestInterfacePtr req) noexcept
     }
     catch(const std::exception &e)
     {
-      XOPNotice_ts(fmt::format(
-          "{}: Caught std::exception with what=\"{}\". This must NOT happen!\r",
-          __func__, e.what()));
+      EMERGENCY_OUTPUT(
+          "Caught std::exception with what=\"{}\". This must NOT happen!",
+          e.what());
     }
   }
   catch(...)
   {
-    XOPNotice_ts(
-        fmt::format("{}: Caught exception. This must NOT happen!\r", __func__));
+    EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
   }
 }
 
@@ -137,14 +134,14 @@ void MessageHandler::StartHandler()
     throw IgorException(HANDLER_ALREADY_RUNNING);
   }
 
-  DebugOutput(fmt::format("{}: Trying to start the handler.\r", __func__));
+  DEBUG_OUTPUT("Trying to start the handler.");
 
   if(!GlobalData::Instance().HasBinds())
   {
     throw IgorException(HANDLER_NO_CONNECTION);
   }
 
-  DebugOutput(fmt::format("{}: Before WorkerThread() start.\r", __func__));
+  DEBUG_OUTPUT("Before WorkerThread() start.");
 
   auto t = std::thread(WorkerThread);
   m_thread.swap(t);
@@ -159,7 +156,7 @@ void MessageHandler::StopHandler()
     return;
   }
 
-  DebugOutput(fmt::format("{}: Shutting down the handler.\r", __func__));
+  DEBUG_OUTPUT("Shutting down the handler.");
 
   {
     LockGuard innerLock(threadShouldFinishMutex);

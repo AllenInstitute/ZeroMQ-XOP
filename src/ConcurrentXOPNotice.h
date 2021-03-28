@@ -14,7 +14,7 @@
 ///   OutputQueuedNotices(). For that the XOP has to be marked as
 ///   `SetXOPType(RESIDENT | IDLES);`.
 
-void XOPNotice_ts(std::string str);
+void XOPNotice_ts(const std::string &str);
 void XOPNotice_ts(const char *noticeStr);
 
 void OutputQueuedNotices();

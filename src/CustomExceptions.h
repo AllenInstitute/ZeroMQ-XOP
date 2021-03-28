@@ -12,8 +12,9 @@
   {                                                                            \
     throw IgorException(                                                       \
         INTERNAL_ERROR,                                                        \
-        fmt::format("The assertion in {} line {} file {} failed\r", __func__,  \
-                    __LINE__, __FILE__));                                      \
+        fmt::format(                                                           \
+            FMT_STRING("The assertion in {} line {} file {} failed\r"),        \
+            __func__, __LINE__, __FILE__));                                    \
   }
 
 #define ZEROMQ_ASSERT(A)                                                       \
@@ -22,35 +23,29 @@
     auto err = zmq_errno();                                                    \
     throw IgorException(                                                       \
         INVALID_ARG,                                                           \
-        fmt::format("The zmq library call in {} line {} file "                 \
-                    "{} failed with errno={} and msg=\"{}\"\r",                \
+        fmt::format(FMT_STRING("The zmq library call in {} line {} file "      \
+                               "{} failed with errno={} and msg=\"{}\"\r"),    \
                     __func__, __LINE__, __FILE__, err, zmq_strerror(err)));    \
   }
 
 class IgorException : public std::exception
 {
 public:
-  const int m_errorCode;
-  const std::string m_message;
-
-/// Constructors
-// Mark default constructor as deprecated
-// - Allows use of default constructor when a custom error code hasn't been
-// implemented
-// - Compiler warning allows us to find usages later
-#ifdef WINIGOR
-  __declspec(deprecated("Using default error code.  You should replace this "
-                        "with a custom error code")) IgorException();
-#endif
   explicit IgorException(int errorCode);
-  IgorException(int errorCode, std::string errorMessage);
+  IgorException(int errorCode, const std::string &errorMessage);
 
   virtual ~IgorException() override;
 
   const char *what() const noexcept override;
 
+  int GetErrorCode() const;
+
   /// Displays the exception if required; gets the return code.
   int HandleException() const;
+
+private:
+  const int m_errorCode;
+  const std::runtime_error m_message;
 };
 
 void to_json(json &j, const IgorException &e);
@@ -60,8 +55,7 @@ int HandleException(const std::exception &e);
 #define BEGIN_OUTER_CATCH                                                      \
   p->result = decltype(p->result)();                                           \
   try                                                                          \
-  {                                                                            \
-    GlobalData::Instance().EnsureInteropProcFileAvailable();
+  {
 
 #define END_OUTER_CATCH                                                        \
   return 0;                                                                    \

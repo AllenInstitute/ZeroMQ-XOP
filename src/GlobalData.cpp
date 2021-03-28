@@ -45,18 +45,13 @@ GlobalData::GlobalData() : m_debugging(false), m_busyWaiting(true)
   ZEROMQ_ASSERT(zmq_context != nullptr);
 }
 
-GlobalData::~GlobalData()
-{
-  // deleting the context is not necessary here.
-}
-
 void *GlobalData::ZMQClientSocket()
 {
   if(!zmq_client_socket)
   {
     LockGuard lock(m_clientMutex);
 
-    DebugOutput(fmt::format("{}: Creating client socket\n", __func__));
+    DEBUG_OUTPUT("Creating client socket");
 
     zmq_client_socket = zmq_socket(zmq_context, ZMQ_DEALER);
     ZEROMQ_ASSERT(zmq_client_socket != nullptr);
@@ -81,7 +76,7 @@ void *GlobalData::ZMQServerSocket()
   {
     LockGuard lock(m_serverMutex);
 
-    DebugOutput(fmt::format("{}: Creating server socket\n", __func__));
+    DEBUG_OUTPUT("Creating server socket");
 
     zmq_server_socket = zmq_socket(zmq_context, ZMQ_ROUTER);
     ZEROMQ_ASSERT(zmq_server_socket != nullptr);
@@ -104,11 +99,11 @@ void GlobalData::SetDebugFlag(bool val)
 {
   LockGuard lock(m_settingsMutex);
 
-  DebugOutput(fmt::format("{}: new value={}\r", __func__, val));
+  DEBUG_OUTPUT("new value={}", val);
   m_debugging = val;
 };
 
-bool GlobalData::GetDebugFlag()
+bool GlobalData::GetDebugFlag() const
 {
   return m_debugging;
 }
@@ -117,11 +112,11 @@ void GlobalData::SetRecvBusyWaitingFlag(bool val)
 {
   LockGuard lock(m_settingsMutex);
 
-  DebugOutput(fmt::format("{}: new value={}\r", __func__, val));
+  DEBUG_OUTPUT("new value={}", val);
   m_busyWaiting = val;
 }
 
-bool GlobalData::GetRecvBusyWaitingFlag()
+bool GlobalData::GetRecvBusyWaitingFlag() const
 {
   return m_busyWaiting;
 }
@@ -130,19 +125,17 @@ void GlobalData::CloseConnections()
 {
   if(HasClientSocket())
   {
-    DebugOutput(
-        fmt::format("{}: Connections={}\r", __func__, m_connections.size()));
+    DEBUG_OUTPUT("Connections={}", m_connections.size());
 
     try
     {
       // client
       GET_CLIENT_SOCKET(socket);
 
-      for(auto conn : m_connections)
+      for(const auto &conn : m_connections)
       {
         auto rc = zmq_disconnect(socket.get(), conn.c_str());
-        DebugOutput(fmt::format("{}: zmq_disconnect({}) returned={}\r",
-                                __func__, conn, rc));
+        DEBUG_OUTPUT("zmq_disconnect({}) returned={}", conn, rc);
         // ignore errors
       }
       m_connections.clear();
@@ -159,18 +152,17 @@ void GlobalData::CloseConnections()
 
   if(HasServerSocket())
   {
-    DebugOutput(fmt::format("{}: Binds={}\r", __func__, m_binds.size()));
+    DEBUG_OUTPUT("Binds={}", m_binds.size());
 
     try
     {
       // server
       GET_SERVER_SOCKET(socket);
 
-      for(auto bind : m_binds)
+      for(const auto &bind : m_binds)
       {
         auto rc = zmq_unbind(socket.get(), bind.c_str());
-        DebugOutput(fmt::format("{}: zmq_unbind({}) returned={}\r", __func__,
-                                bind, rc));
+        DEBUG_OUTPUT("zmq_unbind({}) returned={}", bind, rc);
         // ignore errors
       }
       m_binds.clear();
@@ -186,30 +178,6 @@ void GlobalData::CloseConnections()
   }
 }
 
-void GlobalData::EnsureInteropProcFileAvailable()
-{
-  if(!RunningInMainThread())
-  {
-    return;
-  }
-
-  const std::string procedure = "ZeroMQ_Interop.ipf";
-  Handle listHandle           = WMNewHandle(0);
-  ASSERT(listHandle != nullptr);
-  auto rc = WinList(listHandle, procedure.c_str(), ";", "");
-  ASSERT(rc == 0);
-
-  const auto exists = WMGetHandleSize(listHandle) > 0;
-  WMDisposeHandle(listHandle);
-
-  if(!exists)
-  {
-    XOPNotice_ts(fmt::format(
-        "The procedure file {} is required for ZeroMQ XOP.", procedure));
-    throw IgorException(MISSING_PROCEDURE_FILES);
-  }
-}
-
 bool GlobalData::HasBinds()
 {
   LockGuard lock(m_serverMutex);
@@ -217,7 +185,7 @@ bool GlobalData::HasBinds()
   return !m_binds.empty();
 }
 
-void GlobalData::AddToListOfBinds(std::string localPoint)
+void GlobalData::AddToListOfBinds(const std::string &localPoint)
 {
   LockGuard lock(m_serverMutex);
 
@@ -231,7 +199,7 @@ bool GlobalData::HasConnections()
   return !m_connections.empty();
 }
 
-void GlobalData::AddToListOfConnections(std::string remotePoint)
+void GlobalData::AddToListOfConnections(const std::string &remotePoint)
 {
   LockGuard lock(m_clientMutex);
 

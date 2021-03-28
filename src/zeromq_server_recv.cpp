@@ -8,12 +8,11 @@ extern "C" int zeromq_server_recv(zeromq_server_recvParams *p)
 {
   BEGIN_OUTER_CATCH
 
-  int numBytes, rc;
-  zmq_msg_t payloadMsg, identityMsg;
-
-  rc = zmq_msg_init(&payloadMsg);
+  zmq_msg_t payloadMsg;
+  int rc = zmq_msg_init(&payloadMsg);
   ZEROMQ_ASSERT(rc == 0);
 
+  zmq_msg_t identityMsg;
   rc = zmq_msg_init(&identityMsg);
   ZEROMQ_ASSERT(rc == 0);
 
@@ -21,7 +20,7 @@ extern "C" int zeromq_server_recv(zeromq_server_recvParams *p)
 
   for(;;)
   {
-    numBytes = ZeroMQServerReceive(&identityMsg, &payloadMsg);
+    const int numBytes = ZeroMQServerReceive(&identityMsg, &payloadMsg);
 
     if(numBytes == -1 && zmq_errno() == EAGAIN) // timeout
     {
@@ -49,8 +48,8 @@ extern "C" int zeromq_server_recv(zeromq_server_recvParams *p)
     auto identity = CreateStringFromZMsg(&identityMsg);
     auto msg      = CreateStringFromZMsg(&payloadMsg);
 
-    DebugOutput(fmt::format("{}: numBytes={}, identity={}, msg={:.255s}\r",
-                            __func__, numBytes, identity, msg));
+    DEBUG_OUTPUT("numBytes={}, identity={}, msg={:.255s}", numBytes, identity,
+                 msg);
     break;
   }
 

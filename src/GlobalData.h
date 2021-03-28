@@ -23,30 +23,29 @@ public:
   bool HasServerSocket();
 
   void SetDebugFlag(bool val);
-  bool GetDebugFlag();
+  bool GetDebugFlag() const;
 
   void SetRecvBusyWaitingFlag(bool val);
-  bool GetRecvBusyWaitingFlag();
+  bool GetRecvBusyWaitingFlag() const;
 
   void CloseConnections();
   bool HasBinds();
-  void AddToListOfBinds(std::string localPoint);
+  void AddToListOfBinds(const std::string &localPoint);
   bool HasConnections();
-  void AddToListOfConnections(std::string remotePoint);
-  void EnsureInteropProcFileAvailable();
+  void AddToListOfConnections(const std::string &remotePoint);
   ConcurrentQueue<std::string> &GetXOPNoticeQueue();
 
   std::recursive_mutex m_clientMutex, m_serverMutex;
 
 private:
   GlobalData();
-  ~GlobalData();
+  ~GlobalData()                  = default;
   GlobalData(const GlobalData &) = delete;
   GlobalData &operator=(const GlobalData &) = delete;
 
   void *zmq_context;
-  void *zmq_client_socket;
-  void *zmq_server_socket;
+  void *zmq_client_socket{};
+  void *zmq_server_socket{};
   std::vector<std::string> m_binds, m_connections;
   std::recursive_mutex m_settingsMutex;
 

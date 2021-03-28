@@ -1,15 +1,15 @@
 #include "ZeroMQ.h"
 #include "CallFunctionOperation.h"
 #include "CallFunctionParameterHandler.h"
-#include "SerializeWave.h"
 #include "HistoryGrabber.h"
+#include "SerializeWave.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
 CallFunctionOperation::CallFunctionOperation(json j)
 {
-  DebugOutput(fmt::format("{}: size={}\r", __func__, j.size()));
+  DEBUG_OUTPUT("size={}", j.size());
 
   if(j.size() != 1 && j.size() != 2)
   {
@@ -69,13 +69,12 @@ CallFunctionOperation::CallFunctionOperation(json j)
     }
   }
 
-  DebugOutput(
-      fmt::format("{}: CallFunction object could be created.\r", __func__));
+  DEBUG_OUTPUT("CallFunction object could be created: {}", *this);
 }
 
 void CallFunctionOperation::CanBeProcessed() const
 {
-  DebugOutput(fmt::format("{}: Data={}.\r", __func__, *this));
+  DEBUG_OUTPUT("Data={}", *this);
 
   FunctionInfo fip;
   auto rc = GetFunctionInfo(m_name.c_str(), &fip);
@@ -86,13 +85,12 @@ void CallFunctionOperation::CanBeProcessed() const
     throw RequestInterfaceException(REQ_PROC_NOT_COMPILED);
   }
   // non existing function
-  else if(rc == EXPECTED_FUNCTION_NAME)
+  if(rc == EXPECTED_FUNCTION_NAME)
   {
     throw RequestInterfaceException(REQ_NON_EXISTING_FUNCTION);
   }
 
-  DebugOutput(
-      fmt::format("{}: func return value is ={}.\r", __func__, fip.returnType));
+  DEBUG_OUTPUT("func return value is ={}.", fip.returnType);
 
   ASSERT(rc == 0);
 
@@ -102,17 +100,17 @@ void CallFunctionOperation::CanBeProcessed() const
 
   const auto numParamsSupplied = static_cast<int>(m_params.size());
 
-  DebugOutput(fmt::format(
-      "{}: Multiple return value syntax={}, Number of return values={}, Number "
-      "of required input parameters = {}, Number of parmeters supplied = {}\r",
-      __func__, multipleReturnValueSyntax, numReturnValues, numInputParams,
-      numParamsSupplied));
+  DEBUG_OUTPUT(
+      "Multiple return value syntax={}, Number of return values={}, Number "
+      "of required input parameters = {}, Number of parmeters supplied = {}",
+      multipleReturnValueSyntax, numReturnValues, numInputParams,
+      numParamsSupplied);
 
   if(numParamsSupplied < numInputParams)
   {
     throw RequestInterfaceException(REQ_TOO_FEW_FUNCTION_PARAMS);
   }
-  else if(numParamsSupplied > numInputParams)
+  if(numParamsSupplied > numInputParams)
   {
     throw RequestInterfaceException(REQ_TOO_MANY_FUNCTION_PARAMS);
   }
@@ -190,12 +188,12 @@ void CallFunctionOperation::CanBeProcessed() const
     }
   }
 
-  DebugOutput(fmt::format("{}: Request Object can be processed.\r", __func__));
+  DEBUG_OUTPUT("Request Object can be processed: {}", *this);
 }
 
 json CallFunctionOperation::Call()
 {
-  DebugOutput(fmt::format("{}: Data={}.\r", __func__, *this));
+  DEBUG_OUTPUT("Data={}", *this);
 
   FunctionInfo fip;
   auto rc = GetFunctionInfo(m_name.c_str(), &fip);
@@ -211,8 +209,7 @@ json CallFunctionOperation::Call()
 
   auto functionAborted = SpinProcess();
 
-  DebugOutput(fmt::format("{}: Call finished with functionAborted={}\r",
-                          __func__, functionAborted));
+  DEBUG_OUTPUT("Call finished with functionAborted={}", functionAborted);
 
   if(functionAborted)
   {
