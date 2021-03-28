@@ -178,30 +178,6 @@ void GlobalData::CloseConnections()
   }
 }
 
-void GlobalData::EnsureInteropProcFileAvailable()
-{
-  if(!RunningInMainThread())
-  {
-    return;
-  }
-
-  const std::string procedure = "ZeroMQ_Interop.ipf";
-  Handle listHandle           = WMNewHandle(0);
-  ASSERT(listHandle != nullptr);
-  auto rc = WinList(listHandle, procedure.c_str(), ";", "");
-  ASSERT(rc == 0);
-
-  const auto exists = WMGetHandleSize(listHandle) > 0;
-  WMDisposeHandle(listHandle);
-
-  if(!exists)
-  {
-    EMERGENCY_OUTPUT("The procedure file {} is required for ZeroMQ XOP.",
-                     procedure);
-    throw IgorException(MISSING_PROCEDURE_FILES);
-  }
-}
-
 bool GlobalData::HasBinds()
 {
   LockGuard lock(m_serverMutex);

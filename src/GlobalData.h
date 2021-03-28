@@ -33,7 +33,6 @@ public:
   void AddToListOfBinds(const std::string &localPoint);
   bool HasConnections();
   void AddToListOfConnections(const std::string &remotePoint);
-  static void EnsureInteropProcFileAvailable();
   ConcurrentQueue<std::string> &GetXOPNoticeQueue();
 
   std::recursive_mutex m_clientMutex, m_serverMutex;
