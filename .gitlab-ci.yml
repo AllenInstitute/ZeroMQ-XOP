@@ -331,6 +331,8 @@ coverage:
   artifacts:
     paths:
       - build/coverage
+    exclude:
+      - build/coverage/coverage
   needs:
       - compile-xop-debug-coverage-macosx
       - download-xoptoolkit
