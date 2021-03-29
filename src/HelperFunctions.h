@@ -169,7 +169,8 @@ std::string CleanupString(std::string str);
 enum class OutputMode
 {
   Debug,
-  Emergency
+  Emergency,
+  Normal
 };
 
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
@@ -189,4 +190,8 @@ void xop_logging(OutputMode mode, const char *func, int line, const S &format,
 
 #define DEBUG_OUTPUT(format, ...)                                              \
   xop_logging(OutputMode::Debug, __func__, __LINE__, FMT_STRING(format),       \
+              ##__VA_ARGS__)
+
+#define NORMAL_OUTPUT(format, ...)                                             \
+  xop_logging(OutputMode::Normal, __func__, __LINE__, FMT_STRING(format),      \
               ##__VA_ARGS__)

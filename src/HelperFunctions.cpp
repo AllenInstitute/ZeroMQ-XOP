@@ -12,10 +12,11 @@ ExperimentModification MapOutputModeToExperimentModification(OutputMode mode)
   case OutputMode::Debug:
     return ExperimentModification::Silent;
   case OutputMode::Emergency:
+  case OutputMode::Normal:
     return ExperimentModification::Normal;
-  default:
-    ASSERT(0);
   }
+
+  ASSERT(0);
 }
 
 } // anonymous namespace
@@ -597,11 +598,28 @@ struct fmt::formatter<OutputMode> : fmt::formatter<std::string>
     case OutputMode::Emergency:
       name = "Emergency";
       break;
+    case OutputMode::Normal:
+      name = "Normal";
+      break;
     }
 
     return formatter<std::string>::format(name, ctx);
   }
 };
+
+std::string GetHeader(OutputMode mode, const char *func, int line)
+{
+  switch(mode)
+  {
+  case OutputMode::Debug:
+  case OutputMode::Emergency: // fallthrough-by-design
+    return fmt::format(FMT_STRING("{} {}:L{}: "), mode, func, line);
+  case OutputMode::Normal:
+    return {};
+  }
+
+  ASSERT(0);
+}
 
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
           fmt::format_args args)
@@ -611,7 +629,8 @@ void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
     return;
   }
 
-  const auto header = fmt::format(FMT_STRING("{} {}:L{}: "), mode, func, line);
+  const auto header = GetHeader(mode, func, line);
+
   OutputToHistory_TS(header + fmt::vformat(format, args),
                      MapOutputModeToExperimentModification(mode));
 }
