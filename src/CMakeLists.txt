@@ -360,6 +360,7 @@ ENDIF()
 
 SET(JSON_BuildTests OFF CACHE INTERNAL "")
 SET(JSON_Install OFF CACHE INTERNAL "")
+SET(JSON_ImplicitConversions OFF CACHE INTERNAL "")
 ADD_SUBDIRECTORY(json)
 
 TARGET_LINK_LIBRARIES(${libname} PRIVATE nlohmann_json::nlohmann_json)
