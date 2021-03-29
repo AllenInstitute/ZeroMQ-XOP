@@ -206,7 +206,7 @@ void GlobalData::AddToListOfConnections(const std::string &remotePoint)
   m_connections.push_back(remotePoint);
 }
 
-ConcurrentQueue<std::string> &GlobalData::GetXOPNoticeQueue()
+ConcurrentQueue<OutputMessagePtr> &GlobalData::GetXOPNoticeQueue()
 {
   return m_queue;
 }

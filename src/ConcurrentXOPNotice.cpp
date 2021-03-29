@@ -3,21 +3,44 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-void XOPNotice_ts(const std::string &str)
+namespace
+{
+
+void OutputToHistory(std::string str, ExperimentModification mode)
+{
+  if(str.empty())
+  {
+    return;
+  }
+
+  XOPNotice2(str.append(CR_STR).c_str(),
+             mode == ExperimentModification::Normal ? 0x1 : 0);
+}
+
+} // anonymous namespace
+
+struct OutputMessage
+{
+  OutputMessage(std::string msg_, ExperimentModification mode_)
+      : msg(std::move(msg_)), mode(mode_)
+  {
+  }
+
+  std::string msg;
+  ExperimentModification mode;
+};
+
+void OutputToHistory_TS(std::string str, ExperimentModification mode)
 {
   if(RunningInMainThread())
   {
     OutputQueuedNotices();
-    XOPNotice(str.c_str());
+    OutputToHistory(str, mode);
     return;
   }
 
-  GlobalData::Instance().GetXOPNoticeQueue().push(str);
-}
-
-void XOPNotice_ts(const char *noticeStr)
-{
-  XOPNotice_ts(std::string(noticeStr));
+  GlobalData::Instance().GetXOPNoticeQueue().push(
+      std::make_shared<OutputMessage>(str, mode));
 }
 
 void OutputQueuedNotices()
@@ -28,5 +51,5 @@ void OutputQueuedNotices()
   }
 
   GlobalData::Instance().GetXOPNoticeQueue().apply_to_all(
-      [](const std::string &str) { XOPNotice(str.c_str()); });
+      [](const OutputMessagePtr &om) { OutputToHistory(om->msg, om->mode); });
 }

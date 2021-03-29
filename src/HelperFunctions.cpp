@@ -2,6 +2,24 @@
 #include "HelperFunctions.h"
 #include "RequestInterface.h"
 
+namespace
+{
+
+ExperimentModification MapOutputModeToExperimentModification(OutputMode mode)
+{
+  switch(mode)
+  {
+  case OutputMode::Debug:
+    return ExperimentModification::Silent;
+  case OutputMode::Emergency:
+    return ExperimentModification::Normal;
+  default:
+    ASSERT(0);
+  }
+}
+
+} // anonymous namespace
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
@@ -594,5 +612,6 @@ void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
   }
 
   const auto header = fmt::format(FMT_STRING("{} {}:L{}: "), mode, func, line);
-  XOPNotice_ts(header + fmt::vformat(format, args) + CR_STR);
+  OutputToHistory_TS(header + fmt::vformat(format, args),
+                     MapOutputModeToExperimentModification(mode));
 }
