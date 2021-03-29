@@ -8,7 +8,6 @@
 
 #include ":zmq_bind"
 #include ":zmq_connect"
-#include ":zmq_main_test"
 #include ":zmq_memory_leaks"
 #include ":zmq_set"
 #include ":zmq_start_handler"
