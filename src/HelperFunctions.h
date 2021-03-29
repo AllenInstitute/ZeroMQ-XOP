@@ -3,6 +3,12 @@
 #include <sstream>
 #include <iomanip>
 
+#ifdef MACIGOR
+#include <sys/stat.h>
+#endif
+
+#include "Errors.h"
+
 bool IsBitSet(int val, int bit);
 int ClearBit(int val, int bit);
 int SetBit(int val, int bit);
@@ -195,3 +201,7 @@ void xop_logging(OutputMode mode, const char *func, int line, const S &format,
 #define NORMAL_OUTPUT(format, ...)                                             \
   xop_logging(OutputMode::Normal, __func__, __LINE__, FMT_STRING(format),      \
               ##__VA_ARGS__)
+
+int CreateDirectory(const std::string &path);
+
+void EnsureDirectoryExists(const std::string &path);

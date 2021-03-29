@@ -633,3 +633,73 @@ void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
   OutputToHistory_TS(header + fmt::vformat(format, args),
                      MapOutputModeToExperimentModification(mode));
 }
+
+int CreateDirectory(const std::string &path)
+{
+#ifdef WINIGOR
+  int error;
+
+  // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createdirectorya
+  auto ret = CreateDirectoryA(path.c_str(), nullptr);
+
+  // If the function succeeds, the return value is nonzero
+  if(ret)
+  {
+    return 0;
+  }
+
+  error = GetLastError();
+
+  if(error == ERROR_ALREADY_EXISTS)
+  {
+    return FOLDER_EXISTS_NO_OVERWRITE;
+  }
+  else if(error == ERROR_PATH_NOT_FOUND)
+  {
+    return CANT_OPEN_FOLDER;
+  }
+  else
+  {
+    return INTERNAL_ERROR;
+  }
+#else
+#ifdef MACIGOR
+  // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mkdir.2.html
+  auto ret = mkdir(path.c_str(), 0777);
+  if(!ret)
+  {
+    return 0;
+  }
+
+  if(errno == EEXIST)
+  {
+    return FOLDER_EXISTS_NO_OVERWRITE;
+  }
+  else if(errno == ENOTDIR)
+  {
+    return CANT_OPEN_FOLDER;
+  }
+  else
+  {
+    return INTERNAL_ERROR;
+  }
+
+#else
+#error "Unsupported architecture"
+#endif
+#endif
+}
+
+void EnsureDirectoryExists(const std::string &path)
+{
+  auto ret = CreateDirectory(path);
+
+  if(ret == 0 || ret == FOLDER_EXISTS_NO_OVERWRITE)
+  {
+    return;
+  }
+
+  ASSERT(FullPathPointsToFolder(path.c_str()) == 1);
+
+  throw IgorException(ret);
+}
