@@ -13,6 +13,8 @@ bool IsBitSet(int val, int bit);
 int ClearBit(int val, int bit);
 int SetBit(int val, int bit);
 
+const int DEFAULT_INDENT = 4;
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 

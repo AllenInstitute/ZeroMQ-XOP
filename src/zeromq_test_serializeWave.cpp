@@ -12,7 +12,7 @@ extern "C" int zeromq_test_serializeWave(zeromq_test_serializeWaveParams *p)
 {
   BEGIN_OUTER_CATCH
 
-  const auto str = SerializeWave(p->wv).dump(4);
+  const auto str = SerializeWave(p->wv).dump(DEFAULT_INDENT);
 
   DEBUG_OUTPUT("output={:.255s}", str);
 

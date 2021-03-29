@@ -79,7 +79,7 @@ void WorkerThread()
       catch(const IgorException &e)
       {
         const json reply = e;
-        rc               = ZeroMQServerSend(identity, reply.dump(4));
+        rc = ZeroMQServerSend(identity, reply.dump(DEFAULT_INDENT));
 
         DEBUG_OUTPUT("ZeroMQSendAsServer returned {}", rc);
       }
@@ -108,7 +108,7 @@ void CallAndReply(const RequestInterfacePtr &req) noexcept
     try
     {
       auto doc     = CallIgorFunctionFromReqInterface(req);
-      auto message = doc.dump(4);
+      auto message = doc.dump(DEFAULT_INDENT);
       ZeroMQServerSend(req->GetCallerIdentity(), message);
     }
     catch(const std::exception &e)

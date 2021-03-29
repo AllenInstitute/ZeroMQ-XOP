@@ -192,7 +192,7 @@ struct WriteIntoStream<waveHndl, withComma>
   {
     auto formatSpec = GetFormatString<waveHndl, withComma>()();
 
-    fmt::format_to(buf, formatSpec, SerializeWave(val).dump(4));
+    fmt::format_to(buf, formatSpec, SerializeWave(val).dump(DEFAULT_INDENT));
   }
 };
 

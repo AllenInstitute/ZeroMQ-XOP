@@ -274,7 +274,8 @@ json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
       req->CanBeProcessed();
       auto reply = req->Call();
 
-      DEBUG_OUTPUT("Function return value is {:.255s}", reply.dump(4));
+      DEBUG_OUTPUT("Function return value is {:.255s}",
+                   reply.dump(DEFAULT_INDENT));
 
       GlobalData::Instance().AddLogEntry(reply, MessageDirection::Outgoing);
 
