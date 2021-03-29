@@ -236,7 +236,7 @@ double ConvertStringToDouble(const std::string &str)
   return val;
 }
 
-std::string CallIgorFunctionFromMessage(const std::string &msg)
+json CallIgorFunctionFromMessage(const std::string &msg)
 {
   std::shared_ptr<RequestInterface> req;
   try
@@ -252,14 +252,13 @@ std::string CallIgorFunctionFromMessage(const std::string &msg)
   }
   catch(const IgorException &e)
   {
-    const json reply = e;
-    return reply.dump(4);
+    return e;
   }
 
   return CallIgorFunctionFromReqInterface(req);
 }
 
-std::string CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
+json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
 {
   try
   {
@@ -270,7 +269,7 @@ std::string CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
 
       DEBUG_OUTPUT("Function return value is {:.255s}", reply.dump(4));
 
-      return reply.dump(4);
+      return reply;
     }
     catch(const std::bad_alloc &)
     {
@@ -293,7 +292,7 @@ std::string CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
       reply[HISTORY_KEY] = history;
     }
 
-    return reply.dump(4);
+    return reply;
   }
 }
 

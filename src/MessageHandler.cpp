@@ -107,7 +107,8 @@ void CallAndReply(const RequestInterfacePtr &req) noexcept
   {
     try
     {
-      auto message = CallIgorFunctionFromReqInterface(req);
+      auto doc     = CallIgorFunctionFromReqInterface(req);
+      auto message = doc.dump(4);
       ZeroMQServerSend(req->GetCallerIdentity(), message);
     }
     catch(const std::exception &e)
