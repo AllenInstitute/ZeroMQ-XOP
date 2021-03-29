@@ -6,6 +6,8 @@
 namespace
 {
 
+constexpr char PACKAGE_NAME[] = "ZeroMQ";
+
 void SetSocketDefaults(void *s)
 {
   int val = 0;
@@ -39,7 +41,8 @@ void SetDealerSocketDefaults(void *s)
 
 } // anonymous namespace
 
-GlobalData::GlobalData() : m_debugging(false), m_busyWaiting(true)
+GlobalData::GlobalData()
+    : m_debugging(false), m_busyWaiting(true), m_logging(false)
 {
   zmq_context = zmq_ctx_new();
   ZEROMQ_ASSERT(zmq_context != nullptr);
@@ -209,4 +212,52 @@ void GlobalData::AddToListOfConnections(const std::string &remotePoint)
 ConcurrentQueue<OutputMessagePtr> &GlobalData::GetXOPNoticeQueue()
 {
   return m_queue;
+}
+
+void GlobalData::SetLoggingFlag(bool val)
+{
+  m_logging = val;
+}
+
+bool GlobalData::GetLoggingFlag() const
+{
+  return m_logging;
+}
+
+void GlobalData::AddLogEntry(const json &doc, MessageDirection dir)
+{
+  if(!GetLoggingFlag())
+  {
+    return;
+  }
+
+  LockGuard lock(m_loggingLock);
+
+  m_loggingSink->AddLogEntry(doc, dir);
+}
+
+void GlobalData::AddLogEntry(const std::string &str, MessageDirection dir)
+{
+  if(!GetLoggingFlag())
+  {
+    return;
+  }
+
+  LockGuard lock(m_loggingLock);
+
+  m_loggingSink->AddLogEntry(str, dir);
+}
+
+void GlobalData::SetLoggingTemplate(const std::string &loggingTemplate)
+{
+  LockGuard lock(m_loggingLock);
+
+  m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME, loggingTemplate);
+}
+
+void GlobalData::InitLogging()
+{
+  LockGuard lock(m_loggingLock);
+
+  m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME);
 }

@@ -8,7 +8,7 @@ BEGIN
   "zeromq_client_connect\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
-    HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 1
   0,
 
   // string zeromq_client_recv()
@@ -22,7 +22,7 @@ BEGIN
   "zeromq_client_send\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
-    HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 1
   0,
 
   // variable zeromq_handler_start()
@@ -43,21 +43,21 @@ BEGIN
   "zeromq_server_bind\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
-    HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 1
   0,
 
   // string zeromq_server_recv(string *identity)
   "zeromq_server_recv\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   HSTRING_TYPE,          // Return value type
-    FV_REF_TYPE | HSTRING_TYPE,      // parameter 1
+  FV_REF_TYPE | HSTRING_TYPE,      // parameter 1
   0,
 
   // variable zeromq_server_send(string identity, string msg)
   "zeromq_server_send\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
-    HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 1
   HSTRING_TYPE,      // parameter 2
   0,
 
@@ -65,7 +65,14 @@ BEGIN
   "zeromq_set\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
-    NT_FP64,      // parameter 1
+  NT_FP64,      // parameter 1
+  0,
+
+  // variable zeromq_set_logging_template(string jsonString)
+  "zeromq_set_logging_template\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  HSTRING_TYPE,      // parameter 1
   0,
 
   // variable zeromq_stop()
@@ -79,14 +86,14 @@ BEGIN
   "zeromq_test_callfunction\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   HSTRING_TYPE,          // Return value type
-    HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 1
   0,
 
   // string zeromq_test_serializeWave(WAVE wv)
   "zeromq_test_serializeWave\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   HSTRING_TYPE,          // Return value type
-    WAVE_TYPE,      // parameter 1
+  WAVE_TYPE,      // parameter 1
   0,
 
 0,                // NOTE: 0 required to terminate the resource.

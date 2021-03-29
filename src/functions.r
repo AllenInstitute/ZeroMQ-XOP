@@ -10,7 +10,7 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
   {
-      HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 1
   },
 
   // string zeromq_client_recv()
@@ -26,7 +26,7 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
   {
-      HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 1
   },
 
   // variable zeromq_handler_start()
@@ -50,7 +50,7 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
   {
-      HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 1
   },
 
   // string zeromq_server_recv(string *identity)
@@ -58,7 +58,7 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   HSTRING_TYPE,          // Return value type
   {
-      FV_REF_TYPE | HSTRING_TYPE,      // parameter 1
+  FV_REF_TYPE | HSTRING_TYPE,      // parameter 1
   },
 
   // variable zeromq_server_send(string identity, string msg)
@@ -66,7 +66,7 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
   {
-      HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 1
   HSTRING_TYPE,      // parameter 2
   },
 
@@ -75,7 +75,15 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
   {
-      NT_FP64,      // parameter 1
+  NT_FP64,      // parameter 1
+  },
+
+  // variable zeromq_set_logging_template(string jsonString)
+  "zeromq_set_logging_template",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  HSTRING_TYPE,      // parameter 1
   },
 
   // variable zeromq_stop()
@@ -91,7 +99,7 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   HSTRING_TYPE,          // Return value type
   {
-      HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 1
   },
 
   // string zeromq_test_serializeWave(WAVE wv)
@@ -99,7 +107,7 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   HSTRING_TYPE,          // Return value type
   {
-      WAVE_TYPE,      // parameter 1
+  WAVE_TYPE,      // parameter 1
   },
 
   }

@@ -170,6 +170,7 @@ void ApplyFlags(double flags)
   {
     GlobalData::Instance().SetDebugFlag(false);
     GlobalData::Instance().SetRecvBusyWaitingFlag(true);
+    GlobalData::Instance().SetLoggingFlag(false);
     ToggleIPV6Support(false);
     numMatches++;
   }
@@ -190,6 +191,12 @@ void ApplyFlags(double flags)
      ZeroMQ_SET_FLAGS::NO_RECV_BUSY_WAITING)
   {
     GlobalData::Instance().SetRecvBusyWaitingFlag(false);
+    numMatches++;
+  }
+
+  if((val & ZeroMQ_SET_FLAGS::LOGGING) == ZeroMQ_SET_FLAGS::LOGGING)
+  {
+    GlobalData::Instance().SetLoggingFlag(true);
     numMatches++;
   }
 
@@ -269,6 +276,8 @@ json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
 
       DEBUG_OUTPUT("Function return value is {:.255s}", reply.dump(4));
 
+      GlobalData::Instance().AddLogEntry(reply, MessageDirection::Outgoing);
+
       return reply;
     }
     catch(const std::bad_alloc &)
@@ -291,6 +300,8 @@ json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
     {
       reply[HISTORY_KEY] = history;
     }
+
+    GlobalData::Instance().AddLogEntry(reply, MessageDirection::Outgoing);
 
     return reply;
   }

@@ -97,7 +97,8 @@ enum ZeroMQ_SET_FLAGS
   DEFAULT              = 1,
   DEBUG                = 2,
   IPV6                 = 4,
-  NO_RECV_BUSY_WAITING = 8
+  NO_RECV_BUSY_WAITING = 8,
+  LOGGING              = 16
 };
 }
 

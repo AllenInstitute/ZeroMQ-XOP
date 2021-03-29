@@ -2,7 +2,7 @@
 
 #include <mutex>
 #include <memory>
-
+#include "Logging.h"
 #include "ConcurrentQueue.h"
 #include "ConcurrentXOPNotice.h"
 
@@ -40,6 +40,14 @@ public:
 
   std::recursive_mutex m_clientMutex, m_serverMutex;
 
+  void SetLoggingFlag(bool val);
+  bool GetLoggingFlag() const;
+
+  void AddLogEntry(const json &doc, MessageDirection dir);
+  void AddLogEntry(const std::string &str, MessageDirection dir);
+  void SetLoggingTemplate(const std::string &loggingTemplate);
+  void InitLogging();
+
 private:
   GlobalData();
   ~GlobalData()                  = default;
@@ -54,6 +62,9 @@ private:
 
   bool m_debugging;
   bool m_busyWaiting;
+  bool m_logging;
 
   ConcurrentQueue<OutputMessagePtr> m_queue;
+  std::unique_ptr<Logging> m_loggingSink;
+  std::recursive_mutex m_loggingLock;
 };
