@@ -8,8 +8,7 @@
 // IgorException
 //--------------------------------------------------------------
 
-IgorException::IgorException(int errorCode)
-    : m_errorCode(errorCode), m_message("")
+IgorException::IgorException(int errorCode) : IgorException(errorCode, "")
 {
 }
 
