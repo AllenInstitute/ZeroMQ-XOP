@@ -17,10 +17,7 @@ IgorException::IgorException(int errorCode, const std::string &errorMessage)
 {
 }
 
-IgorException::~IgorException()
-{
-  // do nothing
-}
+IgorException::~IgorException() = default;
 
 const char *IgorException::what() const noexcept
 {
