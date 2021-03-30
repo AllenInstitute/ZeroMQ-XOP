@@ -38,6 +38,9 @@ extern "C" int zeromq_client_recv(zeromq_client_recvParams *p)
 
     WriteZMsgIntoHandle(&(p->result), &payloadMsg);
 
+    auto msg = CreateStringFromZMsg(&payloadMsg);
+    GlobalData::Instance().AddLogEntry(msg, MessageDirection::Incoming);
+
     DEBUG_OUTPUT("numBytes={}", numBytes);
     break;
   }

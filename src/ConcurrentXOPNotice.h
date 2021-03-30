@@ -14,7 +14,16 @@
 ///   OutputQueuedNotices(). For that the XOP has to be marked as
 ///   `SetXOPType(RESIDENT | IDLES);`.
 
-void XOPNotice_ts(const std::string &str);
-void XOPNotice_ts(const char *noticeStr);
+enum class ExperimentModification
+{
+  Normal, ///< Mark experiment as modified
+  Silent  ///< Don't mark the experiment as modified
+};
+
+struct OutputMessage;
+using OutputMessagePtr = std::shared_ptr<OutputMessage>;
+
+/// Threadsafe output to history
+void OutputToHistory_TS(std::string str, ExperimentModification mode);
 
 void OutputQueuedNotices();

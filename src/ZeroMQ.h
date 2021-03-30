@@ -102,6 +102,7 @@ using namespace fmt::literals; // NOLINT
 #include "RequestInterfaceException.h"
 #include "HelperFunctions.h"
 #include "ConcurrentXOPNotice.h"
+#include "Logging.h"
 #include "SocketWithMutex.h"
 #include "Errors.h"
 #include "git_version.h"

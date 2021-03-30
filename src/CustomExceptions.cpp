@@ -8,8 +8,7 @@
 // IgorException
 //--------------------------------------------------------------
 
-IgorException::IgorException(int errorCode)
-    : m_errorCode(errorCode), m_message("")
+IgorException::IgorException(int errorCode) : IgorException(errorCode, "")
 {
 }
 
@@ -18,10 +17,7 @@ IgorException::IgorException(int errorCode, const std::string &errorMessage)
 {
 }
 
-IgorException::~IgorException()
-{
-  // do nothing
-}
+IgorException::~IgorException() = default;
 
 const char *IgorException::what() const noexcept
 {
@@ -35,7 +31,7 @@ int IgorException::GetErrorCode() const
 
 int IgorException::HandleException() const
 {
-  EMERGENCY_OUTPUT("{}", what());
+  NORMAL_OUTPUT("{}", what());
 
   return m_errorCode;
 }

@@ -52,7 +52,4 @@ RequestInterfaceException::RequestInterfaceException(int errorCode)
 {
 }
 
-RequestInterfaceException::~RequestInterfaceException()
-{
-  // do nothing
-}
+RequestInterfaceException::~RequestInterfaceException() = default;

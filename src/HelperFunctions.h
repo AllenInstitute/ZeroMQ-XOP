@@ -3,9 +3,17 @@
 #include <sstream>
 #include <iomanip>
 
+#ifdef MACIGOR
+#include <sys/stat.h>
+#endif
+
+#include "Errors.h"
+
 bool IsBitSet(int val, int bit);
 int ClearBit(int val, int bit);
 int SetBit(int val, int bit);
+
+const int DEFAULT_INDENT = 4;
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -91,7 +99,8 @@ enum ZeroMQ_SET_FLAGS
   DEFAULT              = 1,
   DEBUG                = 2,
   IPV6                 = 4,
-  NO_RECV_BUSY_WAITING = 8
+  NO_RECV_BUSY_WAITING = 8,
+  LOGGING              = 16
 };
 }
 
@@ -138,8 +147,8 @@ std::string To_stringHighRes(const T val)
 }
 
 double ConvertStringToDouble(const std::string &str);
-std::string CallIgorFunctionFromMessage(const std::string &msg);
-std::string CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req);
+json CallIgorFunctionFromMessage(const std::string &msg);
+json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req);
 
 int ZeroMQClientSend(const std::string &payload);
 int ZeroMQServerSend(const std::string &identity, const std::string &payload);
@@ -169,7 +178,8 @@ std::string CleanupString(std::string str);
 enum class OutputMode
 {
   Debug,
-  Emergency
+  Emergency,
+  Normal
 };
 
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
@@ -190,3 +200,11 @@ void xop_logging(OutputMode mode, const char *func, int line, const S &format,
 #define DEBUG_OUTPUT(format, ...)                                              \
   xop_logging(OutputMode::Debug, __func__, __LINE__, FMT_STRING(format),       \
               ##__VA_ARGS__)
+
+#define NORMAL_OUTPUT(format, ...)                                             \
+  xop_logging(OutputMode::Normal, __func__, __LINE__, FMT_STRING(format),      \
+              ##__VA_ARGS__)
+
+int CreateDirectory(const std::string &path);
+
+void EnsureDirectoryExists(const std::string &path);

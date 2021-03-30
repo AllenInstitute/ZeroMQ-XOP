@@ -2,6 +2,25 @@
 #include "HelperFunctions.h"
 #include "RequestInterface.h"
 
+namespace
+{
+
+ExperimentModification MapOutputModeToExperimentModification(OutputMode mode)
+{
+  switch(mode)
+  {
+  case OutputMode::Debug:
+    return ExperimentModification::Silent;
+  case OutputMode::Emergency:
+  case OutputMode::Normal:
+    return ExperimentModification::Normal;
+  }
+
+  ASSERT(0);
+}
+
+} // anonymous namespace
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
@@ -151,6 +170,7 @@ void ApplyFlags(double flags)
   {
     GlobalData::Instance().SetDebugFlag(false);
     GlobalData::Instance().SetRecvBusyWaitingFlag(true);
+    GlobalData::Instance().SetLoggingFlag(false);
     ToggleIPV6Support(false);
     numMatches++;
   }
@@ -171,6 +191,12 @@ void ApplyFlags(double flags)
      ZeroMQ_SET_FLAGS::NO_RECV_BUSY_WAITING)
   {
     GlobalData::Instance().SetRecvBusyWaitingFlag(false);
+    numMatches++;
+  }
+
+  if((val & ZeroMQ_SET_FLAGS::LOGGING) == ZeroMQ_SET_FLAGS::LOGGING)
+  {
+    GlobalData::Instance().SetLoggingFlag(true);
     numMatches++;
   }
 
@@ -217,7 +243,7 @@ double ConvertStringToDouble(const std::string &str)
   return val;
 }
 
-std::string CallIgorFunctionFromMessage(const std::string &msg)
+json CallIgorFunctionFromMessage(const std::string &msg)
 {
   std::shared_ptr<RequestInterface> req;
   try
@@ -233,14 +259,13 @@ std::string CallIgorFunctionFromMessage(const std::string &msg)
   }
   catch(const IgorException &e)
   {
-    const json reply = e;
-    return reply.dump(4);
+    return e;
   }
 
   return CallIgorFunctionFromReqInterface(req);
 }
 
-std::string CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
+json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
 {
   try
   {
@@ -249,9 +274,12 @@ std::string CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
       req->CanBeProcessed();
       auto reply = req->Call();
 
-      DEBUG_OUTPUT("Function return value is {:.255s}", reply.dump(4));
+      DEBUG_OUTPUT("Function return value is {:.255s}",
+                   reply.dump(DEFAULT_INDENT));
 
-      return reply.dump(4);
+      GlobalData::Instance().AddLogEntry(reply, MessageDirection::Outgoing);
+
+      return reply;
     }
     catch(const std::bad_alloc &)
     {
@@ -274,7 +302,9 @@ std::string CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
       reply[HISTORY_KEY] = history;
     }
 
-    return reply.dump(4);
+    GlobalData::Instance().AddLogEntry(reply, MessageDirection::Outgoing);
+
+    return reply;
   }
 }
 
@@ -579,11 +609,28 @@ struct fmt::formatter<OutputMode> : fmt::formatter<std::string>
     case OutputMode::Emergency:
       name = "Emergency";
       break;
+    case OutputMode::Normal:
+      name = "Normal";
+      break;
     }
 
     return formatter<std::string>::format(name, ctx);
   }
 };
+
+std::string GetHeader(OutputMode mode, const char *func, int line)
+{
+  switch(mode)
+  {
+  case OutputMode::Debug:
+  case OutputMode::Emergency: // fallthrough-by-design
+    return fmt::format(FMT_STRING("{} {}:L{}: "), mode, func, line);
+  case OutputMode::Normal:
+    return {};
+  }
+
+  ASSERT(0);
+}
 
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
           fmt::format_args args)
@@ -593,6 +640,78 @@ void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
     return;
   }
 
-  const auto header = fmt::format(FMT_STRING("{} {}:L{}: "), mode, func, line);
-  XOPNotice_ts(header + fmt::vformat(format, args) + CR_STR);
+  const auto header = GetHeader(mode, func, line);
+
+  OutputToHistory_TS(header + fmt::vformat(format, args),
+                     MapOutputModeToExperimentModification(mode));
+}
+
+int CreateDirectory(const std::string &path)
+{
+#ifdef WINIGOR
+  int error;
+
+  // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createdirectorya
+  auto ret = CreateDirectoryA(path.c_str(), nullptr);
+
+  // If the function succeeds, the return value is nonzero
+  if(ret)
+  {
+    return 0;
+  }
+
+  error = GetLastError();
+
+  if(error == ERROR_ALREADY_EXISTS)
+  {
+    return FOLDER_EXISTS_NO_OVERWRITE;
+  }
+  else if(error == ERROR_PATH_NOT_FOUND)
+  {
+    return CANT_OPEN_FOLDER;
+  }
+  else
+  {
+    return INTERNAL_ERROR;
+  }
+#else
+#ifdef MACIGOR
+  // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mkdir.2.html
+  auto ret = mkdir(path.c_str(), 0777);
+  if(!ret)
+  {
+    return 0;
+  }
+
+  if(errno == EEXIST)
+  {
+    return FOLDER_EXISTS_NO_OVERWRITE;
+  }
+  else if(errno == ENOTDIR)
+  {
+    return CANT_OPEN_FOLDER;
+  }
+  else
+  {
+    return INTERNAL_ERROR;
+  }
+
+#else
+#error "Unsupported architecture"
+#endif
+#endif
+}
+
+void EnsureDirectoryExists(const std::string &path)
+{
+  auto ret = CreateDirectory(path);
+
+  if(ret == 0 || ret == FOLDER_EXISTS_NO_OVERWRITE)
+  {
+    return;
+  }
+
+  ASSERT(FullPathPointsToFolder(path.c_str()) == 1);
+
+  throw IgorException(ret);
 }

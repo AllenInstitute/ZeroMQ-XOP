@@ -8,7 +8,7 @@
 
 #include ":zmq_bind"
 #include ":zmq_connect"
-#include ":zmq_main_test"
+#include ":zmq_set_logging_template"
 #include ":zmq_memory_leaks"
 #include ":zmq_set"
 #include ":zmq_start_handler"
@@ -126,7 +126,7 @@ Function TEST_CASE_BEGIN_OVERRIDE(name)
 	string name
 
 	zeromq_stop()
-	zeromq_set(ZeroMQ_SET_FLAGS_DEBUG | ZeroMQ_SET_FLAGS_DEFAULT)
+	zeromq_set(ZeroMQ_SET_FLAGS_DEBUG | ZeroMQ_SET_FLAGS_DEFAULT | ZeroMQ_SET_FLAGS_LOGGING)
 End
 
 Function TEST_CASE_END_OVERRIDE(name)
@@ -930,6 +930,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	list = AddListItem("zmq_bind.ipf", list, ";", inf)
 	list = AddListItem("zmq_connect.ipf", list, ";", inf)
 	list = AddListItem("zmq_memory_leaks.ipf", list, ";", inf)
+	list = AddListItem("zmq_set_logging_template.ipf", list, ";", inf)
 	list = AddListItem("zmq_set.ipf", list, ";", inf)
 	list = AddListItem("zmq_start_handler.ipf", list, ";", inf)
 	list = AddListItem("zmq_stop.ipf", list, ";", inf)

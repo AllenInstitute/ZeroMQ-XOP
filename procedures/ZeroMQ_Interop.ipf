@@ -16,6 +16,9 @@ Constant ZeroMQ_SET_FLAGS_IPV6     = 0x4
 /// Don't do busy waiting on zeromq_server_recv() and zeromq_client_recv()
 /// instead immediately return if no messages are available.
 Constant ZeroMQ_SET_FLAGS_NOBUSYWAITRECV = 0x8
+/// Log incoming and outgoing messages
+Constant ZeroMQ_SET_FLAGS_LOGGING = 0x10
+
 /// @}
 
 /// @name Error codes
@@ -28,6 +31,7 @@ Constant ZeroMQ_HANDLER_ALREADY_RUNNING = 10006
 Constant ZeroMQ_HANDLER_NO_CONNECTION   = 10007
 Constant ZeroMQ_MISSING_PROCEDURE_FILES = 10008
 Constant ZeroMQ_INVALID_MESSAGE_FORMAT  = 10009
+Constant ZeroMQ_INVALID_LOGGING_TEMPLATE= 10010
 /// @}
 
 Constant REQ_SUCCESS                         =   0

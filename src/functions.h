@@ -91,6 +91,17 @@ typedef struct zeromq_setParams zeromq_setParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_set_logging_templateParams
+{
+  Handle jsonString;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_set_logging_templateParams
+    zeromq_set_logging_templateParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_stopParams
 {
   UserFunctionThreadInfoPtr tp; // needed for thread safe functions
@@ -145,6 +156,10 @@ extern "C" int zeromq_server_send(zeromq_server_sendParams *p);
 
 // variable zeromq_set(variable flags)
 extern "C" int zeromq_set(zeromq_setParams *p);
+
+// variable zeromq_set_logging_template(string jsonString)
+extern "C" int
+zeromq_set_logging_template(zeromq_set_logging_templateParams *p);
 
 // variable zeromq_stop()
 extern "C" int zeromq_stop(zeromq_stopParams *p);

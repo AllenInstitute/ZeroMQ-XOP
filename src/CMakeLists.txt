@@ -67,6 +67,7 @@ SET(COVERAGE_SOURCES
   CallFunctionOperation.cpp
   CallFunctionParameterHandler.cpp
   HistoryGrabber.cpp
+  Logging.cpp
   MessageHandler.cpp
   RequestInterface.cpp
   RequestInterfaceException.cpp
@@ -75,6 +76,7 @@ SET(COVERAGE_SOURCES
   zeromq_client_connect.cpp
   zeromq_client_recv.cpp
   zeromq_client_send.cpp
+  zeromq_set_logging_template.cpp
   zeromq_server_bind.cpp
   zeromq_server_recv.cpp
   zeromq_server_send.cpp
@@ -117,6 +119,7 @@ SET(HEADERS
   HelperFunctions.h
   HistoryGrabber.h
   IgorTypeUnion.h
+  Logging.h
   MessageHandler.h
   RequestInterface.h
   RequestInterfaceException.h
@@ -360,6 +363,7 @@ ENDIF()
 
 SET(JSON_BuildTests OFF CACHE INTERNAL "")
 SET(JSON_Install OFF CACHE INTERNAL "")
+SET(JSON_ImplicitConversions OFF CACHE INTERNAL "")
 ADD_SUBDIRECTORY(json)
 
 TARGET_LINK_LIBRARIES(${libname} PRIVATE nlohmann_json::nlohmann_json)

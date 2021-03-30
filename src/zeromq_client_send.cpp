@@ -11,6 +11,7 @@ extern "C" int zeromq_client_send(zeromq_client_sendParams *p)
   const auto msg = GetStringFromHandle(p->msg);
   WMDisposeHandle(p->msg);
 
+  GlobalData::Instance().AddLogEntry(msg, MessageDirection::Outgoing);
   ZeroMQClientSend(msg);
 
   END_OUTER_CATCH

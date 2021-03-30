@@ -15,9 +15,10 @@ extern "C" int zeromq_test_callfunction(zeromq_test_callfunctionParams *p)
 
   DEBUG_OUTPUT("input={}", msg);
 
-  auto retMessage = CallIgorFunctionFromMessage(msg);
+  auto doc = CallIgorFunctionFromMessage(msg);
 
-  auto len = retMessage.size();
+  auto retMessage = doc.dump(DEFAULT_INDENT);
+  auto len        = retMessage.size();
 
   DEBUG_OUTPUT("len={}, retMessage={:.255s}", len, retMessage);
 

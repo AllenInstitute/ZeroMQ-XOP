@@ -1,7 +1,10 @@
 #pragma once
 
 #include <mutex>
+#include <memory>
+#include "Logging.h"
 #include "ConcurrentQueue.h"
+#include "ConcurrentXOPNotice.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -33,9 +36,17 @@ public:
   void AddToListOfBinds(const std::string &localPoint);
   bool HasConnections();
   void AddToListOfConnections(const std::string &remotePoint);
-  ConcurrentQueue<std::string> &GetXOPNoticeQueue();
+  ConcurrentQueue<OutputMessagePtr> &GetXOPNoticeQueue();
 
   std::recursive_mutex m_clientMutex, m_serverMutex;
+
+  void SetLoggingFlag(bool val);
+  bool GetLoggingFlag() const;
+
+  void AddLogEntry(const json &doc, MessageDirection dir);
+  void AddLogEntry(const std::string &str, MessageDirection dir);
+  void SetLoggingTemplate(const std::string &loggingTemplate);
+  void InitLogging();
 
 private:
   GlobalData();
@@ -51,6 +62,9 @@ private:
 
   bool m_debugging;
   bool m_busyWaiting;
+  bool m_logging;
 
-  ConcurrentQueue<std::string> m_queue;
+  ConcurrentQueue<OutputMessagePtr> m_queue;
+  std::unique_ptr<Logging> m_loggingSink;
+  std::recursive_mutex m_loggingLock;
 };

@@ -83,6 +83,17 @@ variable zeromq_handler_start();
 variable zeromq_handler_stop();
 /// @}
 
+/// Set logging template
+///
+/// Set the JSON text used as template for the JSONL log file.
+///
+/// This function does not enable logging, use `zeromq_set(ZeroMQ_SET_FLAGS_LOGGING)` for that.
+///
+/// Requirement:
+/// - Valid JSON text
+/// - Top-level entity must be a JSON object and does not have reserved keys
+THREADSAFE variable zeromq_set_logging_template(string jsonString);
+
 /// @cond DOXYGEN_IGNORES_THIS
 /// @name Functions used for testing and debugging
 /// @{

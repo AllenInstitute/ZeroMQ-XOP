@@ -74,6 +74,10 @@ HOST_IMPORT int XOPMain(IORecHandle ioRecHandle)
 
     GlobalData::Instance();
 
+    // initialize logging, this needs to be done after creating
+    // GlobalData, as we need to be able to output debug messages for that
+    GlobalData::Instance().InitLogging();
+
 #ifdef _DEBUG
     ApplyFlags(ZeroMQ_SET_FLAGS::DEBUG);
 #endif // _DEBUG
