@@ -460,8 +460,8 @@ to force an ``IDLE`` event.
 Logging
 ~~~~~~~
 
-The XOP allows to log all incoming and outgoing messages to disk. This can be enabled via `zeromq_set`. The log format
-is [JSONL](https://jsonlines.org). Additional static entries can be added to every line via
-`zeromq_set_logging_template` which allows to set a new template JSON text.
+The XOP allows to log all incoming and outgoing messages to disk. This can be enabled via ``zeromq_set``. The log format
+is `JSONL <https://jsonlines.org>`__. Additional static entries can be added to every line via
+``zeromq_set_logging_template`` which allows to set a new template JSON text.
 
-The location of the log file on Windows is `C:\Users\$user\AppData\Roaming\WaveMetrics\Igor Pro $version\Packages\ZeroMQ\Log.jsonl`.
+The location of the log file on Windows is ``C:\Users\$user\AppData\Roaming\WaveMetrics\Igor Pro $version\Packages\ZeroMQ\Log.jsonl``.
