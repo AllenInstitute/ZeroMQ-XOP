@@ -65,7 +65,7 @@ json ExtractFromUnion(IgorTypeUnion *ret, int igorType)
     {
       auto result = SerializeWave(ret->waveHandle);
 
-      if(ret->waveHandle != nullptr)
+      if(ret->waveHandle != nullptr && IsFreeWave(ret->waveHandle))
       {
         ReleaseWave(&ret->waveHandle);
         ret->waveHandle = nullptr;
