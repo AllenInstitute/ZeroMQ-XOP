@@ -715,3 +715,12 @@ void EnsureDirectoryExists(const std::string &path)
 
   throw IgorException(ret);
 }
+
+bool IsFreeWave(waveHndl wv)
+{
+  DataFolderHandle dfH = nullptr;
+  int rc               = GetWavesDataFolder(wv, &dfH);
+  ASSERT(rc == 0);
+
+  return dfH == nullptr;
+}
