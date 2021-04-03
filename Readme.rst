@@ -347,7 +347,7 @@ Received JSON message for operation ``CallFunction``
 +------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
 | -> type                | string                   | type of the function result, one of ``string``, ``variable`` or ``dfref``                                          |
 +------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
-| -> value               | number or string         | possibly changed input parameters, only for errorCode.value == 0                                                                     |
+| -> value               | number or string         | possibly changed input parameters, only for errorCode.value == 0                                                   |
 +------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
 | messageID              | string                   | message ID from the sent message. This entry is not present if the sent message did not contain a message id.      |
 +------------------------+--------------------------+--------------------------------------------------------------------------------------------------------------------+
