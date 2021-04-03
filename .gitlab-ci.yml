@@ -92,6 +92,22 @@ compile-libzmq-macosx:
     paths:
       - output/mac
 
+sphinx-documentation-html:
+  tags:
+    - docker, debian
+  stage: first
+  variables:
+    GIT_SUBMODULE_STRATEGY: "normal"
+  image:
+    name: ${CI_REGISTRY}/internal/docker-sphinx:latest
+  script:
+    - cd doc
+    - cp ../Readme.rst index.rst
+    - make html
+  artifacts:
+    paths:
+      - doc/_build/html
+
 compile-xop-windows:
   stage: second
   tags:
