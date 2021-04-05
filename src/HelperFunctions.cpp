@@ -215,6 +215,7 @@ std::string GetLastEndPoint(void *s)
   int rc         = zmq_getsockopt(s, ZMQ_LAST_ENDPOINT, buf, &bufSize);
   ZEROMQ_ASSERT(rc == 0);
 
+  buf[bufSize - 1] = '\0';
   DEBUG_OUTPUT("lastEndPoint={}", buf);
   return std::string(buf);
 }
