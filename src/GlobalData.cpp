@@ -104,7 +104,7 @@ void GlobalData::SetDebugFlag(bool val)
 
   DEBUG_OUTPUT("new value={}", val);
   m_debugging = val;
-};
+}
 
 bool GlobalData::GetDebugFlag() const
 {
