@@ -210,3 +210,4 @@ int CreateDirectory(const std::string &path);
 void EnsureDirectoryExists(const std::string &path);
 
 bool IsFreeWave(waveHndl wv);
+void DoBindOrConnect(Handle &h, SocketTypes st);

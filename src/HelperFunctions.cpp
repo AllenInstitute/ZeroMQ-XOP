@@ -724,3 +724,30 @@ bool IsFreeWave(waveHndl wv)
 
   return dfH == nullptr;
 }
+
+void DoBindOrConnect(Handle &h, SocketTypes st)
+{
+  const auto point = GetStringFromHandle(h);
+  WMDisposeHandle(h);
+  h = nullptr;
+
+  GET_SOCKET(socket, st);
+
+  int rc = 0;
+
+  switch(st)
+  {
+  case SocketTypes::Client:
+    rc = zmq_connect(socket.get(), point.c_str());
+    break;
+  case SocketTypes::Server:
+    rc = zmq_bind(socket.get(), point.c_str());
+    break;
+  }
+
+  ZEROMQ_ASSERT(rc == 0);
+
+  DEBUG_OUTPUT("type={}, point={}, rc={}", st, point, rc);
+  GlobalData::Instance().AddToListOfBindsOrConnections(
+      GetLastEndPoint(socket.get()), st);
+}

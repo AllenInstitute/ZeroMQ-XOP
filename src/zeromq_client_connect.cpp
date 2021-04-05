@@ -8,17 +8,7 @@ extern "C" int zeromq_client_connect(zeromq_client_connectParams *p)
 {
   BEGIN_OUTER_CATCH
 
-  const auto remotePoint = GetStringFromHandle(p->remotePoint);
-  WMDisposeHandle(p->remotePoint);
-  p->remotePoint = nullptr;
-
-  GET_SOCKET(socket, SocketTypes::Client);
-  const auto rc = zmq_connect(socket.get(), remotePoint.c_str());
-  ZEROMQ_ASSERT(rc == 0);
-
-  DEBUG_OUTPUT("remotePoint={}, rc={}", remotePoint, rc);
-  GlobalData::Instance().AddToListOfBindsOrConnections(
-      GetLastEndPoint(socket.get()), SocketTypes::Client);
+  DoBindOrConnect(p->remotePoint, SocketTypes::Client);
 
   END_OUTER_CATCH
 }
