@@ -12,12 +12,13 @@ extern "C" int zeromq_server_bind(zeromq_server_bindParams *p)
   WMDisposeHandle(p->localPoint);
   p->localPoint = nullptr;
 
-  GET_SERVER_SOCKET(socket);
+  GET_SOCKET(socket, SocketTypes::Server);
   const auto rc = zmq_bind(socket.get(), localPoint.c_str());
   ZEROMQ_ASSERT(rc == 0);
 
   DEBUG_OUTPUT("localPoint={}, rc={}", localPoint, rc);
-  GlobalData::Instance().AddToListOfBinds(GetLastEndPoint(socket.get()));
+  GlobalData::Instance().AddToListOfBindsOrConnections(
+      GetLastEndPoint(socket.get()), SocketTypes::Server);
 
   END_OUTER_CATCH
 }

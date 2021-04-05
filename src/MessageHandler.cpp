@@ -137,7 +137,7 @@ void MessageHandler::StartHandler()
 
   DEBUG_OUTPUT("Trying to start the handler.");
 
-  if(!GlobalData::Instance().HasBinds())
+  if(!GlobalData::Instance().HasBindsOrConnections(SocketTypes::Server))
   {
     throw IgorException(HANDLER_NO_CONNECTION);
   }

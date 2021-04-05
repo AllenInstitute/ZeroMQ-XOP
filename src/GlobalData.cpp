@@ -8,38 +8,65 @@ namespace
 
 constexpr char PACKAGE_NAME[] = "ZeroMQ";
 
-void SetSocketDefaults(void *s)
+void ApplySocketDefaults(void *s, SocketTypes st)
 {
-  int val = 0;
-  auto rc = zmq_setsockopt(s, ZMQ_LINGER, &val, sizeof(val));
+  int valZero = 0;
+  int rc      = 0;
+
+  rc = zmq_setsockopt(s, ZMQ_LINGER, &valZero, sizeof(valZero));
   ZEROMQ_ASSERT(rc == 0);
 
-  rc = zmq_setsockopt(s, ZMQ_SNDTIMEO, &val, sizeof(val));
+  rc = zmq_setsockopt(s, ZMQ_SNDTIMEO, &valZero, sizeof(valZero));
   ZEROMQ_ASSERT(rc == 0);
 
-  rc = zmq_setsockopt(s, ZMQ_RCVTIMEO, &val, sizeof(val));
+  rc = zmq_setsockopt(s, ZMQ_RCVTIMEO, &valZero, sizeof(valZero));
   ZEROMQ_ASSERT(rc == 0);
+
+  switch(st)
+  {
+  case SocketTypes::Client:
+  {
+    const char identity[] = "zeromq xop: dealer";
+    rc = zmq_setsockopt(s, ZMQ_IDENTITY, &identity, strlen(identity));
+    ZEROMQ_ASSERT(rc == 0);
+    return;
+  }
+  case SocketTypes::Server:
+  {
+    int valOne = 1;
+
+    rc = zmq_setsockopt(s, ZMQ_ROUTER_MANDATORY, &valOne, sizeof(valOne));
+    ZEROMQ_ASSERT(rc == 0);
+
+    int64_t bytes = 1024;
+
+    rc = zmq_setsockopt(s, ZMQ_MAXMSGSIZE, &bytes, sizeof(bytes));
+    ZEROMQ_ASSERT(rc == 0);
+    return;
+  }
+  }
+
+  ASSERT(0);
 }
 
-void SetRouterSocketDefaults(void *s)
+int GetZeroMQSocketConstant(SocketTypes st)
 {
-  int val = 1;
-  auto rc = zmq_setsockopt(s, ZMQ_ROUTER_MANDATORY, &val, sizeof(val));
-  ZEROMQ_ASSERT(rc == 0);
+  switch(st)
+  {
+  case SocketTypes::Client:
+    return ZMQ_DEALER;
+  case SocketTypes::Server:
+    return ZMQ_ROUTER;
+  }
 
-  int64_t bytes = 1024;
-  rc            = zmq_setsockopt(s, ZMQ_MAXMSGSIZE, &bytes, sizeof(bytes));
-  ZEROMQ_ASSERT(rc == 0);
+  ASSERT(0);
 }
-
-void SetDealerSocketDefaults(void *s)
-{
-  const char identity[] = "zeromq xop: dealer";
-  auto rc = zmq_setsockopt(s, ZMQ_IDENTITY, &identity, strlen(identity));
-  ZEROMQ_ASSERT(rc == 0);
-}
-
 } // anonymous namespace
+
+AllSocketTypesArray GetAllSocketTypes()
+{
+  return AllSocketTypesArray{SocketTypes::Client, SocketTypes::Server};
+}
 
 GlobalData::GlobalData()
     : m_debugging(false), m_busyWaiting(true), m_logging(false)
@@ -48,54 +75,43 @@ GlobalData::GlobalData()
   ZEROMQ_ASSERT(zmq_context != nullptr);
 }
 
-void *GlobalData::ZMQClientSocket()
+void *GlobalData::ZMQSocket(SocketTypes st)
 {
-  if(!zmq_client_socket)
+  LockGuard lock(GetMutex(st));
+
+  auto &socketData = GetSocketTypeData(st);
+  void *&socket    = socketData.m_zmq_socket;
+
+  if(socket)
   {
-    LockGuard lock(m_clientMutex);
-
-    DEBUG_OUTPUT("Creating client socket");
-
-    zmq_client_socket = zmq_socket(zmq_context, ZMQ_DEALER);
-    ZEROMQ_ASSERT(zmq_client_socket != nullptr);
-
-    SetSocketDefaults(zmq_client_socket);
-    SetDealerSocketDefaults(zmq_client_socket);
+    return socket;
   }
 
-  return zmq_client_socket;
+  DEBUG_OUTPUT("Creating {} socket", st);
+
+  socket = zmq_socket(zmq_context, GetZeroMQSocketConstant(st));
+  ZEROMQ_ASSERT(socket != nullptr);
+
+  ApplySocketDefaults(socket, st);
+
+  return socket;
 }
 
-bool GlobalData::HasClientSocket()
+bool GlobalData::HasBindsOrConnections(SocketTypes st)
 {
-  LockGuard lock(m_clientMutex);
+  LockGuard lock(GetMutex(st));
 
-  return zmq_client_socket != nullptr;
+  auto &socketData = GetSocketTypeData(st);
+
+  return !socketData.m_list.empty();
 }
 
-void *GlobalData::ZMQServerSocket()
+bool GlobalData::HasSocket(SocketTypes st)
 {
-  if(!zmq_server_socket)
-  {
-    LockGuard lock(m_serverMutex);
+  LockGuard lock(GetMutex(st));
 
-    DEBUG_OUTPUT("Creating server socket");
-
-    zmq_server_socket = zmq_socket(zmq_context, ZMQ_ROUTER);
-    ZEROMQ_ASSERT(zmq_server_socket != nullptr);
-
-    SetSocketDefaults(zmq_server_socket);
-    SetRouterSocketDefaults(zmq_server_socket);
-  }
-
-  return zmq_server_socket;
-}
-
-bool GlobalData::HasServerSocket()
-{
-  LockGuard lock(m_serverMutex);
-
-  return zmq_server_socket != nullptr;
+  auto &socketData = GetSocketTypeData(st);
+  return socketData.m_zmq_socket != nullptr;
 }
 
 void GlobalData::SetDebugFlag(bool val)
@@ -126,53 +142,47 @@ bool GlobalData::GetRecvBusyWaitingFlag() const
 
 void GlobalData::CloseConnections()
 {
-  if(HasClientSocket())
+
+  for(auto st : GetAllSocketTypes())
   {
-    DEBUG_OUTPUT("Connections={}", m_connections.size());
+    LockGuard lock(GetMutex(st));
+
+    if(!HasSocket(st))
+    {
+      continue;
+    }
+
+    auto &socketData = GetSocketTypeData(st);
+    auto &list       = socketData.m_list;
+
+    DEBUG_OUTPUT("SocketType {}, Connections={}", st, list.size());
 
     try
     {
-      // client
-      GET_CLIENT_SOCKET(socket);
+      GET_SOCKET(socket, st);
 
-      for(const auto &conn : m_connections)
+      for(const auto &conn : list)
       {
-        auto rc = zmq_disconnect(socket.get(), conn.c_str());
-        DEBUG_OUTPUT("zmq_disconnect({}) returned={}", conn, rc);
+        int rc = 0;
+        switch(st)
+        {
+        case SocketTypes::Server:
+          rc = zmq_disconnect(socket.get(), conn.c_str());
+          DEBUG_OUTPUT("zmq_disconnect({}) returned={}", conn, rc);
+
+          break;
+        case SocketTypes::Client:
+          rc = zmq_unbind(socket.get(), conn.c_str());
+          DEBUG_OUTPUT("zmq_unbind({}) returned={}", conn, rc);
+          break;
+        }
         // ignore errors
       }
-      m_connections.clear();
+      list.clear();
 
       auto rc = zmq_close(socket.get());
       ZEROMQ_ASSERT(rc == 0);
-      zmq_client_socket = nullptr;
-    }
-    catch(...)
-    {
-      // ignore errors
-    }
-  }
-
-  if(HasServerSocket())
-  {
-    DEBUG_OUTPUT("Binds={}", m_binds.size());
-
-    try
-    {
-      // server
-      GET_SERVER_SOCKET(socket);
-
-      for(const auto &bind : m_binds)
-      {
-        auto rc = zmq_unbind(socket.get(), bind.c_str());
-        DEBUG_OUTPUT("zmq_unbind({}) returned={}", bind, rc);
-        // ignore errors
-      }
-      m_binds.clear();
-
-      auto rc = zmq_close(socket.get());
-      ZEROMQ_ASSERT(rc == 0);
-      zmq_server_socket = nullptr;
+      socketData.m_zmq_socket = nullptr;
     }
     catch(...)
     {
@@ -181,32 +191,13 @@ void GlobalData::CloseConnections()
   }
 }
 
-bool GlobalData::HasBinds()
+void GlobalData::AddToListOfBindsOrConnections(const std::string &point,
+                                               SocketTypes st)
 {
-  LockGuard lock(m_serverMutex);
+  LockGuard lock(GetMutex(st));
 
-  return !m_binds.empty();
-}
-
-void GlobalData::AddToListOfBinds(const std::string &localPoint)
-{
-  LockGuard lock(m_serverMutex);
-
-  m_binds.push_back(localPoint);
-}
-
-bool GlobalData::HasConnections()
-{
-  LockGuard lock(m_clientMutex);
-
-  return !m_connections.empty();
-}
-
-void GlobalData::AddToListOfConnections(const std::string &remotePoint)
-{
-  LockGuard lock(m_clientMutex);
-
-  m_connections.push_back(remotePoint);
+  auto &socketData = GetSocketTypeData(st);
+  socketData.m_list.push_back(point);
 }
 
 ConcurrentQueue<OutputMessagePtr> &GlobalData::GetXOPNoticeQueue()
@@ -264,4 +255,30 @@ void GlobalData::InitLogging()
   LockGuard lock(m_loggingLock);
 
   m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME);
+}
+
+std::recursive_mutex &GlobalData::GetMutex(SocketTypes st)
+{
+  switch(st)
+  {
+  case SocketTypes::Client:
+    return m_client.m_mutex;
+  case SocketTypes::Server:
+    return m_server.m_mutex;
+  }
+
+  ASSERT(0);
+}
+
+GlobalData::SocketTypeData &GlobalData::GetSocketTypeData(SocketTypes st)
+{
+  switch(st)
+  {
+  case SocketTypes::Client:
+    return m_client;
+  case SocketTypes::Server:
+    return m_server;
+  }
+
+  ASSERT(0);
 }

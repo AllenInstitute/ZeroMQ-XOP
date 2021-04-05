@@ -221,18 +221,16 @@ std::string GetLastEndPoint(void *s)
 
 void ToggleIPV6Support(bool enable)
 {
-  GET_CLIENT_SOCKET(clientSocket);
+  for(auto st : GetAllSocketTypes())
+  {
+    GET_SOCKET(clientSocket, st);
 
-  DEBUG_OUTPUT("enable={}", enable);
+    DEBUG_OUTPUT("enable={}", enable);
 
-  const int val = enable;
-  auto rc = zmq_setsockopt(clientSocket.get(), ZMQ_IPV6, &val, sizeof(val));
-  ZEROMQ_ASSERT(rc == 0);
-
-  GET_SERVER_SOCKET(serverSocket);
-
-  rc = zmq_setsockopt(serverSocket.get(), ZMQ_IPV6, &val, sizeof(val));
-  ZEROMQ_ASSERT(rc == 0);
+    const int val = enable;
+    auto rc = zmq_setsockopt(clientSocket.get(), ZMQ_IPV6, &val, sizeof(val));
+    ZEROMQ_ASSERT(rc == 0);
+  }
 }
 
 double ConvertStringToDouble(const std::string &str)
@@ -310,7 +308,7 @@ json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
 
 int ZeroMQClientSend(const std::string &payload)
 {
-  GET_CLIENT_SOCKET(socket);
+  GET_SOCKET(socket, SocketTypes::Client);
   const auto payloadLength = payload.length();
 
   DEBUG_OUTPUT("payloadLength={}, socket={}", payloadLength, socket.get());
@@ -330,7 +328,7 @@ int ZeroMQClientSend(const std::string &payload)
 
 int ZeroMQServerSend(const std::string &identity, const std::string &payload)
 {
-  GET_SERVER_SOCKET(socket);
+  GET_SOCKET(socket, SocketTypes::Server);
   const auto payloadLength = payload.length();
 
   DEBUG_OUTPUT("payloadLength={}, socket={}", payloadLength, socket.get());
@@ -359,7 +357,7 @@ int ZeroMQServerSend(const std::string &identity, const std::string &payload)
 /// - payload
 int ZeroMQServerReceive(zmq_msg_t *identityMsg, zmq_msg_t *payloadMsg)
 {
-  GET_SERVER_SOCKET(socket);
+  GET_SOCKET(socket, SocketTypes::Server);
   auto numBytes = zmq_msg_recv(identityMsg, socket.get(), 0);
 
   if(numBytes < 0)
@@ -394,7 +392,7 @@ int ZeroMQServerReceive(zmq_msg_t *identityMsg, zmq_msg_t *payloadMsg)
 /// - payload
 int ZeroMQClientReceive(zmq_msg_t *payloadMsg)
 {
-  GET_CLIENT_SOCKET(socket);
+  GET_SOCKET(socket, SocketTypes::Client);
   auto numBytes = zmq_msg_recv(payloadMsg, socket.get(), 0);
 
   if(numBytes < 0)
