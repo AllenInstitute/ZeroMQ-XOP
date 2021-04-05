@@ -216,6 +216,10 @@ ConcurrentQueue<OutputMessagePtr> &GlobalData::GetXOPNoticeQueue()
 
 void GlobalData::SetLoggingFlag(bool val)
 {
+  LockGuard lock(m_settingsMutex);
+
+  DEBUG_OUTPUT("new value={}", val);
+
   m_logging = val;
 }
 
