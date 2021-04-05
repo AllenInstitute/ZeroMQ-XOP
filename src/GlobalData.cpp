@@ -31,6 +31,9 @@ void ApplySocketDefaults(void *s, SocketTypes st)
     ZEROMQ_ASSERT(rc == 0);
     return;
   }
+  case SocketTypes::Publisher:
+    // do nothing
+    return;
   case SocketTypes::Server:
   {
     int valOne = 1;
@@ -44,6 +47,9 @@ void ApplySocketDefaults(void *s, SocketTypes st)
     ZEROMQ_ASSERT(rc == 0);
     return;
   }
+  case SocketTypes::Subscriber:
+    // do nothing
+    return;
   }
 
   ASSERT(0);
@@ -55,8 +61,12 @@ int GetZeroMQSocketConstant(SocketTypes st)
   {
   case SocketTypes::Client:
     return ZMQ_DEALER;
+  case SocketTypes::Publisher:
+    return ZMQ_PUB;
   case SocketTypes::Server:
     return ZMQ_ROUTER;
+  case SocketTypes::Subscriber:
+    return ZMQ_SUB;
   }
 
   ASSERT(0);
@@ -65,7 +75,8 @@ int GetZeroMQSocketConstant(SocketTypes st)
 
 AllSocketTypesArray GetAllSocketTypes()
 {
-  return AllSocketTypesArray{SocketTypes::Client, SocketTypes::Server};
+  return AllSocketTypesArray{SocketTypes::Client, SocketTypes::Subscriber,
+                             SocketTypes::Publisher, SocketTypes::Server};
 }
 
 GlobalData::GlobalData()
@@ -142,6 +153,10 @@ bool GlobalData::GetRecvBusyWaitingFlag() const
 
 void GlobalData::CloseConnections()
 {
+  if(HasSocket(SocketTypes::Subscriber))
+  {
+    RemoveSubscriberMessageFilter("");
+  }
 
   for(auto st : GetAllSocketTypes())
   {
@@ -167,11 +182,13 @@ void GlobalData::CloseConnections()
         switch(st)
         {
         case SocketTypes::Server:
+        case SocketTypes::Publisher:
           rc = zmq_disconnect(socket.get(), conn.c_str());
           DEBUG_OUTPUT("zmq_disconnect({}) returned={}", conn, rc);
 
           break;
         case SocketTypes::Client:
+        case SocketTypes::Subscriber:
           rc = zmq_unbind(socket.get(), conn.c_str());
           DEBUG_OUTPUT("zmq_unbind({}) returned={}", conn, rc);
           break;
@@ -257,14 +274,78 @@ void GlobalData::InitLogging()
   m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME);
 }
 
+void GlobalData::AddSubscriberMessageFilter(std::string filter)
+{
+  DEBUG_OUTPUT("filter={}", filter);
+
+  const auto st = SocketTypes::Subscriber;
+
+  GET_SOCKET(socket, st);
+
+  auto it = std::find(std::begin(m_subMessageFilters),
+                      std::end(m_subMessageFilters), filter);
+
+  if(it != std::end(m_subMessageFilters))
+  {
+    throw IgorException(MESSAGE_FILTER_DUPLICATED);
+  }
+
+  auto rc = zmq_setsockopt(socket.get(), ZMQ_SUBSCRIBE, filter.c_str(),
+                           filter.size());
+  ZEROMQ_ASSERT(rc == 0);
+
+  m_subMessageFilters.emplace_back(std::move(filter));
+}
+
+void GlobalData::RemoveSubscriberMessageFilter(const std::string &filter)
+{
+  DEBUG_OUTPUT("filter={}", filter);
+
+  const auto st = SocketTypes::Subscriber;
+
+  GET_SOCKET(socket, st);
+
+  auto unsubscribe = [&socket](const std::string &entry) -> void {
+    auto rc = zmq_setsockopt(socket.get(), ZMQ_UNSUBSCRIBE, entry.c_str(),
+                             entry.size());
+    ZEROMQ_ASSERT(rc == 0);
+  };
+
+  if(filter.empty())
+  {
+    for(auto &entry : m_subMessageFilters)
+    {
+      unsubscribe(entry);
+    }
+    m_subMessageFilters.clear();
+  }
+  else
+  {
+    auto it = std::find(std::begin(m_subMessageFilters),
+                        std::end(m_subMessageFilters), filter);
+
+    if(it == std::end(m_subMessageFilters))
+    {
+      throw IgorException(MESSAGE_FILTER_MISSING);
+    }
+
+    unsubscribe(filter);
+    m_subMessageFilters.erase(it);
+  }
+}
+
 std::recursive_mutex &GlobalData::GetMutex(SocketTypes st)
 {
   switch(st)
   {
   case SocketTypes::Client:
     return m_client.m_mutex;
+  case SocketTypes::Publisher:
+    return m_pub.m_mutex;
   case SocketTypes::Server:
     return m_server.m_mutex;
+  case SocketTypes::Subscriber:
+    return m_sub.m_mutex;
   }
 
   ASSERT(0);
@@ -276,8 +357,12 @@ GlobalData::SocketTypeData &GlobalData::GetSocketTypeData(SocketTypes st)
   {
   case SocketTypes::Client:
     return m_client;
+  case SocketTypes::Publisher:
+    return m_pub;
   case SocketTypes::Server:
     return m_server;
+  case SocketTypes::Subscriber:
+    return m_sub;
   }
 
   ASSERT(0);

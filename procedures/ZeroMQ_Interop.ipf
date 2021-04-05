@@ -21,6 +21,8 @@ Constant ZeroMQ_SET_FLAGS_LOGGING = 0x10
 
 /// @}
 
+StrConstant ZeroMQ_HEARTBEAT = "heartbeat"
+
 /// @name Error codes
 /// @anchor ZeroMQErrorCodes
 /// @{

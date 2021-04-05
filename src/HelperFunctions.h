@@ -151,8 +151,10 @@ json CallIgorFunctionFromMessage(const std::string &msg);
 json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req);
 
 int ZeroMQClientSend(const std::string &payload);
+int ZeroMQPublisherSend(const std::string &filter, const std::string &payload);
 int ZeroMQServerSend(const std::string &identity, const std::string &payload);
 int ZeroMQClientReceive(zmq_msg_t *payloadMsg);
+int ZeroMQSubscriberReceive(zmq_msg_t *filterMsg, zmq_msg_t *payloadMsg);
 int ZeroMQServerReceive(zmq_msg_t *identityMsg, zmq_msg_t *payloadMsg);
 
 std::string SerializeDataFolder(DataFolderHandle dataFolderHandle);

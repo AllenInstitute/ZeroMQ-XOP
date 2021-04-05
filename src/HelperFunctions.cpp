@@ -353,6 +353,26 @@ int ZeroMQServerSend(const std::string &identity, const std::string &payload)
   return rc;
 }
 
+int ZeroMQPublisherSend(const std::string &filter, const std::string &payload)
+{
+  GET_SOCKET(socket, SocketTypes::Publisher);
+
+  DEBUG_OUTPUT("filterLength={}, payloadLength={}, socket={}", filter.length(),
+               payload.length(), socket.get());
+
+  // filter
+  int rc = zmq_send(socket.get(), filter.c_str(), filter.length(), ZMQ_SNDMORE);
+  ZEROMQ_ASSERT(rc >= 0);
+
+  // payload
+  rc = zmq_send(socket.get(), payload.c_str(), payload.length(), 0);
+  ZEROMQ_ASSERT(rc >= 0);
+
+  DEBUG_OUTPUT("rc={}", rc);
+
+  return rc;
+}
+
 /// Expect three frames:
 /// - identity
 /// - empty
@@ -405,6 +425,34 @@ int ZeroMQClientReceive(zmq_msg_t *payloadMsg)
   // zeromq guarantees that either all parts in multi-part messages
   // arrive or none.
   if(!zmq_msg_more(payloadMsg))
+  {
+    throw IgorException(INVALID_MESSAGE_FORMAT);
+  }
+
+  numBytes = zmq_msg_recv(payloadMsg, socket.get(), 0);
+
+  if(numBytes < 0 || zmq_msg_more(payloadMsg))
+  {
+    throw IgorException(INVALID_MESSAGE_FORMAT);
+  }
+
+  return numBytes;
+}
+
+/// Expect two frames:
+/// - filter
+/// - payload
+int ZeroMQSubscriberReceive(zmq_msg_t *filterMsg, zmq_msg_t *payloadMsg)
+{
+  GET_SOCKET(socket, SocketTypes::Subscriber);
+  auto numBytes = zmq_msg_recv(filterMsg, socket.get(), 0);
+
+  if(numBytes < 0)
+  {
+    return numBytes;
+  }
+
+  if(!zmq_msg_more(filterMsg))
   {
     throw IgorException(INVALID_MESSAGE_FORMAT);
   }
@@ -738,8 +786,10 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   switch(st)
   {
   case SocketTypes::Client:
+  case SocketTypes::Publisher:
     rc = zmq_connect(socket.get(), point.c_str());
     break;
+  case SocketTypes::Subscriber:
   case SocketTypes::Server:
     rc = zmq_bind(socket.get(), point.c_str());
     break;

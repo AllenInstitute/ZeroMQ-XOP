@@ -45,6 +45,23 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
 
   },
 
+  // variable zeromq_pub_bind(string localPoint)
+  "zeromq_pub_bind",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  HSTRING_TYPE,      // parameter 1
+  },
+
+  // variable zeromq_pub_send(string filter, string msg)
+  "zeromq_pub_send",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 2
+  },
+
   // variable zeromq_server_bind(string localPoint)
   "zeromq_server_bind",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
@@ -92,6 +109,38 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   NT_FP64,          // Return value type
   {
 
+  },
+
+  // variable zeromq_sub_add_filter(string filter)
+  "zeromq_sub_add_filter",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  HSTRING_TYPE,      // parameter 1
+  },
+
+  // variable zeromq_sub_connect(string remotePoint)
+  "zeromq_sub_connect",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  HSTRING_TYPE,      // parameter 1
+  },
+
+  // string zeromq_sub_recv(string *filter)
+  "zeromq_sub_recv",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  HSTRING_TYPE,          // Return value type
+  {
+  FV_REF_TYPE | HSTRING_TYPE,      // parameter 1
+  },
+
+  // variable zeromq_sub_remove_filter(string filter)
+  "zeromq_sub_remove_filter",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  HSTRING_TYPE,      // parameter 1
   },
 
   // string zeromq_test_callfunction(string msg)

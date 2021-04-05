@@ -100,6 +100,7 @@ using namespace fmt::literals; // NOLINT
 #include "GlobalData.h"
 #include "CustomExceptions.h"
 #include "RequestInterfaceException.h"
+#include "HeartbeatPublisher.h"
 #include "HelperFunctions.h"
 #include "ConcurrentXOPNotice.h"
 #include "Logging.h"

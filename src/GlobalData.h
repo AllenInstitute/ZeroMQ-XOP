@@ -12,10 +12,12 @@
 enum class SocketTypes
 {
   Client,
-  Server
+  Server,
+  Publisher,
+  Subscriber
 };
 
-using AllSocketTypesArray = std::array<SocketTypes, 2>;
+using AllSocketTypesArray = std::array<SocketTypes, 4>;
 
 AllSocketTypesArray GetAllSocketTypes();
 
@@ -53,6 +55,10 @@ public:
   void SetLoggingTemplate(const std::string &loggingTemplate);
   void InitLogging();
 
+  void AddSubscriberMessageFilter(std::string filter);
+
+  void RemoveSubscriberMessageFilter(const std::string &filter);
+
 private:
   GlobalData();
   ~GlobalData()                  = default;
@@ -62,7 +68,7 @@ private:
   struct SocketTypeData
   {
     std::vector<std::string> m_list; // list of connections or binds
-    void *m_zmq_socket{};
+    void *m_zmq_socket{nullptr};
     std::recursive_mutex m_mutex;
   };
 
@@ -81,6 +87,7 @@ private:
   std::unique_ptr<Logging> m_loggingSink;
   std::recursive_mutex m_loggingLock;
   void *zmq_context;
+  std::vector<std::string> m_subMessageFilters;
 };
 
 template <>
@@ -98,6 +105,12 @@ struct fmt::formatter<SocketTypes> : fmt::formatter<std::string>
       break;
     case SocketTypes::Server:
       name = "Server";
+      break;
+    case SocketTypes::Publisher:
+      name = "Publisher";
+      break;
+    case SocketTypes::Subscriber:
+      name = "Subscriber";
       break;
     }
 

@@ -72,6 +72,48 @@ THREADSAFE variable zeromq_client_connect(string remotePoint);
 /// @return received message
 THREADSAFE string zeromq_client_recv();
 
+/// @name Publishers and Subscribers
+///
+/// @{
+
+/// @brief Start listening on the given TCP port as ZMQ_PUB socket
+///
+/// @param localPoint transport protocol and address, something like
+///                   `tcp://127.0.0.1:5670` should be used, the TCP/IP port
+///                   must be > 1024 and unused, 5670 is a good default choice
+///                   [standard port for FileMQ]
+THREADSAFE variable zeromq_pub_bind(string localPoint);
+
+/// @brief Publish the given message to all connected subscribers
+///
+/// Message filtering happens on the publisher side, around ZMQ_SNDHWM messages (by default 1000) will be kept.
+THREADSAFE variable zeromq_pub_send(string filter, string msg);
+
+/// @brief Connect to a ZMQ_PUB socket as ZMQ_SUB
+///
+/// @param remotePoint Protocol and address of the server, usually something like `tcp://127.0.0.1:5670`
+///
+/// By default there are no subscriptions, be sure to call zeromq_sub_add_filter at least once.
+THREADSAFE variable zeromq_sub_connect(string remotePoint);
+
+/// @brief Add a message filter
+///
+/// @param filter message type to add a subscription for. Using an empty string will subscribe to all messages.
+///
+/// Multiple filters are or'ed, which means a message must match at least one filter.
+///
+/// The filter types are binary compared.
+THREADSAFE variable zeromq_sub_add_filter(string filter);
+
+/// @brief Removes a previously added message filter
+///
+/// @param filter message type to remove a subscription for. Use an empty string to unsubscribe from all messages.
+THREADSAFE variable zeromq_sub_remove_filter(string filter);
+
+/// @brief Receive subscribed messages
+THREADSAFE string zeromq_sub_recv(string *filter);
+/// @}
+
 /// @name Message handler
 ///
 /// The XOP implements a threaded message handler. This message handler can be
