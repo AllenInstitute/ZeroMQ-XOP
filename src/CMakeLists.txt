@@ -66,7 +66,11 @@ ENDIF()
 SET(COVERAGE_SOURCES
   CallFunctionOperation.cpp
   CallFunctionParameterHandler.cpp
+  ConcurrentXOPNotice.cpp
+  CustomExceptions.cpp
+  GlobalData.cpp
   HeartbeatPublisher.cpp
+  HelperFunctions.cpp
   HistoryGrabber.cpp
   Logging.cpp
   MessageHandler.cpp
@@ -99,10 +103,6 @@ SET(COVERAGE_SOURCES
 SET(SOURCES
   ${COVERAGE_SOURCES}
   functions.cpp
-  GlobalData.cpp
-  HelperFunctions.cpp
-  ConcurrentXOPNotice.cpp
-  CustomExceptions.cpp
 )
 
 # CPP files *not* used for clang-format
