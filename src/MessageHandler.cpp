@@ -126,7 +126,7 @@ void CallAndReply(const RequestInterfacePtr &req) noexcept
 
 } // anonymous namespace
 
-void MessageHandler::StartHandler()
+void MessageHandler::Start()
 {
   LockGuard lock(threadMutex);
 
@@ -137,7 +137,7 @@ void MessageHandler::StartHandler()
 
   DEBUG_OUTPUT("Trying to start the handler.");
 
-  if(!GlobalData::Instance().HasBinds())
+  if(!GlobalData::Instance().HasBindsOrConnections(SocketTypes::Server))
   {
     throw IgorException(HANDLER_NO_CONNECTION);
   }
@@ -148,7 +148,7 @@ void MessageHandler::StartHandler()
   m_thread.swap(t);
 }
 
-void MessageHandler::StopHandler()
+void MessageHandler::Stop()
 {
   LockGuard lock(threadMutex);
 
@@ -179,5 +179,5 @@ void MessageHandler::HandleAllQueuedMessages()
 
 MessageHandler::~MessageHandler()
 {
-  StopHandler();
+  Stop();
 }

@@ -50,6 +50,27 @@ typedef struct zeromq_handler_stopParams zeromq_handler_stopParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_pub_bindParams
+{
+  Handle localPoint;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_pub_bindParams zeromq_pub_bindParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_pub_sendParams
+{
+  Handle msg;
+  Handle filter;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_pub_sendParams zeromq_pub_sendParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_server_bindParams
 {
   Handle localPoint;
@@ -111,6 +132,46 @@ typedef struct zeromq_stopParams zeromq_stopParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_sub_add_filterParams
+{
+  Handle filter;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_sub_add_filterParams zeromq_sub_add_filterParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_sub_connectParams
+{
+  Handle remotePoint;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_sub_connectParams zeromq_sub_connectParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_sub_recvParams
+{
+  Handle *filter;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  Handle result;
+};
+typedef struct zeromq_sub_recvParams zeromq_sub_recvParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_sub_remove_filterParams
+{
+  Handle filter;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_sub_remove_filterParams zeromq_sub_remove_filterParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_test_callfunctionParams
 {
   Handle msg;
@@ -145,6 +206,12 @@ extern "C" int zeromq_handler_start(zeromq_handler_startParams *p);
 // variable zeromq_handler_stop()
 extern "C" int zeromq_handler_stop(zeromq_handler_stopParams *p);
 
+// variable zeromq_pub_bind(string localPoint)
+extern "C" int zeromq_pub_bind(zeromq_pub_bindParams *p);
+
+// variable zeromq_pub_send(string filter, string msg)
+extern "C" int zeromq_pub_send(zeromq_pub_sendParams *p);
+
 // variable zeromq_server_bind(string localPoint)
 extern "C" int zeromq_server_bind(zeromq_server_bindParams *p);
 
@@ -163,6 +230,18 @@ zeromq_set_logging_template(zeromq_set_logging_templateParams *p);
 
 // variable zeromq_stop()
 extern "C" int zeromq_stop(zeromq_stopParams *p);
+
+// variable zeromq_sub_add_filter(string filter)
+extern "C" int zeromq_sub_add_filter(zeromq_sub_add_filterParams *p);
+
+// variable zeromq_sub_connect(string remotePoint)
+extern "C" int zeromq_sub_connect(zeromq_sub_connectParams *p);
+
+// string zeromq_sub_recv(string *filter)
+extern "C" int zeromq_sub_recv(zeromq_sub_recvParams *p);
+
+// variable zeromq_sub_remove_filter(string filter)
+extern "C" int zeromq_sub_remove_filter(zeromq_sub_remove_filterParams *p);
 
 // string zeromq_test_callfunction(string msg)
 extern "C" int zeromq_test_callfunction(zeromq_test_callfunctionParams *p);

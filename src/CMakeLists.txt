@@ -66,6 +66,11 @@ ENDIF()
 SET(COVERAGE_SOURCES
   CallFunctionOperation.cpp
   CallFunctionParameterHandler.cpp
+  ConcurrentXOPNotice.cpp
+  CustomExceptions.cpp
+  GlobalData.cpp
+  HeartbeatPublisher.cpp
+  HelperFunctions.cpp
   HistoryGrabber.cpp
   Logging.cpp
   MessageHandler.cpp
@@ -76,14 +81,20 @@ SET(COVERAGE_SOURCES
   zeromq_client_connect.cpp
   zeromq_client_recv.cpp
   zeromq_client_send.cpp
-  zeromq_set_logging_template.cpp
+  zeromq_handler_start.cpp
+  zeromq_handler_stop.cpp
+  zeromq_pub_bind.cpp
+  zeromq_pub_send.cpp
   zeromq_server_bind.cpp
   zeromq_server_recv.cpp
   zeromq_server_send.cpp
   zeromq_set.cpp
-  zeromq_handler_start.cpp
+  zeromq_set_logging_template.cpp
   zeromq_stop.cpp
-  zeromq_handler_stop.cpp
+  zeromq_sub_add_filter.cpp
+  zeromq_sub_connect.cpp
+  zeromq_sub_recv.cpp
+  zeromq_sub_remove_filter.cpp
   zeromq_test_callfunction.cpp
   zeromq_test_serializeWave.cpp
 )
@@ -92,10 +103,6 @@ SET(COVERAGE_SOURCES
 SET(SOURCES
   ${COVERAGE_SOURCES}
   functions.cpp
-  GlobalData.cpp
-  HelperFunctions.cpp
-  ConcurrentXOPNotice.cpp
-  CustomExceptions.cpp
 )
 
 # CPP files *not* used for clang-format
@@ -116,6 +123,7 @@ SET(HEADERS
   Errors.h
   functions.h
   GlobalData.h
+  HeartbeatPublisher.h
   HelperFunctions.h
   HistoryGrabber.h
   IgorTypeUnion.h

@@ -1,5 +1,5 @@
 #pragma TextEncoding = "UTF-8"
-#pragma rtGlobals=3		// Use modern global access method and strict wave access.
+#pragma rtGlobals=3
 #pragma IgorVersion=8.0
 
 #include "unit-testing"
@@ -10,6 +10,7 @@
 #include ":zmq_connect"
 #include ":zmq_set_logging_template"
 #include ":zmq_memory_leaks"
+#include ":zmq_pub_sub"
 #include ":zmq_set"
 #include ":zmq_start_handler"
 #include ":zmq_stop"
@@ -54,6 +55,10 @@ End
 /// @brief Check using netstat that a process listens on the given port
 ///
 /// Adapted and inspired by http://www.igorexchange.com/node/1243
+///
+/// Note:
+/// "Server" sockets immediately show up in netstat, where as Publisher sockets need a connetected Subscriber so that
+/// they show up. This is most likely due to internal difference in ready vs. inactive state.
 Function GetListeningStatus_IGNORE(port, tcpVersion)
 	variable port, tcpVersion
 
@@ -586,7 +591,6 @@ Function TestFunctionPassByRef7(WAVE& wv)
 	return 42
 End
 
-
 Function/WAVE ReturnWaveWithLongNames()
 
 	Make/O/N=1 AVeryLongNameOnlyAllowedWithIgorProEight
@@ -930,6 +934,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	list = AddListItem("zmq_bind.ipf", list, ";", inf)
 	list = AddListItem("zmq_connect.ipf", list, ";", inf)
 	list = AddListItem("zmq_memory_leaks.ipf", list, ";", inf)
+	list = AddListItem("zmq_pub_sub.ipf", list, ";", inf)
 	list = AddListItem("zmq_set_logging_template.ipf", list, ";", inf)
 	list = AddListItem("zmq_set.ipf", list, ";", inf)
 	list = AddListItem("zmq_start_handler.ipf", list, ";", inf)

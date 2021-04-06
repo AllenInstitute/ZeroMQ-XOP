@@ -346,8 +346,7 @@ coverage:
   coverage: '/TOTAL.+ (\d+\.\d+%)$/'
   artifacts:
     paths:
-      - build/coverage/*.html
-      - build/coverage/*.css
+      - build/coverage
   needs:
       - compile-xop-debug-coverage-macosx
       - download-xoptoolkit

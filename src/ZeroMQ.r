@@ -27,8 +27,10 @@ resource 'STR#' (1100) {					/* custom error messages */
   "Message handler could not find a binded server.", // HANDLER_NO_CONNECTION
   "Can not handle multipart messages.",              // INVALID_MULTIPART_MSG
   "Required procedure files are missing.",           // MISSING_PROCEDURE_FILES
-  "Unexpected multi-part message format."            // INVALID_MESSAGE_FORMAT
+  "Unexpected multi-part message format.",           // INVALID_MESSAGE_FORMAT
   "Invalid logging template.",                       // INVALID_LOGGING_TEMPLATE
+  "Exists already as message filter .",              // MESSAGE_FILTER_DUPLICATED
+  "No such message filter."                          // MESSAGE_FILTER_MISSING
 	}
 };
 

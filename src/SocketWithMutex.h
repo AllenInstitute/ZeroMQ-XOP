@@ -3,19 +3,9 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-/// @param A object name to create
-#define GET_CLIENT_SOCKET(A)                                                   \
-  SocketWithMutex A(GlobalData::Instance().ZMQClientSocket(),                  \
-                    GlobalData::Instance().m_clientMutex);
-
-// DEBUG_OUTPUT("Trying to lock client socket");
-
-/// @param A object name to create
-#define GET_SERVER_SOCKET(A)                                                   \
-  SocketWithMutex A(GlobalData::Instance().ZMQServerSocket(),                  \
-                    GlobalData::Instance().m_serverMutex);
-
-// DEBUG_OUTPUT("Trying to lock server socket");
+#define GET_SOCKET(A, ST)                                                      \
+  SocketWithMutex A(GlobalData::Instance().ZMQSocket(ST),                      \
+                    GlobalData::Instance().GetMutex(ST));
 
 class SocketWithMutex
 {
