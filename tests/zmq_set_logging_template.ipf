@@ -1,5 +1,5 @@
 ﻿#pragma TextEncoding = "UTF-8"
-#pragma rtGlobals=3		// Use modern global access method and strict wave access.
+#pragma rtGlobals=3
 #pragma ModuleName=ZMQ_LOGGING
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
