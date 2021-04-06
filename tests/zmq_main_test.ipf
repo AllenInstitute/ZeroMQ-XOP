@@ -590,7 +590,6 @@ Function TestFunctionPassByRef7(WAVE& wv)
 	return 42
 End
 
-
 Function/WAVE ReturnWaveWithLongNames()
 
 	Make/O/N=1 AVeryLongNameOnlyAllowedWithIgorProEight
