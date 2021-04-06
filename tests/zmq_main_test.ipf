@@ -10,6 +10,7 @@
 #include ":zmq_connect"
 #include ":zmq_set_logging_template"
 #include ":zmq_memory_leaks"
+#include ":zmq_pub_sub"
 #include ":zmq_set"
 #include ":zmq_start_handler"
 #include ":zmq_stop"
@@ -933,6 +934,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	list = AddListItem("zmq_bind.ipf", list, ";", inf)
 	list = AddListItem("zmq_connect.ipf", list, ";", inf)
 	list = AddListItem("zmq_memory_leaks.ipf", list, ";", inf)
+	list = AddListItem("zmq_pub_sub.ipf", list, ";", inf)
 	list = AddListItem("zmq_set_logging_template.ipf", list, ";", inf)
 	list = AddListItem("zmq_set.ipf", list, ";", inf)
 	list = AddListItem("zmq_start_handler.ipf", list, ";", inf)
