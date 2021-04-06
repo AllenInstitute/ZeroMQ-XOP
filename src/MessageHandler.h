@@ -15,8 +15,8 @@ public:
     return obj;
   }
 
-  void StartHandler();
-  void StopHandler();
+  void Start();
+  void Stop();
   void HandleAllQueuedMessages();
 
 private:

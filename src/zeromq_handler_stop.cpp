@@ -9,7 +9,7 @@ extern "C" int zeromq_handler_stop(zeromq_handler_stopParams *p)
 {
   BEGIN_OUTER_CATCH
 
-  MessageHandler::Instance().StopHandler();
+  MessageHandler::Instance().Stop();
 
   END_OUTER_CATCH
 }
