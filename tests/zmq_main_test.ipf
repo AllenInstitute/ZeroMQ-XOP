@@ -54,6 +54,10 @@ End
 /// @brief Check using netstat that a process listens on the given port
 ///
 /// Adapted and inspired by http://www.igorexchange.com/node/1243
+///
+/// Note:
+/// "Server" sockets immediately show up in netstat, where as Publisher sockets need a connetected Subscriber so that
+/// they show up. This is most likely due to internal difference in ready vs. inactive state.
 Function GetListeningStatus_IGNORE(port, tcpVersion)
 	variable port, tcpVersion
 
