@@ -1,0 +1,4 @@
+# github specialities, see https://github.com/github/linguist
+
+doc/* linguist-documentation
+output/* linguist-vendored
