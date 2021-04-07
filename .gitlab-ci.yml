@@ -137,7 +137,7 @@ compile-xop-windows:
     - download-xoptoolkit
   artifacts:
     paths:
-      - output/win
+      - output/win/*/xop
 
 compile-xop-release-macosx:
   stage: second
@@ -152,7 +152,7 @@ compile-xop-release-macosx:
     - download-xoptoolkit
   artifacts:
     paths:
-      - output/mac
+      - output/mac/xop
 
 compile-xop-debug-coverage-macosx:
   stage: second
@@ -168,7 +168,7 @@ compile-xop-debug-coverage-macosx:
   artifacts:
     expire_in: 1 week
     paths:
-      - output/mac
+      - output/mac/xop
 
 clang-tidy:
   stage: second
