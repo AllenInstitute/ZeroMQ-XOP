@@ -2,3 +2,6 @@
 
 doc/* linguist-documentation
 output/* linguist-vendored
+
+# Mark MacOSX resource files as text
+*.r linguist-language=text
