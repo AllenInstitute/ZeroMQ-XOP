@@ -84,34 +84,23 @@ static Function ComplainsWithInvalidArg2([string str])
 	CHECK_EQUAL_VAR(ret, 0)
 End
 
-Function ConnectionsAcceptsHostNameWithClient()
+// UTF_TD_GENERATOR zmq_connect#ConnectLikeFunctions
+Function ConnectionsAcceptsHostName([string str])
 
 	variable ret
 
-	ret = zeromq_client_connect("tcp://localhost:5555")
+	FUNCREF CONNECT_PROTOTYPE f = $str
+
+	ret = f("tcp://localhost:5555")
 	CHECK_EQUAL_VAR(ret, 0)
 End
-
-static Function ComplainsWithHostnameAndSubscriber()
-
-	variable err, ret
-
-	try
-		ret = zeromq_sub_connect("tcp://localhost:5555"); AbortOnRTE
-		FAIL()
-	catch
-		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_INVALID_ARG)
-	endtry
-
-	CHECK_EQUAL_VAR(ret, 0)
-End
-
 
 // UTF_TD_GENERATOR zmq_connect#ConnectLikeFunctions
 Function ConnectionOrderDoesNotMatter1([string str])
 
 	variable ret, skipSourceCheck
+
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
 
 	FUNCREF CONNECT_PROTOTYPE f = $str
 	skipSourceCheck = GetSourceCheck_IGNORE(str)
@@ -128,6 +117,8 @@ End
 Function ConnectionOrderDoesNotMatter2([string str])
 
 	variable ret, skipSourceCheck
+
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
 
 	FUNCREF CONNECT_PROTOTYPE f = $str
 	skipSourceCheck = GetSourceCheck_IGNORE(str)

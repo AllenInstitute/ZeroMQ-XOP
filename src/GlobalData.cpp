@@ -183,13 +183,13 @@ void GlobalData::CloseConnections()
         {
         case SocketTypes::Server:
         case SocketTypes::Publisher:
-          rc = zmq_disconnect(socket.get(), conn.c_str());
+          rc = zmq_unbind(socket.get(), conn.c_str());
           DEBUG_OUTPUT("zmq_disconnect({}) returned={}", conn, rc);
 
           break;
         case SocketTypes::Client:
         case SocketTypes::Subscriber:
-          rc = zmq_unbind(socket.get(), conn.c_str());
+          rc = zmq_disconnect(socket.get(), conn.c_str());
           DEBUG_OUTPUT("zmq_unbind({}) returned={}", conn, rc);
           break;
         }

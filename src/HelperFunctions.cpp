@@ -786,11 +786,11 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   switch(st)
   {
   case SocketTypes::Client:
-  case SocketTypes::Publisher:
+  case SocketTypes::Subscriber:
     rc = zmq_connect(socket.get(), point.c_str());
     break;
-  case SocketTypes::Subscriber:
   case SocketTypes::Server:
+  case SocketTypes::Publisher:
     rc = zmq_bind(socket.get(), point.c_str());
     break;
   }
