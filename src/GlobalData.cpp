@@ -98,10 +98,10 @@ void *GlobalData::ZMQSocket(SocketTypes st)
     return socket;
   }
 
-  DEBUG_OUTPUT("Creating {} socket", st);
-
   socket = zmq_socket(zmq_context, GetZeroMQSocketConstant(st));
   ZEROMQ_ASSERT(socket != nullptr);
+
+  DEBUG_OUTPUT("Creating {} socket {}", st, socket);
 
   ApplySocketDefaults(socket, st);
 
