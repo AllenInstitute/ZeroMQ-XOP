@@ -73,26 +73,21 @@ Function ComplainsWithInvalidArg2([string str])
 End
 
 // bind does not accept names
-Function ComplainsWithInvalidArg3AndServer()
+// UTF_TD_GENERATOR zmq_bind#BindLikeFunctions
+Function ComplainsWithInvalidArg3([string str])
 
 	variable err, ret
 
+	FUNCREF BIND_PROTOTYPE f = $str
+
 	try
-		ret = zeromq_server_bind("tcp://localhost:5555"); AbortOnRTE
+		ret = f("tcp://localhost:5555"); AbortOnRTE
 		FAIL()
 	catch
 		err = GetRTError(1)
 		CheckErrorMessage(err, ZeroMQ_INVALID_ARG)
 	endtry
 
-	CHECK_EQUAL_VAR(ret, 0)
-End
-
-Function WorksWithNamesAndPublisher()
-
-	variable ret
-
-	ret = zeromq_pub_bind("tcp://localhost:5555")
 	CHECK_EQUAL_VAR(ret, 0)
 End
 
@@ -104,8 +99,11 @@ Function BindsToLocalHost([string str])
 	FUNCREF BIND_PROTOTYPE f = $str
 	skipSourceCheck = GetSourceCheck_IGNORE(str)
 
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
+
 	ret = f("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 End
 
 // UTF_TD_GENERATOR zmq_bind#BindLikeFunctions
@@ -113,12 +111,15 @@ Function BindsToLocalHostIPV6([string str])
 
 	variable ret, skipSourceCheck
 
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V6), 0)
+
 	FUNCREF BIND_PROTOTYPE f = $str
 	skipSourceCheck = GetSourceCheck_IGNORE(str)
 
 	zeromq_set(ZeroMQ_SET_FLAGS_IPV6)
 	ret = f("tcp://::1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V6), 1)
 End
 
 // UTF_TD_GENERATOR zmq_bind#BindLikeFunctions
@@ -126,44 +127,43 @@ Function BindsToLocalHostIPV6AndIPV4([string str])
 
 	variable ret, skipSourceCheck
 
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666, TCP_V6), 0)
+
 	FUNCREF BIND_PROTOTYPE f = $str
 	skipSourceCheck = GetSourceCheck_IGNORE(str)
 
 	ret = f("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
+
 	// the ipv6 flag juggling is required due to https://github.com/zeromq/libzmq/issues/853
 	zeromq_set(ZeroMQ_SET_FLAGS_IPV6)
 	ret = f("tcp://::1:6666")
 	CHECK_EQUAL_VAR(ret, 0)
+
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666, TCP_V6), 1)
 End
 
-Function ComplainsOnBindOnUsedPortServer()
+// UTF_TD_GENERATOR zmq_bind#BindLikeFunctions
+Function ComplainsOnBindOnUsedPortServer([string str])
 
 	variable err, ret
 
+	FUNCREF BIND_PROTOTYPE f = $str
+
 	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
-	ret = zeromq_server_bind("tcp://127.0.0.1:5555")
+	ret = f("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
 	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 
 	try
-		ret = zeromq_server_bind("tcp://127.0.0.1:5555"); AbortOnRTE
+		ret = f("tcp://127.0.0.1:5555"); AbortOnRTE
 		FAIL()
 	catch
 		err = GetRTError(1)
 		CheckErrorMessage(err, ZeroMQ_INVALID_ARG)
 	endtry
-End
-
-Function BindMultipleTimesWorksWithPublisher()
-
-	variable ret
-
-	ret = zeromq_pub_bind("tcp://127.0.0.1:5555")
-	CHECK_EQUAL_VAR(ret, 0)
-
-	ret = zeromq_pub_bind("tcp://127.0.0.1:5555")
-	CHECK_EQUAL_VAR(ret, 0)
 End
 
 // UTF_TD_GENERATOR zmq_bind#BindLikeFunctions
@@ -174,11 +174,15 @@ Function AllowsBindingMultiplePorts([string str])
 	FUNCREF BIND_PROTOTYPE f = $str
 	skipSourceCheck = GetSourceCheck_IGNORE(str)
 
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
 	ret = f("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666, TCP_V4), 0)
 	ret = f("tcp://127.0.0.1:6666")
 	CHECK_EQUAL_VAR(ret, 0)
+	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666, TCP_V4), 1)
 End
 
 Function DoesNotAcceptLargeMessagesOnServerSocket()

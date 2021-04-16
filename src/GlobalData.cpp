@@ -98,10 +98,10 @@ void *GlobalData::ZMQSocket(SocketTypes st)
     return socket;
   }
 
-  DEBUG_OUTPUT("Creating {} socket", st);
-
   socket = zmq_socket(zmq_context, GetZeroMQSocketConstant(st));
   ZEROMQ_ASSERT(socket != nullptr);
+
+  DEBUG_OUTPUT("Creating {} socket {}", st, socket);
 
   ApplySocketDefaults(socket, st);
 
@@ -183,13 +183,13 @@ void GlobalData::CloseConnections()
         {
         case SocketTypes::Server:
         case SocketTypes::Publisher:
-          rc = zmq_disconnect(socket.get(), conn.c_str());
+          rc = zmq_unbind(socket.get(), conn.c_str());
           DEBUG_OUTPUT("zmq_disconnect({}) returned={}", conn, rc);
 
           break;
         case SocketTypes::Client:
         case SocketTypes::Subscriber:
-          rc = zmq_unbind(socket.get(), conn.c_str());
+          rc = zmq_disconnect(socket.get(), conn.c_str());
           DEBUG_OUTPUT("zmq_unbind({}) returned={}", conn, rc);
           break;
         }
