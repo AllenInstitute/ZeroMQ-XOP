@@ -321,10 +321,13 @@ packaging:
     name: ${CI_REGISTRY}/internal/docker-utils:latest
   variables:
       GIT_SUBMODULE_STRATEGY: "none"
+      GIT_DEPTH: 0
+      GIT_FETCH_EXTRA_FLAGS: "--tags --unshallow --prune --quiet"
   script:
     - mkdir package
-    - zip -r package/ZeroMQ-XOP-$(git describe --tags --always).zip CONTRIBUTING.md LICENSE.txt procedures help/*.ihf output/mac/xop/Release/*.zip output/win/*/xop/Release/*{.xop,.dll}
-    - zip -r package/ZeroMQ-PDB-$(git describe --tags --always).zip output/win/*/xop/Release/*.pdb
+    - VERSION_STR=$(git describe --tags --always --match "version")
+    - zip -r package/ZeroMQ-XOP-${VERSION_STR}.zip CONTRIBUTING.md LICENSE.txt procedures help/*.ihf output/mac/xop/Release/*.zip output/win/*/xop/Release/*{.xop,.dll}
+    - zip -r package/ZeroMQ-PDB-${VERSION_STR}.zip output/win/*/xop/Release/*.pdb
   needs:
     - compile-xop-windows
     - compile-xop-release-macosx
