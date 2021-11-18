@@ -11,6 +11,7 @@ stages:
   - second
   - third
   - fourth
+  - fifth
 
 download-xoptoolkit:
   stage: first
@@ -354,3 +355,21 @@ coverage:
       - compile-xop-debug-coverage-macosx
       - download-xoptoolkit
       - testing-macosx
+
+symbol_creation_and_upload:
+  tags:
+    - debian, docker
+  stage: fifth
+  image:
+    name: ${CI_REGISTRY}/internal/docker-utils:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
+  needs:
+    - compile-xop-windows
+  script:
+    - mkdir symbols
+    - symstore -z symbols output/win/*/*.pdb
+    - lftp -e "mirror --reverse -n symbols /; bye" -u $FTP_SYMBOLS_USER,$FTP_SYMBOLS_PASS ftp.byte-physics.de
