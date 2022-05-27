@@ -323,7 +323,6 @@ packaging:
   variables:
       GIT_SUBMODULE_STRATEGY: "none"
       GIT_DEPTH: 0
-      GIT_FETCH_EXTRA_FLAGS: "--tags --unshallow --prune --quiet"
   script:
     - mkdir package
     - VERSION_STR=$(git describe --tags --always --match "version")
