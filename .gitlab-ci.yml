@@ -371,6 +371,6 @@ symbol_creation_and_upload:
     - compile-xop-windows
   script:
     - mkdir symbols
-    - symstore -z symbols output/win/x64/xop/Release/*.pdb
-    - symstore -z symbols output/win/x86/xop/Release/*.pdb
+    - symstore -z symbols output/win/x64/xop/Release/*.pdb output/win/x64/xop/Release/*.xop
+    - symstore -z symbols output/win/x86/xop/Release/*.pdb output/win/x86/xop/Release/*.xop
     - lftp -e "mirror --reverse -n symbols /; bye" -u $FTP_SYMBOLS_USER,$FTP_SYMBOLS_PASS ftp.byte-physics.de
