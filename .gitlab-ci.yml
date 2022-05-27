@@ -323,7 +323,6 @@ packaging:
   variables:
       GIT_SUBMODULE_STRATEGY: "none"
       GIT_DEPTH: 0
-      GIT_FETCH_EXTRA_FLAGS: "--tags --unshallow --prune --quiet"
   script:
     - mkdir package
     - VERSION_STR=$(git describe --tags --always --match "version")
@@ -347,7 +346,7 @@ coverage:
       - cmake -G "Xcode" -DCOVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ../src
       - cmake --build . --config Debug --target install
       - cmake --build . --target coverage
-  coverage: '/TOTAL.+ (\d+\.\d+%)$/'
+  coverage: '/^TOTAL.*\s+(\d+\%)$/'
   artifacts:
     paths:
       - build/coverage
@@ -371,6 +370,6 @@ symbol_creation_and_upload:
     - compile-xop-windows
   script:
     - mkdir symbols
-    - symstore -z symbols output/win/x64/xop/Release/*.pdb
-    - symstore -z symbols output/win/x86/xop/Release/*.pdb
+    - symstore -z symbols output/win/x64/xop/Release/*.pdb output/win/x64/xop/Release/*.xop
+    - symstore -z symbols output/win/x86/xop/Release/*.pdb output/win/x86/xop/Release/*.xop
     - lftp -e "mirror --reverse -n symbols /; bye" -u $FTP_SYMBOLS_USER,$FTP_SYMBOLS_PASS ftp.byte-physics.de
