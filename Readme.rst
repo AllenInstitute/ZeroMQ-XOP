@@ -32,7 +32,6 @@ Windows
 ^^^^^^^
 
 - Quit Igor Pro
-- Install the vcredist packages in "output/win"
 - Create the following shortcuts in "$HOME\\Documents\\WaveMetrics\\Igor Pro 8 User Files"
 
   - In "Igor Procedures" a shortcut pointing to "procedures"
