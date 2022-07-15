@@ -28,12 +28,16 @@ The XOP provides the following functions:
 Installation
 ~~~~~~~~~~~~
 
+Here `XX` denotes your major Igor Pro version, e.g. 8 or 9.
+
+- Download the `ZeroMQ-XOP*.zip` file from the latest `release <https://github.com/AllenInstitute/ZeroMQ-XOP/releases/tag/version>`__.
+- Extract it to a folder
+
 Windows
 ^^^^^^^
 
 - Quit Igor Pro
-- Install the vcredist packages in "output/win"
-- Create the following shortcuts in "$HOME\\Documents\\WaveMetrics\\Igor Pro 8 User Files"
+- Create the following shortcuts in "$HOME\\Documents\\WaveMetrics\\Igor Pro XX User Files"
 
   - In "Igor Procedures" a shortcut pointing to "procedures"
   - In "Igor Help Files" a shortcut pointing to "help"
@@ -47,7 +51,7 @@ MacOSX
 
 - Quit Igor Pro
 - Unzip the files in "output/mac"
-- Create the following symbolic links (symlinks) in "$HOME/Documents/WaveMetrics/Igor Pro 8 User Files"
+- Create the following symbolic links (symlinks) in "$HOME/Documents/WaveMetrics/Igor Pro XX User Files"
 
   - In "Igor Procedures" a symlink pointing to "procedures"
   - In "Igor Help Files" a symlink pointing to "help"
