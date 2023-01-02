@@ -22,7 +22,7 @@ public:
 private:
   MessageHandler() = default;
   ~MessageHandler();
-  MessageHandler(const MessageHandler &) = delete;
+  MessageHandler(const MessageHandler &)            = delete;
   MessageHandler &operator=(const MessageHandler &) = delete;
 
   class thread;
