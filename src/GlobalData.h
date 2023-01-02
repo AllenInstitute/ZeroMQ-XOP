@@ -61,8 +61,8 @@ public:
 
 private:
   GlobalData();
-  ~GlobalData()                  = default;
-  GlobalData(const GlobalData &) = delete;
+  ~GlobalData()                             = default;
+  GlobalData(const GlobalData &)            = delete;
   GlobalData &operator=(const GlobalData &) = delete;
 
   struct SocketTypeData

@@ -305,7 +305,8 @@ void GlobalData::RemoveSubscriberMessageFilter(const std::string &filter)
 
   GET_SOCKET(socket, st);
 
-  auto unsubscribe = [&socket](const std::string &entry) -> void {
+  auto unsubscribe = [&socket](const std::string &entry) -> void
+  {
     auto rc = zmq_setsockopt(socket.get(), ZMQ_UNSUBSCRIBE, entry.c_str(),
                              entry.size());
     ZEROMQ_ASSERT(rc == 0);

@@ -21,7 +21,7 @@ public:
 private:
   HeartbeatPublisher() = default;
   ~HeartbeatPublisher();
-  HeartbeatPublisher(const HeartbeatPublisher &) = delete;
+  HeartbeatPublisher(const HeartbeatPublisher &)            = delete;
   HeartbeatPublisher &operator=(const HeartbeatPublisher &) = delete;
 
   class thread;

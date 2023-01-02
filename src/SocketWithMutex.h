@@ -21,7 +21,7 @@ public:
     // DEBUG_OUTPUT("Unlocking {}",  m_plainSocket);
   }
 
-  SocketWithMutex(const SocketWithMutex &) = delete;
+  SocketWithMutex(const SocketWithMutex &)            = delete;
   SocketWithMutex &operator=(const SocketWithMutex &) = delete;
 
   void *get()

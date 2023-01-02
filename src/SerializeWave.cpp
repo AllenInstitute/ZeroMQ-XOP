@@ -534,8 +534,10 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
       if(strlen(label) > 0)
       {
         differentFromDefault = true;
-        labels[k++]          = label;
+        labels[k]            = label;
       }
+
+      k++;
     }
   }
 

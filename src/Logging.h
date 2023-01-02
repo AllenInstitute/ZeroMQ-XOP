@@ -24,9 +24,9 @@ public:
   void AddLogEntry(const std::string &str, MessageDirection dir) const;
 
 private:
-  Logging(const Logging &)  = delete;
-  Logging(const Logging &&) = delete;
-  Logging &operator=(Logging &) = delete;
+  Logging(const Logging &)        = delete;
+  Logging(const Logging &&)       = delete;
+  Logging &operator=(Logging &)   = delete;
   Logging &&operator=(Logging &&) = delete;
 
   class Implementation;
