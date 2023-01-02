@@ -399,14 +399,16 @@ Function DoesIncludeDimensionLabelEach()
 
 	string actual, expected
 	string replyMessage
-	Make/FREE/T lbls = { "myLabel00", "myLabel10", "myLabel01", "myLabel11" }
+	                                                  // Col0
+	Make/FREE/T lbls = {"myLabelRow0", "myLabelRow1", "",      "myLabelCol1", "myLabelCol2"}
 
-	Make/O/T wv = {"00", "10", "01", "11"}
-	Redimension/N=(2, 2) wv
+	Make/O/T wv = {"00", "10", "01", "11", "02", "12"}
+	Redimension/N=(2, 3) wv
 	SetDimLabel 0, 0, $(lbls[0]), wv
 	SetDimLabel 0, 1, $(lbls[1]), wv
 	SetDimLabel 1, 0, $(lbls[2]), wv
 	SetDimLabel 1, 1, $(lbls[3]), wv
+	SetDimLabel 1, 2, $(lbls[4]), wv
 
 	replyMessage = zeromq_test_serializeWave(wv)
 
@@ -434,7 +436,15 @@ Function DoesIncludeDimensionLabelEach()
 	expected = lbls[2]
 	CHECK_EQUAL_STR(actual, expected)
 
+#if IgorVersion() >= 9.0
 	actual = T_TokenText[V_value + 5]
 	expected = lbls[3]
 	CHECK_EQUAL_STR(actual, expected)
+
+	actual = T_TokenText[V_value + 6]
+	expected = lbls[4]
+	CHECK_EQUAL_STR(actual, expected)
+#else
+	PASS()
+#endif
 End
