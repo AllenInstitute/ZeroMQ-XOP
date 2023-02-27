@@ -3,7 +3,8 @@ ZeroMQ XOP
 
 The ZeroMQ XOP allows to interface with Igor Pro over the network using `ZeroMQ
 <http://www.zeromq.org>`__ as messaging layer and `JSON
-<http://www.json.org>`__ as message format.
+<http://www.json.org>`__ as message format. Reading and writing JSON documents
+can be done with the `JSON XOP <https://docs.byte-physics.de/json-xop/>`__.
 
 The XOP provides the following functions:
 
