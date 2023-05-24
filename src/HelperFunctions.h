@@ -187,12 +187,11 @@ enum class OutputMode
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
           fmt::format_args args);
 
-template <typename S, typename... Args>
-void xop_logging(OutputMode mode, const char *func, int line, const S &format,
-                 Args &&...args)
+template <typename... T>
+void xop_logging(OutputMode mode, const char *func, int line,
+                 fmt::format_string<T...> format, T &&...args)
 {
-  vlog(mode, func, line, format,
-       fmt::make_args_checked<Args...>(format, args...));
+  vlog(mode, func, line, format, fmt::make_format_args(args...));
 }
 
 #define EMERGENCY_OUTPUT(format, ...)                                          \

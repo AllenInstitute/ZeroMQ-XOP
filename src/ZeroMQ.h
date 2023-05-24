@@ -74,6 +74,7 @@ using LockGuard = std::lock_guard<std::recursive_mutex>;
 #pragma clang diagnostic ignored "-Wsigned-enum-bitfield"
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 #pragma clang diagnostic ignored "-Wc++2a-compat"
+#pragma clang diagnostic ignored "-Wfloat-equal"
 #endif
 
 #ifdef _MSC_VER
@@ -84,8 +85,7 @@ using LockGuard = std::lock_guard<std::recursive_mutex>;
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
-
-using namespace fmt::literals; // NOLINT
+#include <fmt/chrono.h>
 
 #ifdef _MSC_VER
 #pragma warning(pop)

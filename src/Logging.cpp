@@ -8,9 +8,11 @@ constexpr char SESSION_START_MARKER[] = "{}";
 constexpr char TEMPLATE_KEY_JSON[]      = "json";
 constexpr char TEMPLATE_KEY_STR[]       = "str";
 constexpr char TEMPLATE_KEY_DIRECTION[] = "direction";
+constexpr char TEMPLATE_KEY_TS[]        = "ts";
 
-constexpr std::array<const char *, 3> RESERVED_KEYS = {
-    TEMPLATE_KEY_DIRECTION, TEMPLATE_KEY_JSON, TEMPLATE_KEY_STR};
+constexpr std::array<const char *, 4> RESERVED_KEYS = {
+    TEMPLATE_KEY_DIRECTION, TEMPLATE_KEY_JSON, TEMPLATE_KEY_STR,
+    TEMPLATE_KEY_TS};
 
 #ifdef WINIGOR
 constexpr const char DIR_SEPARATOR[] = "\\";
@@ -103,6 +105,12 @@ public:
 
     j[key]                    = entry;
     j[TEMPLATE_KEY_DIRECTION] = fmt::to_string(dir);
+
+    const auto now = std::chrono::system_clock::now();
+    // see https://stackoverflow.com/a/67076017
+    const auto ts = fmt::format(FMT_STRING("{0:%FT%H:%M:}{1:%S}{0:%z}"), now,
+                                now.time_since_epoch());
+    j[TEMPLATE_KEY_TS] = ts;
 
     WriteIntoLogfile(j.dump());
   }
