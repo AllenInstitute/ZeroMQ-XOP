@@ -121,7 +121,7 @@ struct WriteIntoStream
   {
     auto formatSpec = GetFormatString<T, withComma>()();
 
-    fmt::format_to(buf, formatSpec, val);
+    fmt::format_to(std::back_inserter(buf), formatSpec, val);
   }
 };
 
@@ -135,11 +135,12 @@ struct WriteIntoStream<double, withComma>
 
     if(std::isnan(val) || std::isinf(val))
     {
-      fmt::format_to(buf, formatSpecString, JSONQuote(std::to_string(val)));
+      fmt::format_to(std::back_inserter(buf), formatSpecString,
+                     JSONQuote(std::to_string(val)));
     }
     else
     {
-      fmt::format_to(buf, formatSpecNumber, val);
+      fmt::format_to(std::back_inserter(buf), formatSpecNumber, val);
     }
   }
 };
@@ -154,11 +155,12 @@ struct WriteIntoStream<float, withComma>
 
     if(std::isnan(val) || std::isinf(val))
     {
-      fmt::format_to(buf, formatSpecString, JSONQuote(std::to_string(val)));
+      fmt::format_to(std::back_inserter(buf), formatSpecString,
+                     JSONQuote(std::to_string(val)));
     }
     else
     {
-      fmt::format_to(buf, formatSpecNumber, val);
+      fmt::format_to(std::back_inserter(buf), formatSpecNumber, val);
     }
   }
 };
@@ -170,7 +172,7 @@ struct WriteIntoStream<char *, withComma>
   {
     auto formatSpec = GetFormatString<char *, withComma>()();
 
-    fmt::format_to(buf, formatSpec, JSONQuote(val));
+    fmt::format_to(std::back_inserter(buf), formatSpec, JSONQuote(val));
   }
 };
 
@@ -181,7 +183,7 @@ struct WriteIntoStream<std::string, withComma>
   {
     auto formatSpec = GetFormatString<char *, withComma>()();
 
-    fmt::format_to(buf, formatSpec, JSONQuote(val));
+    fmt::format_to(std::back_inserter(buf), formatSpec, JSONQuote(val));
   }
 };
 
@@ -192,7 +194,8 @@ struct WriteIntoStream<waveHndl, withComma>
   {
     auto formatSpec = GetFormatString<waveHndl, withComma>()();
 
-    fmt::format_to(buf, formatSpec, SerializeWave(val).dump(DEFAULT_INDENT));
+    fmt::format_to(std::back_inserter(buf), formatSpec,
+                   SerializeWave(val).dump(DEFAULT_INDENT));
   }
 };
 
@@ -203,7 +206,8 @@ struct WriteIntoStream<DataFolderHandle, withComma>
   {
     auto formatSpec = GetFormatString<std::string, withComma>()();
 
-    fmt::format_to(buf, formatSpec, JSONQuote(SerializeDataFolder(val)));
+    fmt::format_to(std::back_inserter(buf), formatSpec,
+                   JSONQuote(SerializeDataFolder(val)));
   }
 };
 
@@ -213,7 +217,7 @@ void OutputArray(fmt::memory_buffer &buf, T *data, CountInt dataLength)
   WriteIntoStream<T, 1> streamWriterWithComma;
   WriteIntoStream<T, 0> streamWriter;
 
-  fmt::format_to(buf, "[");
+  fmt::format_to(std::back_inserter(buf), "[");
 
   CountInt i = 0;
   for(i = 0; i < dataLength - 1; i++)
@@ -223,7 +227,7 @@ void OutputArray(fmt::memory_buffer &buf, T *data, CountInt dataLength)
 
   streamWriter(buf, *(data + i));
 
-  fmt::format_to(buf, "]");
+  fmt::format_to(std::back_inserter(buf), "]");
 }
 
 template <typename T>
@@ -233,7 +237,7 @@ void ToString(fmt::memory_buffer &buf, waveHndl waveHandle, CountInt offset)
 
   if(dataLength == 0)
   {
-    fmt::format_to(buf, "[]");
+    fmt::format_to(std::back_inserter(buf), "[]");
     return;
   }
 
@@ -251,7 +255,7 @@ void ToString<char *>(fmt::memory_buffer &buf, waveHndl waveHandle,
 
   if(dataLength == 0)
   {
-    fmt::format_to(buf, "[]");
+    fmt::format_to(std::back_inserter(buf), "[]");
     return;
   }
 
@@ -265,7 +269,7 @@ void ToString<char *>(fmt::memory_buffer &buf, waveHndl waveHandle,
   WriteIntoStream<char *, 1> streamWriterWithComma;
   WriteIntoStream<char *, 0> streamWriter;
 
-  fmt::format_to(buf, "[");
+  fmt::format_to(std::back_inserter(buf), "[");
 
   CountInt i = 0;
   for(i = 0; i < dataLength - 1; i++)
@@ -276,7 +280,7 @@ void ToString<char *>(fmt::memory_buffer &buf, waveHndl waveHandle,
 
   streamWriter(buf, data);
 
-  fmt::format_to(buf, "]");
+  fmt::format_to(std::back_inserter(buf), "]");
 
   WMDisposeHandle(textHandle);
 }
