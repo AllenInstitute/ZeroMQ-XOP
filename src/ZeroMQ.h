@@ -85,6 +85,7 @@ using LockGuard = std::lock_guard<std::recursive_mutex>;
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
+#include <fmt/chrono.h>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
