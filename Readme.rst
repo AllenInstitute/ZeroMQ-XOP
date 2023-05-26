@@ -388,8 +388,7 @@ When the serialization is done as part of the function call reply as shown above
 | date.modification    | number                   | time of last modification in seconds since unix epoch in UTC. 0 for free waves.                                                                                           |
 +----------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | data.raw             | array of numbers/strings | column-major format, read it with ``np.array([5, 6, 7, 8, "-inf", 10]).reshape(3, 2, order='F')`` using Python.                                                           |
-|                      |                          | For complex waves ``raw`` has two properties ``real`` and ``imag`` both holding arrays. For wave reference waves this holds a new instance of a wave object or null.      |
-|                      |                          | For type equal ``WAVE_TYPE`` this holds an array with waves. Each array entry is an object with again ```` entries.                                                       |
+|                      |                          | For complex waves ``raw`` has two keys ``real`` and ``imag`` both holding arrays. For wave reference waves ``raw`` holds an array with wave objects or null.              |
 +----------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | data.unit            | string                   | arbitrary strings denoting the unit. The contents are most likely SI with prefix, but this is not guaranteed.                                                             |
 +----------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -397,6 +396,96 @@ When the serialization is done as part of the function call reply as shown above
 +----------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | note                 | string                   | wave note                                                                                                                                                                 |
 +----------------------+--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+Examples
+^^^^^^^^
+
+Numeric wave with properties set to non-default values:
+
+.. code-block:: json
+
+   {
+     "type"     : "NT_FP64",
+     "data" : {
+       "raw"       : [5, 6, 7, 8, "-inf", 10],
+        "unit"      : "m",
+        "fullScale" : [5, 10]
+     },
+     "date"     : {
+       "modification" : 10221232
+     },
+     "dimension" : {
+       "size"  : [3, 2],
+        "delta" : [1, 2.5],
+        "offset": [1e5, 3e7],
+        "unit"  : ["kHz", "s"],
+        "label" : {
+          "full"  : [ "some name", "blah" ],
+          "each" : [ "..." ]
+         }
+     },
+     "note" : "Hi there I'm a nice wave note and are encoded in \"UTF8\". With fancy things like ï or ß."
+   }
+
+Text wave:
+
+.. code-block:: json
+
+   {
+     "data": {
+         "raw": [ "abcd", "efgh" ]
+     },
+     "date": {
+         "modification": 1685115358
+     },
+     "dimension": {
+         "size": [ 2 ]
+     },
+     "type": "TEXT_WAVE_TYPE"
+   }
+
+Wave reference wave:
+
+.. code-block:: json
+
+   {
+     "data": {
+         "raw": [
+             {
+                 "data": {
+                     "raw": [ 1, 2 ]
+                 },
+                 "date": {
+                     "modification": 1685115583
+                 },
+                 "dimension": {
+                     "size": [ 2 ]
+                 },
+                 "type": "NT_FP32"
+             },
+             {
+                 "data": {
+                     "raw": [ 3, 4 ]
+                 },
+                 "date": {
+                     "modification": 1685115598
+                 },
+                 "dimension": {
+                     "size": [ 2 ]
+                 },
+                 "type": "NT_FP32"
+             },
+             null
+         ]
+     },
+     "date": {
+         "modification": 1685115607
+     },
+     "dimension": {
+         "size": [ 3 ]
+     },
+     "type": "WAVE_TYPE"
+   }
 
 Direction: Igor Pro -> World
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
