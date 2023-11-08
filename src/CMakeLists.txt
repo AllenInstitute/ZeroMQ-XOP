@@ -287,7 +287,7 @@ IF(APPLE)
                         -fsanitize-recover=unsigned-integer-overflow>)
   ENDIF()
 
-  SET(LLVM_BREW "/usr/local/opt/llvm/bin")
+  SET(LLVM_BREW "/usr/local/opt/llvm/bin" "/usr/local/Cellar/llvm/11.1.0/share/clang")
 
   IF(${COVERAGE})
     MESSAGE(STATUS "Building with coverage instrumentation")
@@ -394,14 +394,17 @@ IF(CLANG_FORMAT)
                      COMMENT "Running clang-format" VERBATIM)
 ENDIF()
 
+FIND_PROGRAM(RUN_CLANG_TIDY PATHS ${LLVM_BREW} NAMES run-clang-tidy.py)
 FIND_PROGRAM(CLANG_TIDY PATHS ${LLVM_BREW} NAMES clang-tidy)
+FIND_PROGRAM(CLANG_APPLY_REPLACEMENTS PATHS ${LLVM_BREW} NAMES clang-apply-replacements)
 
-IF(CLANG_TIDY)
+IF(RUN_CLANG_TIDY AND CLANG_TIDY AND CLANG_APPLY_REPLACEMENTS)
   ADD_CUSTOM_TARGET(clang-tidy
-                    COMMAND ${CLANG_TIDY}
+                    COMMAND ${RUN_CLANG_TIDY}
+                    -clang-tidy-binary=${CLANG_TIDY}
+                    -clang-apply-replacements-binary=${CLANG_APPLY_REPLACEMENTS}
                     -fix
                     -p=${CMAKE_BINARY_DIR}
-                    -export-fixes=${CMAKE_BINARY_DIR}/clang-tidy-fixes.yaml
                     ${SOURCES}
                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                     COMMENT "Running clang-tidy" VERBATIM)
