@@ -48,7 +48,7 @@ Function ComplainsWithInvalidArg1([string str])
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_INVALID_ARG)
+		CheckErrorMessage(err, ZMQ_INVALID_ARG)
 	endtry
 
 	CHECK_EQUAL_VAR(ret, 0)
@@ -66,7 +66,7 @@ Function ComplainsWithInvalidArg2([string str])
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_INVALID_ARG)
+		CheckErrorMessage(err, ZMQ_INVALID_ARG)
 	endtry
 
 	CHECK_EQUAL_VAR(ret, 0)
@@ -85,7 +85,7 @@ Function ComplainsWithInvalidArg3([string str])
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_INVALID_ARG)
+		CheckErrorMessage(err, ZMQ_INVALID_ARG)
 	endtry
 
 	CHECK_EQUAL_VAR(ret, 0)
@@ -116,7 +116,7 @@ Function BindsToLocalHostIPV6([string str])
 	FUNCREF BIND_PROTOTYPE f = $str
 	skipSourceCheck = GetSourceCheck_IGNORE(str)
 
-	zeromq_set(ZeroMQ_SET_FLAGS_IPV6)
+	zeromq_set(ZMQ_SET_FLAGS_IPV6)
 	ret = f("tcp://::1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
 	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V6), 1)
@@ -138,7 +138,7 @@ Function BindsToLocalHostIPV6AndIPV4([string str])
 	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 
 	// the ipv6 flag juggling is required due to https://github.com/zeromq/libzmq/issues/853
-	zeromq_set(ZeroMQ_SET_FLAGS_IPV6)
+	zeromq_set(ZMQ_SET_FLAGS_IPV6)
 	ret = f("tcp://::1:6666")
 	CHECK_EQUAL_VAR(ret, 0)
 
@@ -162,7 +162,7 @@ Function ComplainsOnBindOnUsedPortServer([string str])
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_INVALID_ARG)
+		CheckErrorMessage(err, ZMQ_INVALID_ARG)
 	endtry
 End
 
@@ -191,7 +191,7 @@ Function DoesNotAcceptLargeMessagesOnServerSocket()
 	string identity, reply
 	string msg = ""
 
-	zeromq_set(ZeroMQ_SET_FLAGS_DEFAULT | ZeroMQ_SET_FLAGS_NOBUSYWAITRECV)
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT | ZMQ_SET_FLAGS_NOBUSYWAITRECV)
 
 	rc = zeromq_server_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)

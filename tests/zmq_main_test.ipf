@@ -1,6 +1,6 @@
 #pragma TextEncoding = "UTF-8"
 #pragma rtGlobals=3
-#pragma IgorVersion=8.0
+#pragma IgorVersion=6.0
 
 #include "unit-testing"
 
@@ -131,7 +131,7 @@ Function TEST_CASE_BEGIN_OVERRIDE(name)
 	string name
 
 	zeromq_stop()
-	zeromq_set(ZeroMQ_SET_FLAGS_DEBUG | ZeroMQ_SET_FLAGS_DEFAULT | ZeroMQ_SET_FLAGS_LOGGING)
+	zeromq_set(ZMQ_SET_FLAGS_DEBUG | ZMQ_SET_FLAGS_DEFAULT | ZMQ_SET_FLAGS_LOGGING)
 End
 
 Function TEST_CASE_END_OVERRIDE(name)

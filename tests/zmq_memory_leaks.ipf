@@ -30,7 +30,7 @@ static Function TEST_CASE_BEGIN_OVERRIDE(name)
 	CHECK(	NUM_BYTES_LEAK_TESTING * NUM_RUNS > ADDITIONAL_MEMORY_USED)
 
 	zeromq_stop()
-	zeromq_set(ZeroMQ_SET_FLAGS_DEFAULT)
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
 
 	printf "BEGIN: Used memory %W0PB\r", NumberByKey("USEDPHYSMEM", IgorInfo(0))
 End

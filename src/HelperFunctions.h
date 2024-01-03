@@ -91,10 +91,10 @@ void SetDimensionLabels(waveHndl h, int Dimension,
 
 void ApplyFlags(double flags);
 
-namespace ZeroMQ_SET_FLAGS
+namespace ZMQ_SET_FLAGS
 {
 
-enum ZeroMQ_SET_FLAGS
+enum ZMQ_SET_FLAGS
 {
   DEFAULT              = 1,
   DEBUG                = 2,
