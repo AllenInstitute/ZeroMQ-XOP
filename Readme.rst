@@ -520,11 +520,49 @@ Required additional software:
 - (Windows only) Visual Studio 2019
 - (MacOSX only) Xcode
 - `CMake <https://cmake.org>`__ version 3.15 or later
-- `XOPSupport Toolkit 8 <https://www.wavemetrics.com/products/xoptoolkit/xoptoolkit.htm>`__
+- `XOPSupport Toolkit 8 <https://www.wavemetrics.com/products/xoptoolkit/xoptoolkit.htm>`__ (**see below**)
 - `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`__
+- `FMT <https://github.com/fmtlib/fmt>`__ formatting library (**see below**)
+- `JSON for Modern C++ <https://github.com/nlohmann/json>`__ JSON encoding/decoding in C++ (**see below**)
+- `Rylie's CMake Modules Collection <https://github.com/rpavlik/cmake-modules>`__ Helper modules used by the build system (**see below**)
+
+  The highlighted dependencies will require 'preparation' before building (see 'Code Preparation' step below).
+
 
 Building and installing the ZeroMQ.xop
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Code Preparation
+^^^^^^^^^^^^^^^^
+
+Before running cmake, we must place our fmt, json, cmake-modules, and XOP toolkit dependencies into expected locations for compilation. Assuming:
+- $fmt-dir is the path to our fmt dependency;
+- $json-dir is the path to our json dependency;
+- $cmake-modules-dir is the path to our cmake-modules dependency;
+- $xop-toolkit-dir is the path to the XOP Toolkit's source directory (e.g. subdirectory IgorXOPs8 for XOP Toolkit 8); and
+- $zmq-xop-dir is the path to our ZeroMQ-XOP code;
+
+Then:
+
+.. code-block:: sh
+    # Windows (Note: mklink requires administrator privileges)
+    # {
+    mklink \d $zmq-xop-dir/src/fmt $fmt-dir
+    mklink \d $zmq-xop-dir/src/json $json-dir
+    mklink \d $zmq-xop-dir/src/cmake-modules $cmake-modules-dir
+    mklink \d $zmq-xop-dir/XOPSupport $xop-toolkit-dir/XOPSupport
+    # }
+
+    # MacOSX
+    # {
+    ln -s $fmt-dir $zmq-xop-dir/src/fmt
+    ln -s $json-dir $zmq-xop-dir/src/json
+    ln -s $cmake-modules-dir $zmq-xop-dir/src/cmake-modules
+    ln -s $xop-toolkit-dir/XOPSupport $zmq-xop-dir/XOPSupport
+    # }
+
+CMake Build and Compilation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 See also ``.gitlab.ci.yml`` for up-do-date build instructions.
 
@@ -532,23 +570,26 @@ See also ``.gitlab.ci.yml`` for up-do-date build instructions.
 
    # Windows
    # {
-   # Install cmake from www.cmake.org
-   # Install Visual Studio 2019 Community
-   # Open a Visual Studio 2019 command prompt
-   cd Packages/ZeroMQ/src
+   cd $zmq-xop-dir/src
    md build build-64
-   cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE=Release ..
+   cd build
+   cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE=Release -S .. -B .
    cmake --build . --config Release --target install
-   cd ..
-   cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release ..
+   cd ../build-64
+   cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -S .. -B .
    cmake --build . --config Release --target install
    # }
 
    # MacOSX
    # {
-   cmake -G Xcode -DCMAKE_BUILD_TYPE=Release ..
+   cd $zmq-xop-dir/src
+   mkdir build
+   cd build
+   cmake -G Xcode -DCMAKE_BUILD_TYPE=Release -S .. -B .
    cmake --build . --config Release --target install
    # }
+
+After install, the created libraries will be located in $zmq-xop-dir/output/$os, where $os is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
 
 Running the test suite
 ~~~~~~~~~~~~~~~~~~~~~~
