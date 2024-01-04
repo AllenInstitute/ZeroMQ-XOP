@@ -536,6 +536,7 @@ Code Preparation
 ^^^^^^^^^^^^^^^^
 
 Before running cmake, we must place our fmt, json, cmake-modules, and XOP toolkit dependencies into expected locations for compilation. Assuming:
+
 - $fmt-dir is the path to our fmt dependency;
 - $json-dir is the path to our json dependency;
 - $cmake-modules-dir is the path to our cmake-modules dependency;
@@ -545,6 +546,7 @@ Before running cmake, we must place our fmt, json, cmake-modules, and XOP toolki
 Then:
 
 .. code-block:: sh
+
     # Windows (Note: mklink requires administrator privileges)
     # {
     mklink \d $zmq-xop-dir/src/fmt $fmt-dir
