@@ -23,7 +23,7 @@ ENDIF()
 
 SET(XOP_MINIMUM_IGORVERSION 800)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/CreateLaunchers/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake-modules")
 include(CreateLaunchers)
 
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
