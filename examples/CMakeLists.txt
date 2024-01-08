@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
 
 # This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
