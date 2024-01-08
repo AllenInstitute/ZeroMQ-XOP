@@ -538,6 +538,7 @@ Building and installing the ZeroMQ.xop
 To get set up, we must clone our repository, set up our submodules, and 'position' the XOP toolkit.
 
 We will use the following variable names for clarity below:
+
 - ``$xop-toolkit-dir`` is the path to the XOP Toolkit's source directory (e.g. subdirectory IgorXOPs8 for XOP Toolkit 8); and
 - ``$zmq-xop-dir`` is the path to our ZeroMQ-XOP code;
 
@@ -551,7 +552,7 @@ To clone the repository (and clone the required submodules), perform the followi
 
     git clone --recurse-submodules https://github.com/AllenInstitute/ZeroMQ-XOP.git
 
-- Here, '``--recurse-submodules``' is responsible for recursively initializing and updating the submodules (described above). If you have already cloned, init and update the modules via '``git submodule update --init --recursive``'.
+- Here, ``--recurse-submodules`` is responsible for recursively initializing and updating the submodules (described above). If you have already cloned, init and update the modules via ``git submodule update --init --recursive``.
 - If you are using SSH or another mechanism to obtain the repository, replace the http link above with your repository ID.
 
 XOP Toolkit Setup
