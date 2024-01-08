@@ -537,10 +537,9 @@ Building and installing the ZeroMQ.xop
 
 To get set up, we must clone our repository, set up our submodules, and 'position' the XOP toolkit.
 
-Below, we will refer to the following:
-
-- $xop-toolkit-dir is the path to the XOP Toolkit's source directory (e.g. subdirectory IgorXOPs8 for XOP Toolkit 8); and
-- $zmq-xop-dir is the path to our ZeroMQ-XOP code;
+We will use the following variable names for clarity below:
+- ``$xop-toolkit-dir`` is the path to the XOP Toolkit's source directory (e.g. subdirectory IgorXOPs8 for XOP Toolkit 8); and
+- ``$zmq-xop-dir`` is the path to our ZeroMQ-XOP code;
 
 
 Repository Setup
@@ -552,7 +551,7 @@ To clone the repository (and clone the required submodules), perform the followi
 
     git clone --recurse-submodules https://github.com/AllenInstitute/ZeroMQ-XOP.git
 
-- Here, '--recurse-submodules' is responsible for recursively initializing and updating the submodules (described above). If you have already cloned, init and update the modules via 'git submodule update --init --recursive'.
+- Here, '``--recurse-submodules``' is responsible for recursively initializing and updating the submodules (described above). If you have already cloned, init and update the modules via '``git submodule update --init --recursive``'.
 - If you are using SSH or another mechanism to obtain the repository, replace the http link above with your repository ID.
 
 XOP Toolkit Setup
@@ -560,7 +559,7 @@ XOP Toolkit Setup
 
 Our build system (cmake) must know where the XOP toolkit's main code files are (located in $xop-toolkit-dir/XOPSupport). By default, cmake will search for them in: $zmq-xop-dir/XOPSupport.
 
-If using the default location, one should make a shortcut/symbolic link between $xop-toolkit-dir/XOPSupport and $zmq-xop-dir/XOPSupport:
+If using the default location, one should make a shortcut/symbolic link between ``$xop-toolkit-dir/XOPSupport`` and ``$zmq-xop-dir/XOPSupport``:
 
 .. code-block:: sh
 
@@ -573,7 +572,7 @@ If using the default location, one should make a shortcut/symbolic link between 
     ln -s $xop-toolkit-dir/XOPSupport $zmq-xop-dir/XOPSupport
     # }
 
-This can be alternatively be changed by changing cmake's ${XOP_SUPPORT_PATH} variable, either via the UI (cmake-gui for Windows, ccmake for Linux/Mac OSX), or when invoking the generator:
+This can be alternatively be changed by changing cmake's ``${XOP_SUPPORT_PATH}`` variable, either via the UI (cmake-gui for Windows, ccmake for Linux/Mac OSX), or when invoking the generator:
 
 .. code-block:: sh
 
