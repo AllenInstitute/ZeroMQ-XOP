@@ -549,6 +549,7 @@ Repository Setup
 To clone the repository (and clone the required submodules), perform the following:
 
 .. code-block:: sh
+
     git clone --recurse-submodules https://github.com/AllenInstitute/ZeroMQ-XOP.git
 
 - Here, '--recurse-submodules' is responsible for recursively initializing and updating the submodules (described above). If you have already cloned, init and update the modules via 'git submodule update --init --recursive'.
@@ -562,6 +563,7 @@ Our build system (cmake) must know where the XOP toolkit's main code files are (
 If using the default location, one should make a shortcut/symbolic link between $xop-toolkit-dir/XOPSupport and $zmq-xop-dir/XOPSupport:
 
 .. code-block:: sh
+
     # Windows (Note: mklink requires administrator privileges)
     # {
     mklink \d $zmq-xop-dir/XOPSupport $xop-toolkit-dir/XOPSupport
@@ -575,13 +577,12 @@ Compilation and Installation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The compilation procedure involves:
+
 1. cmake generates the environment-specific 'projects', based on its CMakeLists.txt files. This is achieved by the initial cmake call.
 2. The development environment builds the XOP library, via the '--build' portion of the cmake call.
 3. The development environment installs the XOP library (and dependencies) in an install location (as defined in the CMakeLists).
 
-The commands below perform this.
-
-(See also ``.gitlab.ci.yml`` for up-do-date build instructions.)
+The commands below perform this. (See also ``.gitlab.ci.yml`` for up-do-date build instructions.)
 
 .. code-block:: sh
 
