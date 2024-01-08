@@ -1,6 +1,6 @@
 #pragma TextEncoding = "UTF-8"
 #pragma rtGlobals=3
-#pragma IgorVersion=6.2
+#pragma IgorVersion=8.0
 
 #include "unit-testing"
 
