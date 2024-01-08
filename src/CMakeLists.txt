@@ -141,39 +141,42 @@ SET(HEADERS
 SOURCE_GROUP("Headers" FILES ${HEADERS})
 
 # Remove that hack once we compile the XOPToolkit with cmake
+SET(XOP_SUPPORT_PATH ${CMAKE_SOURCE_DIR}/../XOPSupport/ CACHE STRING
+"Path to XOP Toolkit's XOPSupport directory. By default, assumed to be linked \
+ at $zmq-xop-dir/XOPSupport.")
 
 SET(XOPTOOLKIT_SOURCES
- ${CMAKE_SOURCE_DIR}/../XOPSupport/IgorErrors.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/IgorXOP.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/NamedFIFO.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/WMTypes.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOP.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPContainers.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPContainers.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPDataFolderAccess.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPDialogsMac.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPDialogsWin.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPFileNavigationMac.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPFileNavigationWin.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPFiles.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPFilesMac.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPFilesWin.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPMemory.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPMenus.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPNumericConversion.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPResources.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPStandardHeaders.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPSupport.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPSupport.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPSupportMac.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPSupportMac.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPSupportWin.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPSupportWin.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPTextUtilityWindows.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPWaveAccess.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPWindows.c
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPWindows.h
- ${CMAKE_SOURCE_DIR}/../XOPSupport/XOPWinMacSupport.h
+ ${XOP_SUPPORT_PATH}/IgorErrors.h
+ ${XOP_SUPPORT_PATH}/IgorXOP.h
+ ${XOP_SUPPORT_PATH}/NamedFIFO.h
+ ${XOP_SUPPORT_PATH}/WMTypes.h
+ ${XOP_SUPPORT_PATH}/XOP.h
+ ${XOP_SUPPORT_PATH}/XOPContainers.c
+ ${XOP_SUPPORT_PATH}/XOPContainers.h
+ ${XOP_SUPPORT_PATH}/XOPDataFolderAccess.c
+ ${XOP_SUPPORT_PATH}/XOPDialogsMac.c
+ ${XOP_SUPPORT_PATH}/XOPDialogsWin.c
+ ${XOP_SUPPORT_PATH}/XOPFileNavigationMac.c
+ ${XOP_SUPPORT_PATH}/XOPFileNavigationWin.c
+ ${XOP_SUPPORT_PATH}/XOPFiles.c
+ ${XOP_SUPPORT_PATH}/XOPFilesMac.c
+ ${XOP_SUPPORT_PATH}/XOPFilesWin.c
+ ${XOP_SUPPORT_PATH}/XOPMemory.c
+ ${XOP_SUPPORT_PATH}/XOPMenus.c
+ ${XOP_SUPPORT_PATH}/XOPNumericConversion.c
+ ${XOP_SUPPORT_PATH}/XOPResources.h
+ ${XOP_SUPPORT_PATH}/XOPStandardHeaders.h
+ ${XOP_SUPPORT_PATH}/XOPSupport.c
+ ${XOP_SUPPORT_PATH}/XOPSupport.h
+ ${XOP_SUPPORT_PATH}/XOPSupportMac.c
+ ${XOP_SUPPORT_PATH}/XOPSupportMac.h
+ ${XOP_SUPPORT_PATH}/XOPSupportWin.c
+ ${XOP_SUPPORT_PATH}/XOPSupportWin.h
+ ${XOP_SUPPORT_PATH}/XOPTextUtilityWindows.c
+ ${XOP_SUPPORT_PATH}/XOPWaveAccess.c
+ ${XOP_SUPPORT_PATH}/XOPWindows.c
+ ${XOP_SUPPORT_PATH}/XOPWindows.h
+ ${XOP_SUPPORT_PATH}/XOPWinMacSupport.h
 )
 
 FOREACH(it IN LISTS ${XOPTOOLKIT_SOURCES})
@@ -184,7 +187,7 @@ ADD_CUSTOM_TARGET("XOP_Toolkit" SOURCES ${XOPTOOLKIT_SOURCES}
                                 COMMAND "echo"
                                 COMMENT "Fake target for convenience. This does nothing.")
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/../XOPSupport)
+INCLUDE_DIRECTORIES(${XOP_SUPPORT_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${installFolderLibZMQ}/include)
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
@@ -232,7 +235,7 @@ IF(APPLE)
     PRE_BUILD
     COMMAND ${APPLE_RESOURCE}
     ${sysroot}
-    -i ${CMAKE_SOURCE_DIR}/../XOPSupport
+    -i ${XOP_SUPPORT_PATH}
     -F ${CARBON_LIBRARY}
     -useDF
     ${RESOURCES}
@@ -259,7 +262,7 @@ IF(APPLE)
     PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/English.lproj")
 
   TARGET_LINK_LIBRARIES(${libname} PRIVATE ${EXTRA_LIBS}
-                         ${CMAKE_SOURCE_DIR}/../XOPSupport/Xcode/libXOPSupport${bitness}.a
+                         ${XOP_SUPPORT_PATH}/Xcode/libXOPSupport${bitness}.a
                          ${installFolderLibZMQ}/lib/libzmq.a)
 
   TARGET_COMPILE_OPTIONS(${libname} PRIVATE -Weverything $<$<BOOL:${WARNINGS_AS_ERRORS}>:-Werror> -Wno-global-constructors -Wno-padded
@@ -337,8 +340,8 @@ ELSEIF(WIN32)
   SET_TARGET_PROPERTIES(${libname} PROPERTIES SUFFIX ".xop")
 
   TARGET_LINK_LIBRARIES(${libname} PRIVATE version.lib ${EXTRA_LIBS}
-                        ${CMAKE_SOURCE_DIR}/../XOPSupport/IGOR${bitness}.lib
-                        ${CMAKE_SOURCE_DIR}/../XOPSupport/VC/XOPSupport${bitness}.lib
+                        ${XOP_SUPPORT_PATH}/IGOR${bitness}.lib
+                        ${XOP_SUPPORT_PATH}/VC/XOPSupport${bitness}.lib
                         optimized ${installFolderLibZMQ}/lib/libzmq-v142-mt-4_3_4.lib
                         debug ${installFolderLibZMQ}/lib/libzmq-v142-mt-gd-4_3_4.lib)
 
