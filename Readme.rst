@@ -512,50 +512,105 @@ One publisher message is sent out every five seconds, this is the "heartbeat" me
 Users are encouraged to offer a list of available message filters via server/client sockets and calling a pre-agreed
 function which returns a text wave.
 
-Compilation instructions
-^^^^^^^^^^^^^^^^^^^^^^^^
+Dependencies
+^^^^^^^^^^^^
 
-Required additional software:
+zeromq-xop has the following 3rd party dependencies, which must be installed to compile:
 
-- (Windows only) Visual Studio 2019
-- (MacOSX only) Xcode
-- `CMake <https://cmake.org>`__ version 3.15 or later
-- `XOPSupport Toolkit 8 <https://www.wavemetrics.com/products/xoptoolkit/xoptoolkit.htm>`__
+- (Windows only) Visual Studio 2019 - Windows development environment.
+- (MacOSX only) Xcode - Mac OSX development environment.
+- `CMake <https://cmake.org>`__ (version 3.15 or later) - build system.
+- `XOPToolkit 8 <https://www.wavemetrics.com/products/xoptoolkit/xoptoolkit.htm>`__ - toolkit for creating XOPs (such as this one), to communicate with Igor Pro.
+
+zeromq-xop also depends on a couple of additional repositories, which are included in the repository and *do not* require separate installation:
+
+- `FMT <https://github.com/fmtlib/fmt>`__ formatting library.
+- `JSON for Modern C++ <https://github.com/nlohmann/json>`__ JSON encoding/decoding in C++.
+- `Caseymcc's CreateLaunchers (from Rylie's CMake Modules Collection) <https://github.com/rpavlik/cmake-modules>`__ helper modules used by the build system.
+
+Lastly, unit tests requires setup of the following (with instructions on doing so further below):
+
 - `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`__
 
 Building and installing the ZeroMQ.xop
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See also ``.gitlab.ci.yml`` for up-do-date build instructions.
+To get set up, we must clone our repository, set up our submodules, and 'position' the XOP toolkit.
+
+Below, we will refer to the following:
+
+- $xop-toolkit-dir is the path to the XOP Toolkit's source directory (e.g. subdirectory IgorXOPs8 for XOP Toolkit 8); and
+- $zmq-xop-dir is the path to our ZeroMQ-XOP code;
+
+
+Repository Setup
+^^^^^^^^^^^^^^^^
+
+To clone the repository (and clone the required submodules), perform the following:
+
+.. code-block:: sh
+    git clone --recurse-submodules https://github.com/AllenInstitute/ZeroMQ-XOP.git
+
+- Here, '--recurse-submodules' is responsible for recursively initializing and updating the submodules (described above). If you have already cloned, init and update the modules via 'git submodule update --init --recursive'.
+- If you are using SSH or another mechanism to obtain the repository, replace the http link above with your repository ID.
+
+XOP Toolkit Setup
+^^^^^^^^^^^^^^^^^
+
+Our build system (cmake) must know where the XOP toolkit's main code files are (located in $xop-toolkit-dir/XOPSupport). By default, cmake will search for them in: $zmq-xop-dir/XOPSupport. This can be changed by overriding the #TODO: Finish me variable.
+
+If using the default location, one should make a shortcut/symbolic link between $xop-toolkit-dir/XOPSupport and $zmq-xop-dir/XOPSupport:
+
+.. code-block:: sh
+    # Windows (Note: mklink requires administrator privileges)
+    # {
+    mklink \d $zmq-xop-dir/XOPSupport $xop-toolkit-dir/XOPSupport
+    # }
+    # MacOSX
+    # {
+    ln -s $xop-toolkit-dir/XOPSupport $zmq-xop-dir/XOPSupport
+    # }
+
+Compilation and Installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The compilation procedure involves:
+1. cmake generates the environment-specific 'projects', based on its CMakeLists.txt files. This is achieved by the initial cmake call.
+2. The development environment builds the XOP library, via the '--build' portion of the cmake call.
+3. The development environment installs the XOP library (and dependencies) in an install location (as defined in the CMakeLists).
+
+The commands below perform this.
+
+(See also ``.gitlab.ci.yml`` for up-do-date build instructions.)
 
 .. code-block:: sh
 
    # Windows
    # {
-   # Install cmake from www.cmake.org
-   # Install Visual Studio 2019 Community
-   # Open a Visual Studio 2019 command prompt
-   cd Packages/ZeroMQ/src
+   cd $zmq-xop-dir/src
    md build build-64
-   cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE=Release ..
+   cd build
+   cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE=Release -S .. -B .
    cmake --build . --config Release --target install
-   cd ..
-   cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release ..
+   cd ../build-64
+   cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -S .. -B .
    cmake --build . --config Release --target install
    # }
 
    # MacOSX
    # {
-   cmake -G Xcode -DCMAKE_BUILD_TYPE=Release ..
+   cmake -G Xcode -DCMAKE_BUILD_TYPE=Release -S .. -B .
    cmake --build . --config Release --target install
    # }
+
+After install, the created libraries will be located in $zmq-xop-dir/output/$os, where $os is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
 
 Running the test suite
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Clone the `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`_.
 - Create in "Igor Procedures" a shortcut pointing to the "procedures" directory of that repository.
-- Open Packages/ZeroMQ/tests/RunTests.pxp
+- Open $zmq-xop-dir/tests/RunTests.pxp
 - Execute in Igor ``run()``
 - The test suite always passes *without* errors
 
