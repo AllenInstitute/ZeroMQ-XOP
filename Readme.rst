@@ -570,11 +570,11 @@ If using the default location, one should make a shortcut/symbolic link between 
 
     # Windows (Note: mklink requires administrator privileges)
     # {
-    mklink \d $zmq-xop-dir/XOPSupport $xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport
+    mklink \d $zmq-xop-dir/XOPSupport "$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport"
     # }
     # MacOSX
     # {
-    ln -s $xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport $zmq-xop-dir/XOPSupport
+    ln -s "$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport" $zmq-xop-dir/XOPSupport
     # }
 
 This can be alternatively be changed by changing cmake's ``${XOP_SUPPORT_PATH}`` variable, either via the UI (cmake-gui for Windows, ccmake for Linux/Mac OSX), or when invoking the generator:
