@@ -46,7 +46,7 @@ ENDIF()
 
 # Set where we expect Igor to be, used to create our launcher.
 IF(IGOR6)
-  SET(igorSubdir "igor6")
+  SET(igorVersion "igor6")  # Note this is *really* XOP Toolkit 7, which supports Igors 6 and 7.
   IF(MSVC)
     SET(igorPath "C:/Program Files (x86)/WaveMetrics/Igor Pro Folder/Igor.exe")
   ELSEIF(APPLE)
@@ -54,7 +54,7 @@ IF(IGOR6)
     SET(igorPath "/Applications/Igor\ Pro\ Folder/Igor.app/Contents/MacOS/Igor")
   ENDIF()
 ELSE()
-  SET(igorSubdir "igor8")
+  SET(igorVersion "igor8")  # Note this is *really* XOP Toolkit 8, which supports Igors 8+.
   IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
     IF(MSVC)
       SET(igorPath "C:/Program Files/WaveMetrics/Igor Pro 9 Folder/IgorBinaries_Win32/Igor.exe")
@@ -80,12 +80,12 @@ IF(APPLE)
   # use RPATH
   cmake_policy(SET CMP0042 NEW)
   SET(RESOURCES "${PROJECT_NAME}.r")
-  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/${igorSubdir}/mac/xop/${CMAKE_BUILD_TYPE}")
-  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/${igorSubdir}/mac/libzmq/${CMAKE_BUILD_TYPE}")
+  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/mac/xop/${CMAKE_BUILD_TYPE}")
+  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/mac/libzmq/${CMAKE_BUILD_TYPE}")
 ELSEIF(WIN32)
   SET(RESOURCES "${PROJECT_NAME}.rc")
-  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/${igorSubdir}/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
-  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/${igorSubdir}/win/${bitnessLibFolder}/libzmq/${CMAKE_BUILD_TYPE}")
+  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
+  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/win/${bitnessLibFolder}/libzmq/${CMAKE_BUILD_TYPE}")
 ENDIF()
 
 # CPP files used for coverage analysis
