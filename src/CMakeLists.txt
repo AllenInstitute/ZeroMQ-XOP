@@ -70,6 +70,10 @@ ELSE()
   ENDIF()
 ENDIF()
 
+# Set igorPath to be a cached variable, tso the user can override it.
+SET(igorPath ${igorPath} CACHE FILEPATH "Path to Igor executable of interest. \
+Used by launcher scripts for debugging purposes.")
+
 SET(libname "${PROJECT_NAME}${bitnessWithDash}")
 
 IF(APPLE)

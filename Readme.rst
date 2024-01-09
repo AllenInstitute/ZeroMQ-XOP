@@ -534,8 +534,8 @@ Lastly, unit tests requires setup of the following (with instructions on doing s
 
 - `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`__
 
-Building the ZeroMQ.xop
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Building the ZeroMQ XOP
+~~~~~~~~~~~~~~~~~~~~~~~
 
 To get set up, we must install prerequisites, clone our repository, set up our submodules, and 'position' the XOP toolkit.
 
@@ -618,6 +618,17 @@ The commands below perform this. (See also ``.gitlab.ci.yml`` for up-do-date bui
    # }
 
 After cmake 'install', the created libraries will be located in ``$zmq-xop-dir/output/igor8/$os``, where ``$os`` is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
+
+Debugging the XOP
+^^^^^^^^^^^^^^^^
+
+When compiled from source, debugging launchers are created to allow easier debugging of the XOP.
+
+- For Windows, a number of ``launch-ZeroMQ-${CMAKE_BUILD_TYPE}.cmd`` scripts are created, with ``${CMAKE_BUILD_TYPE}`` referring to a compilation mode of interest (e.g., Debug, Release). Running it will launch Igor with the ZeroMQ.xop in debugger mode. The user can then open their VS debugger and debug as needed.
+- For Mac OSX, a ``launch-ZeroMQ.sh`` script is created. Running it will start Igor and a gdb debugger, allowing similar debugging to be done as needed.
+
+In both cases, a knowledge of *where* the Igor executable is located is necessary. The existing CMake files contain hardcoded assumptions for where they are, assuming Igor Pro 9 is installed. However, the user may explicit this path by setting the CMake variable ``${igorPath}`` (see "XOP toolkit setup" for instructions on settings cmake variables).
+
 
 Running the test suite
 ~~~~~~~~~~~~~~~~~~~~~~

@@ -2,7 +2,7 @@
 #pragma rtGlobals=3
 #pragma IgorVersion=8.0
 
-#include "unit-testing"
+#include "igortest"
 
 #include "::procedures:ZeroMQ_Interop"
 
