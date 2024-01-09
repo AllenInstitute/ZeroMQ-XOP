@@ -562,7 +562,7 @@ To clone the repository (and clone the required submodules), perform the followi
 XOP Toolkit Setup
 ^^^^^^^^^^^^^^^^^
 
-Our build system (cmake) must know where the XOP toolkit's main code files are (located in $xop-toolkit-dir/XOPSupport). By default, cmake will search for them in: $zmq-xop-dir/XOPSupport.
+Our build system (cmake) must know where the XOP toolkit's main code files are (located in $xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport). By default, cmake will search for them in: $zmq-xop-dir/XOPSupport.
 
 If using the default location, one should make a shortcut/symbolic link between ``$xop-toolkit-dir/XOPSupport`` and ``$zmq-xop-dir/XOPSupport``:
 
@@ -570,18 +570,18 @@ If using the default location, one should make a shortcut/symbolic link between 
 
     # Windows (Note: mklink requires administrator privileges)
     # {
-    mklink \d $zmq-xop-dir/XOPSupport $xop-toolkit-dir/XOPSupport
+    mklink \d $zmq-xop-dir/XOPSupport $xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport
     # }
     # MacOSX
     # {
-    ln -s $xop-toolkit-dir/XOPSupport $zmq-xop-dir/XOPSupport
+    ln -s $xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport $zmq-xop-dir/XOPSupport
     # }
 
 This can be alternatively be changed by changing cmake's ``${XOP_SUPPORT_PATH}`` variable, either via the UI (cmake-gui for Windows, ccmake for Linux/Mac OSX), or when invoking the generator:
 
 .. code-block:: sh
 
-    cmake -DXOP_SUPPORT_PATH=some/new/path
+    cmake -DXOP_SUPPORT_PATH="$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport"
 
 
 Compilation and Installation
