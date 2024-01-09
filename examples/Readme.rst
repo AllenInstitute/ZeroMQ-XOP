@@ -24,8 +24,10 @@ Compilation
 
 - ``mkdir build``
 - ``cd build``
-- ``cmake -G "Visual Studio 14 2015" ..``
+- ``cmake -G "Visual Studio 16 2019" -S .. -B .``
 - ``cmake --build . --config Release``
+
+The executable will be located in the Release or Debug directory of your build subdirectory, depending on your compilation mode (in the above, Release).
 
 Usage
 ~~~~~
