@@ -1134,7 +1134,7 @@ Function WorksWithFunctionsAndPassByRef3()
 
 	Make/FREE/T/N=0 wv
 	ExtractReturnValue(replyMessage, passByRefWave=wv)
-	expected = "NaN"
+	expected = "nan"
 	actual   = wv[0]
 	CHECK_EQUAL_STR(expected, actual)
 
@@ -1383,7 +1383,7 @@ Function WorksWithMultipleReturnValues1()
 	actual   = wv[1]
 	CHECK_EQUAL_STR(expected, actual)
 
-	expected = "NaN"
+	expected = "nan"
 	actual   = wv[2]
 	CHECK_EQUAL_STR(expected, actual)
 End
