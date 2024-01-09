@@ -26,6 +26,8 @@ The XOP provides the following functions:
 - :cpp:func:`zeromq_sub_recv`
 - :cpp:func:`zeromq_sub_remove_filter`
 
+This XOP primarily supports (and is tested on) Igor Pro versions 8 or above. The code in principle supports Igor Pro 6 and 7, but the test suite does not. Therefore, builds released for Igor 6/7 are considered **EXPERIMENTAL** and should be treated as such. Special instructions for Igor 6/7 are described at the end of this readme.
+
 Installation
 ~~~~~~~~~~~~
 
@@ -42,8 +44,8 @@ Windows
 
   - In "Igor Procedures" a shortcut pointing to "procedures"
   - In "Igor Help Files" a shortcut pointing to "help"
-  - In "Igor Extensions" a shortcut pointing to "output/win/x86"
-  - In "Igor Extensions (64-bit)" a shortcut pointing to "output/win/x64"
+  - In "Igor Extensions" a shortcut pointing to "output/igor8/win/x86"
+  - In "Igor Extensions (64-bit)" a shortcut pointing to "output/igor8/win/x64"
 
 - Start Igor Pro
 
@@ -57,7 +59,7 @@ MacOSX
   - In "Igor Procedures" a symlink pointing to "procedures"
   - In "Igor Help Files" a symlink pointing to "help"
   - In "Igor Extensions" a symlink pointing to "output/mac/ZeroMQ"
-  - In "Igor Extensions (64-bit)" a symlink pointing to "output/mac/ZeroMQ-64"
+  - In "Igor Extensions (64-bit)" a symlink pointing to "output/igor8/mac/ZeroMQ-64"
 
 - Start Igor Pro
 
@@ -615,7 +617,7 @@ The commands below perform this. (See also ``.gitlab.ci.yml`` for up-do-date bui
    cmake --build . --config Release --target install
    # }
 
-After install, the created libraries will be located in $zmq-xop-dir/output/$os, where $os is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
+After install, the created libraries will be located in $zmq-xop-dir/output/igor8/$os, where $os is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
 
 Running the test suite
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -662,3 +664,56 @@ is `JSONL <https://jsonlines.org>`__. Additional static entries can be added to 
 ``zeromq_set_logging_template`` which allows to set a new template JSON text.
 
 The location of the log file on Windows is ``C:\Users\$user\AppData\Roaming\WaveMetrics\Igor Pro $version\Packages\ZeroMQ\Log.jsonl``.
+
+Igor Pro 6/7 Support
+--------------------
+
+As mentioned previously, this XOP supports Igor versions 6/7 in principle. However, the test suite *does not*. Thus, Igor6/7 builds are **experimental** and should be treated as such.
+
+In what follows, we explicit the differences in installation and compilation when using with Igor6/7.
+
+Installation
+^^^^^^^^^^^^
+
+The differences in installation relate to Igor 6/7's support for 32-bit or 64-bit extensions.
+
+- Igor6 is or before are 32-bit applications, and thus require 32-bit extensions. Note that there is a special 64-bit Igor6 for Windows, but it is suggested only for special cases. Also note that Igor6 on Mac requires MacOS 10.14 or earlier (as 32-bit support ends with MacOS 10.15).
+- Igor7 installs both 32-bit and 64-bit versios, with the 64-bit recommended.
+
+In both cases, only a single "Igor Extensions" directory is provided in the user files directory (i.e., there is no "Igor Extensions (64-bit)"). As such, you must symlink **the appropriate** extensions folder **depending on your Igor bitness**:
+
+- If using 32-bit Igor, make a symbolic link/shortcut to "output/igor6/win/x86" for Windows, and "output/igor6/mac/ZeroMQ" for Mac.
+- If using 64-bit Igor, make a symbolic link/shortcut to "output/igor6/win/x64" for Windows, and "output/igor6/mac/ZeroMQ-64" for Mac.
+
+Compilation
+^^^^^^^^^^^
+
+To compile for IgorPro 6/7:
+
+- You must use the proper XOP Toolkit: **Toolkit 7**. Thus, in the *XOP Toolkit Setup* section, replaces ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport`` with ``$xop-toolkit-dir/XOP Toolkit 7/IgorXOPs/XOPSupport`` throughout.
+- You must explicit the IGOR6_OR_7 option in the cmake generation stage. In other words, your ``cmake -G ..`` calls (the first cmake call) must include ``-DIGOR6=ON``.
+- On Windows, you should compile with the officially supported Visual Studio version: Visual Studio 15 2017. As such, your cmake generation stage should use ``cmake -G "Visual Studio 15 2017" ..`` (instead of 2019).
+
+  Putting these together, the generation steps are:
+
+.. code-block:: sh
+
+   # Windows
+   # {
+   cd $zmq-xop-dir/src
+   md build build-64
+   cd build
+   cmake -G "Visual Studio 15 2017" -A Win32 -DCMAKE_BUILD_TYPE=Release -DIGOR6=ON -S .. -B .
+   cmake --build . --config Release --target install
+   cd ../build-64
+   cmake -G "Visual Studio 15 2017" -A x64 -DCMAKE_BUILD_TYPE=Release -DIGOR6=ON -S .. -B .
+   cmake --build . --config Release --target install
+   # }
+
+   # MacOSX
+   # {
+   cmake -G Xcode -DCMAKE_BUILD_TYPE=Release -DIGOR6=ON -S .. -B .
+   cmake --build . --config Release --target install
+   # }
+
+After compilation, the created libraries will be located in $zmq-xop-dir/output/igor6/$os (instead of $zmq-xop-dir/output/igor8).
