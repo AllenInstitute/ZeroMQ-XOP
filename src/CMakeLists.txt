@@ -141,7 +141,7 @@ SET(HEADERS
 SOURCE_GROUP("Headers" FILES ${HEADERS})
 
 # Remove that hack once we compile the XOPToolkit with cmake
-SET(XOP_SUPPORT_PATH ${CMAKE_SOURCE_DIR}/../XOPSupport/ CACHE STRING
+SET(XOP_SUPPORT_PATH ${CMAKE_SOURCE_DIR}/../XOPSupport/ CACHE PATH
 "Path to XOP Toolkit's XOPSupport directory. By default, assumed to be linked \
  at $zmq-xop-dir/XOPSupport.")
 
