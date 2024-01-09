@@ -532,7 +532,7 @@ Lastly, unit tests requires setup of the following (with instructions on doing s
 
 - `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`__
 
-Building and installing the ZeroMQ.xop
+Building the ZeroMQ.xop
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To get set up, we must install prerequisites, clone our repository, set up our submodules, and 'position' the XOP toolkit.
@@ -547,7 +547,7 @@ Installing prerequisites
 
 Before continuing, ensure you have installed the prerequisites listed in the 'Dependencies' section above. For a Windows system, ensure Visual Studio is installed; for a Mac system, ensure XCode is installed. For both, ensure you have cmake installed, and the XOP Toolkit downloaded.
 
-Repository Setup
+Repository setup
 ^^^^^^^^^^^^^^^^
 
 To clone the repository (and clone the required submodules), perform the following:
@@ -559,7 +559,7 @@ To clone the repository (and clone the required submodules), perform the followi
 - Here, ``--recurse-submodules`` is responsible for recursively initializing and updating the submodules (described above). If you have already cloned, init and update the modules via ``git submodule update --init --recursive``.
 - If you are using SSH or another mechanism to obtain the repository, replace the http link above with your repository ID.
 
-XOP Toolkit Setup
+XOP toolkit setup
 ^^^^^^^^^^^^^^^^^
 
 Our build system (cmake) must know where the XOP toolkit's main code files are (located in ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport``). By default, cmake will search for them in: $zmq-xop-dir/XOPSupport.
@@ -584,14 +584,14 @@ This can be alternatively be changed by changing cmake's ``${XOP_SUPPORT_PATH}``
     cmake -DXOP_SUPPORT_PATH="$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport"
 
 
-Compilation and Installation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Compilation instructions
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 The compilation procedure involves:
 
 1. cmake generates the environment-specific 'projects', based on its CMakeLists.txt files. This is achieved by the initial cmake call.
 2. The development environment builds the XOP library, via the '--build' portion of the cmake call.
-3. The development environment installs the XOP library (and dependencies) in an install location (as defined in the CMakeLists).
+3. The development environment 'installs' the XOP library (and dependencies) in an install location (as defined in the CMakeLists). Note that 'install' here simply refers to a copy of appropriate files to a predefined location (and thus differs from our "Installation" instructions).
 
 The commands below perform this. (See also ``.gitlab.ci.yml`` for up-do-date build instructions.)
 
@@ -615,7 +615,7 @@ The commands below perform this. (See also ``.gitlab.ci.yml`` for up-do-date bui
    cmake --build . --config Release --target install
    # }
 
-After install, the created libraries will be located in $zmq-xop-dir/output/$os, where $os is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
+After cmake 'install', the created libraries will be located in $zmq-xop-dir/output/$os, where $os is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
 
 Running the test suite
 ~~~~~~~~~~~~~~~~~~~~~~
