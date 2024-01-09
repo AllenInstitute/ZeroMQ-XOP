@@ -598,16 +598,16 @@ The commands below perform this. (See also ``.gitlab.ci.yml`` for up-do-date bui
    cd $zmq-xop-dir/src
    md build build-64
    cd build
-   cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE=Release ..
+   cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE=Release -S .. -B .
    cmake --build . --config Release --target install
    cd ../build-64
-   cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release ..
+   cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release -S .. -B .
    cmake --build . --config Release --target install
    # }
 
    # MacOSX
    # {
-   cmake -G Xcode -DCMAKE_BUILD_TYPE=Release ..
+   cmake -G Xcode -DCMAKE_BUILD_TYPE=Release -S .. -B .
    cmake --build . --config Release --target install
    # }
 
