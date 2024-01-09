@@ -562,7 +562,7 @@ To clone the repository (and clone the required submodules), perform the followi
 XOP toolkit setup
 ^^^^^^^^^^^^^^^^^
 
-Our build system (cmake) must know where the XOP toolkit's main code files are (located in ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport``). By default, cmake will search for them in: $zmq-xop-dir/XOPSupport.
+Our build system (cmake) must know where the XOP toolkit's main code files are (located in ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport``). By default, cmake will search for them in: ``$zmq-xop-dir/XOPSupport``.
 
 If using the default location, one should make a shortcut/symbolic link between ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport`` and ``$zmq-xop-dir/XOPSupport``:
 
