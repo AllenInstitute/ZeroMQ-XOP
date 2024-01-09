@@ -541,7 +541,7 @@ To get set up, we must install prerequisites, clone our repository, set up our s
 
 We will use the following variable names for clarity below:
 
-- ``$xop-toolkit-dir`` is the path to the XOP Toolkit's source directory (e.g. subdirectory IgorXOPs8 for XOP Toolkit 8); and
+- ``$xop-toolkit-dir`` is the path to the XOP Toolkit top-level directory; and
 - ``$zmq-xop-dir`` is the path to our ZeroMQ-XOP code;
 
 Installing prerequisites
@@ -564,26 +564,26 @@ To clone the repository (and clone the required submodules), perform the followi
 XOP toolkit setup
 ^^^^^^^^^^^^^^^^^
 
-Our build system (cmake) must know where the XOP toolkit's main code files are (located in ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport``). By default, cmake will search for them in: ``$zmq-xop-dir/XOPSupport``.
+Our build system (cmake) must know where the XOP toolkit's main code files are (located in ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport``). By default, cmake will search for them in: ``$zmq-xop-dir/XOPSupport``.
 
-If using the default location, one should make a shortcut/symbolic link between ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport`` and ``$zmq-xop-dir/XOPSupport``:
+If using the default location, one should make a shortcut/symbolic link between ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport`` and ``$zmq-xop-dir/XOPSupport``:
 
 .. code-block:: sh
 
     # Windows (Note: mklink requires administrator privileges)
     # {
-    mklink \d $zmq-xop-dir/XOPSupport "$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport"
+    mklink \d $zmq-xop-dir/XOPSupport "$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport"
     # }
     # MacOSX
     # {
-    ln -s "$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport" $zmq-xop-dir/XOPSupport
+    ln -s "$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport" $zmq-xop-dir/XOPSupport
     # }
 
 This can be alternatively be changed by changing cmake's ``${XOP_SUPPORT_PATH}`` variable, either via the UI (cmake-gui for Windows, ccmake for Linux/Mac OSX), or when invoking the generator:
 
 .. code-block:: sh
 
-    cmake -DXOP_SUPPORT_PATH="$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport"
+    cmake -DXOP_SUPPORT_PATH="$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport"
 
 
 Compilation instructions
@@ -681,15 +681,15 @@ Igor Pro 6/7 Support
 
 As mentioned previously, this XOP supports Igor versions 6/7 in principle. However, the test suite *does not*. Thus, Igor6/7 builds are **experimental** and should be treated as such.
 
-In what follows, we explicit the differences in installation and compilation when using with Igor6/7.
+In what follows, we explicit the differences in installation and compilation for Igor6/7.
 
 Installation
 ^^^^^^^^^^^^
 
-The differences in installation relate to Igor 6/7's support for 32-bit or 64-bit extensions.
+The differences in installation relate to Igor Pro 6/7's support for 32-bit or 64-bit extensions.
 
-- Igor6 is or before are 32-bit applications, and thus require 32-bit extensions. Note that there is a special 64-bit Igor6 for Windows, but it is suggested only for special cases. Also note that Igor6 on Mac requires MacOS 10.14 or earlier (as 32-bit support ends with MacOS 10.15).
-- Igor7 installs both 32-bit and 64-bit versios, with the 64-bit recommended.
+- Igor Pro 6 and earlier are 32-bit applications, and thus require 32-bit extensions. Note that there is a special 64-bit Igor Pro 6 for Windows, but it is suggested only for special cases. Also note that Igor6 on Mac requires MacOS 10.14 or earlier (as 32-bit support ends with MacOS 10.15).
+- Igor Pro 7 installs both 32-bit and 64-bit versions, with the 64-bit recommended to be used.
 
 In both cases, only a single "Igor Extensions" directory is provided in the user files directory (i.e., there is no "Igor Extensions (64-bit)"). As such, you must symlink **the appropriate** extensions folder **depending on your Igor bitness**:
 
@@ -699,11 +699,11 @@ In both cases, only a single "Igor Extensions" directory is provided in the user
 Compilation
 ^^^^^^^^^^^
 
-To compile for IgorPro 6/7:
+To compile for Igor Pro 6/7:
 
-- You must use the proper XOP Toolkit: **Toolkit 7**. Thus, in the *XOP Toolkit Setup* section, replaces ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport`` with ``$xop-toolkit-dir/XOP Toolkit 7/IgorXOPs/XOPSupport`` throughout.
-- You must explicit the IGOR6_OR_7 option in the cmake generation stage. In other words, your ``cmake -G ..`` calls (the first cmake call) must include ``-DIGOR6=ON``.
-- On Windows, you should compile with the officially supported Visual Studio version: Visual Studio 15 2017. As such, your cmake generation stage should use ``cmake -G "Visual Studio 15 2017" ..`` (instead of 2019).
+- You must use the proper XOP Toolkit: **Toolkit 7**. Thus, in the *XOP Toolkit Setup* section, replace ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport`` with ``$xop-toolkit-dir/XOP Toolkit 7/IgorXOPs7/XOPSupport`` throughout.
+- You must explicit the IGOR6 option in the cmake generation stage. In other words, your ``cmake -G ..`` calls (the first cmake call) must include ``-DIGOR6=ON``.
+- On Windows, you should compile with the officially supported Visual Studio version for XOP Toolki 7: Visual Studio 15 2017. As such, your cmake generation stage should use ``cmake -G "Visual Studio 15 2017" ..`` (instead of 2019).
 
   Putting these together, the generation steps are:
 
