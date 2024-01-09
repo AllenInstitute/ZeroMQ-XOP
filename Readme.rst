@@ -564,7 +564,7 @@ To clone the repository (and clone the required submodules), perform the followi
 XOP toolkit setup
 ^^^^^^^^^^^^^^^^^
 
-Our build system (cmake) must know where the XOP toolkit's main code files are (located in ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport``). By default, cmake will search for them in: $zmq-xop-dir/XOPSupport.
+Our build system (cmake) must know where the XOP toolkit's main code files are (located in ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport``). By default, cmake will search for them in: ``$zmq-xop-dir/XOPSupport``.
 
 If using the default location, one should make a shortcut/symbolic link between ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport`` and ``$zmq-xop-dir/XOPSupport``:
 
@@ -617,14 +617,14 @@ The commands below perform this. (See also ``.gitlab.ci.yml`` for up-do-date bui
    cmake --build . --config Release --target install
    # }
 
-After cmake 'install', the created libraries will be located in $zmq-xop-dir/output/igor8/$os, where $os is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
+After cmake 'install', the created libraries will be located in ``$zmq-xop-dir/output/igor8/$os``, where ``$os`` is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
 
 Running the test suite
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - Clone the `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`_.
 - Create in "Igor Procedures" a shortcut pointing to the "procedures" directory of that repository.
-- Open $zmq-xop-dir/tests/RunTests.pxp
+- Open ``$zmq-xop-dir/tests/RunTests.pxp``
 - Execute in Igor ``run()``
 - The test suite always passes *without* errors
 
