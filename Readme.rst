@@ -677,7 +677,7 @@ is `JSONL <https://jsonlines.org>`__. Additional static entries can be added to 
 The location of the log file on Windows is ``C:\Users\$user\AppData\Roaming\WaveMetrics\Igor Pro $version\Packages\ZeroMQ\Log.jsonl``.
 
 Igor Pro 6/7 Support
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 As mentioned previously, this XOP supports Igor versions 6/7 in principle. However, the test suite *does not*. Thus, Igor6/7 builds are **experimental** and should be treated as such.
 
