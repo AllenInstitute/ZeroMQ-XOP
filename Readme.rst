@@ -535,13 +535,17 @@ Lastly, unit tests requires setup of the following (with instructions on doing s
 Building and installing the ZeroMQ.xop
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To get set up, we must clone our repository, set up our submodules, and 'position' the XOP toolkit.
+To get set up, we must install prerequisites, clone our repository, set up our submodules, and 'position' the XOP toolkit.
 
 We will use the following variable names for clarity below:
 
 - ``$xop-toolkit-dir`` is the path to the XOP Toolkit's source directory (e.g. subdirectory IgorXOPs8 for XOP Toolkit 8); and
 - ``$zmq-xop-dir`` is the path to our ZeroMQ-XOP code;
 
+Installing prerequisites
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Before continuing, ensure you have installed the prerequisites listed in the 'Dependencies' section above. For a Windows system, ensure Visual Studio is installed; for a Mac system, ensure XCode is installed. For both, ensure you have cmake installed, and the XOP Toolkit downloaded.
 
 Repository Setup
 ^^^^^^^^^^^^^^^^
