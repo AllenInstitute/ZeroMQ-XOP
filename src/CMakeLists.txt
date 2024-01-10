@@ -6,6 +6,11 @@ cmake_policy(SET CMP0091 NEW)
 if(APPLE)
   # IP8 supports MacOSX 10.10 or higher
   # https://www.wavemetrics.com/products/igorpro
+  # Note:
+  # Igor6 supports OSX 10.4 or later. Igor7 supports OSX 10.9 or later.
+  # Igor8 supports OSX 10.10 - 10.14 (10.15 nos supported).
+  # Igor9 supports 10.13 & 10.14 (and 'partially' 10.15).
+  # TODO: Consider adding min/max constraints in the future?
   SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Minimum MacOSX version")
 endif()
 
