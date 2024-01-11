@@ -86,11 +86,11 @@ IF(APPLE)
   cmake_policy(SET CMP0042 NEW)
   SET(RESOURCES "${PROJECT_NAME}.r")
   SET(installFolder "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/mac/xop/${CMAKE_BUILD_TYPE}")
-  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/mac/libzmq/${CMAKE_BUILD_TYPE}")
+  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/libzmq/mac/${CMAKE_BUILD_TYPE}")
 ELSEIF(WIN32)
   SET(RESOURCES "${PROJECT_NAME}.rc")
   SET(installFolder "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
-  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/win/${bitnessLibFolder}/libzmq/${CMAKE_BUILD_TYPE}")
+  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/libzmq/win/${bitnessLibFolder}/${CMAKE_BUILD_TYPE}")
 ENDIF()
 
 # CPP files used for coverage analysis
