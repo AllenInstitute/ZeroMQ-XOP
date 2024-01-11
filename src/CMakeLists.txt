@@ -31,7 +31,10 @@ ENDIF()
 # minimum version is lower.
 SET(XOP_MINIMUM_IGOR_VERSION 800)
 IF(IGOR6)
-  SET(XOP_MINIMUM_IGORVERSION 620)
+  # In theory, we should be able to support 6.20. Setting to 637 as
+  # a minimum because it is latest Igor6 and anyone using this should be
+  # forced to be on this 'old bleeding edge'.
+  SET(XOP_MINIMUM_IGORVERSION 637)
 ENDIF()
 
 
