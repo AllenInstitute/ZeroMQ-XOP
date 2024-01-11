@@ -13,7 +13,7 @@ Function ComplainsWithUnknownFlagsLow()
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_UNKNOWN_SET_FLAG)
+		CheckErrorMessage(err, ZMQ_UNKNOWN_SET_FLAG)
 	endtry
 
 	CHECK_EQUAL_VAR(ret, 0)
@@ -28,7 +28,7 @@ Function ComplainsWithUnknownFlagsHigh()
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_UNKNOWN_SET_FLAG)
+		CheckErrorMessage(err, ZMQ_UNKNOWN_SET_FLAG)
 		PASS()
 	endtry
 
@@ -40,7 +40,7 @@ Function AcceptsDefaultFlag()
 	variable ret, err
 
 	try
-		ret = zeromq_set(ZeroMQ_SET_FLAGS_DEFAULT); AbortOnRTE
+		ret = zeromq_set(ZMQ_SET_FLAGS_DEFAULT); AbortOnRTE
 		PASS()
 	catch
 		err = GetRTError(1)
@@ -55,7 +55,7 @@ Function AcceptsDebugFlag()
 	variable ret, err
 
 	try
-		ret = zeromq_set(ZeroMQ_SET_FLAGS_DEBUG); AbortOnRTE
+		ret = zeromq_set(ZMQ_SET_FLAGS_DEBUG); AbortOnRTE
 		PASS()
 	catch
 		err = GetRTError(1)
@@ -70,7 +70,7 @@ Function AcceptsIPV6Flag()
 	variable ret, err
 
 	try
-		ret = zeromq_set(ZeroMQ_SET_FLAGS_IPV6); AbortOnRTE
+		ret = zeromq_set(ZMQ_SET_FLAGS_IPV6); AbortOnRTE
 		PASS()
 	catch
 		err = GetRTError(1)
@@ -85,7 +85,7 @@ Function AcceptsRecvWaitFlag()
 	variable ret, err
 
 	try
-		ret = zeromq_set(ZeroMQ_SET_FLAGS_NOBUSYWAITRECV); AbortOnRTE
+		ret = zeromq_set(ZMQ_SET_FLAGS_NOBUSYWAITRECV); AbortOnRTE
 		PASS()
 	catch
 		err = GetRTError(1)
@@ -101,7 +101,7 @@ Function AcceptsMultipleFLags()
 	variable ret, err
 
 	try
-		ret = zeromq_set(ZeroMQ_SET_FLAGS_IPV6 | ZeroMQ_SET_FLAGS_DEBUG); AbortOnRTE
+		ret = zeromq_set(ZMQ_SET_FLAGS_IPV6 | ZMQ_SET_FLAGS_DEBUG); AbortOnRTE
 		PASS()
 	catch
 		err = GetRTError(1)

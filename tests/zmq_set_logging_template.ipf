@@ -73,7 +73,7 @@ static Function TEST_CASE_BEGIN_OVERRIDE(name)
 	CHECK(V_Flag == 0 || V_Flag == -43)
 
 	zeromq_stop()
-	zeromq_set(ZeroMQ_SET_FLAGS_DEBUG | ZeroMQ_SET_FLAGS_DEFAULT | ZeroMQ_SET_FLAGS_LOGGING)
+	zeromq_set(ZMQ_SET_FLAGS_DEBUG | ZMQ_SET_FLAGS_DEFAULT | ZMQ_SET_FLAGS_LOGGING)
 End
 
 static Function TEST_CASE_END_OVERRIDE(name)
@@ -99,7 +99,7 @@ Function InvalidJSONTemplates([string str])
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_INVALID_LOGGING_TEMPLATE)
+		CheckErrorMessage(err, ZMQ_INVALID_LOGGING_TEMPLATE)
 	endtry
 End
 

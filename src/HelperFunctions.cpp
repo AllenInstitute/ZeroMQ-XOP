@@ -167,7 +167,7 @@ void ApplyFlags(double flags)
 
   DEBUG_OUTPUT("git revision {}", GIT_REVISION);
 
-  if((val & ZeroMQ_SET_FLAGS::DEFAULT) == ZeroMQ_SET_FLAGS::DEFAULT)
+  if((val & ZMQ_SET_FLAGS::DEFAULT) == ZMQ_SET_FLAGS::DEFAULT)
   {
     GlobalData::Instance().SetDebugFlag(false);
     GlobalData::Instance().SetRecvBusyWaitingFlag(true);
@@ -176,26 +176,26 @@ void ApplyFlags(double flags)
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::DEBUG) == ZeroMQ_SET_FLAGS::DEBUG)
+  if((val & ZMQ_SET_FLAGS::DEBUG) == ZMQ_SET_FLAGS::DEBUG)
   {
     GlobalData::Instance().SetDebugFlag(true);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::IPV6) == ZeroMQ_SET_FLAGS::IPV6)
+  if((val & ZMQ_SET_FLAGS::IPV6) == ZMQ_SET_FLAGS::IPV6)
   {
     ToggleIPV6Support(true);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::NO_RECV_BUSY_WAITING) ==
-     ZeroMQ_SET_FLAGS::NO_RECV_BUSY_WAITING)
+  if((val & ZMQ_SET_FLAGS::NO_RECV_BUSY_WAITING) ==
+     ZMQ_SET_FLAGS::NO_RECV_BUSY_WAITING)
   {
     GlobalData::Instance().SetRecvBusyWaitingFlag(false);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::LOGGING) == ZeroMQ_SET_FLAGS::LOGGING)
+  if((val & ZMQ_SET_FLAGS::LOGGING) == ZMQ_SET_FLAGS::LOGGING)
   {
     GlobalData::Instance().SetLoggingFlag(true);
     numMatches++;
