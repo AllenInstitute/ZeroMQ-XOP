@@ -20,7 +20,6 @@ OPTION(COVERAGE "Enable coverage instrumentation" OFF)
 OPTION(SANITIZER "Enable sanitizer instrumentation" OFF)
 OPTION(MSVC_RUNTIME_DYNAMIC "Link dynamically against the MSVC runtime library" OFF)
 OPTION(WARNINGS_AS_ERRORS "Error out on compiler warnings" OFF)
-OPTION(IGOR6 "Compile for Igor 6 or Igor 7 (i.e. XOP Toolkit 7) - EXPERIMENTAL." OFF)
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "Debug")
@@ -28,15 +27,10 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 # Define minimum version based on XOP Toolkit. If compiling for Igor 6/7,
-# minimum version is lower.
-SET(XOP_MINIMUM_IGORVERSION 800)
-IF(IGOR6)
-  # In theory, we should be able to support 6.20. Setting to 637 as
-  # a minimum because it is latest Igor6 and anyone using this should be
-  # forced to be on this 'old bleeding edge'.
-  SET(XOP_MINIMUM_IGORVERSION 637)
-ENDIF()
-
+# set to 637 when calling cmake: cmake -DXOP_MINIMUM_IGORVERSION=637...
+SET(XOP_IGOR_6_MINIMUM "637")
+SET(XOP_IGOR_8_MINIMUM "800")
+SET(XOP_MINIMUM_IGORVERSION ${XOP_IGOR_8_MINIMUM} CACHE STRING "Select minimum Igor Version")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/CreateLaunchers/cmake")
 include(CreateLaunchers)
@@ -53,16 +47,7 @@ ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
 ENDIF()
 
 # Set where we expect Igor to be, used to create our launcher.
-IF(IGOR6)
-  SET(igorVersion "igor6")  # Note this is *really* XOP Toolkit 7, which supports Igors 6 and 7.
-  IF(MSVC)
-    SET(igorPath "C:/Program Files (x86)/WaveMetrics/Igor Pro Folder/Igor.exe")
-  ELSEIF(APPLE)
-    MESSAGE(WARNING "Igor 6/7 support is untested with Mac! Try at your own risk!")
-    SET(igorPath "/Applications/Igor\ Pro\ Folder/Igor.app/Contents/MacOS/Igor")
-  ENDIF()
-ELSE()
-  SET(igorVersion "igor8")  # Note this is *really* XOP Toolkit 8, which supports Igors 8+.
+IF(XOP_MINIMUM_IGORVERSION GREATER_EQUAL ${XOP_IGOR_8_MINIMUM})
   IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
     IF(MSVC)
       SET(igorPath "C:/Program Files/WaveMetrics/Igor Pro 9 Folder/IgorBinaries_Win32/Igor.exe")
@@ -76,6 +61,17 @@ ELSE()
       SET(igorPath "/Applications/Igor\ Pro\ 9\ Folder/Igor64.app/Contents/MacOS/Igor64")
     ENDIF()
   ENDIF()
+  SET(DECLARE_ZEROMQ_CONSTANTS_LEGACY 1)  # TRUE
+ELSEIF(XOP_MINIMUM_IGORVERSION GREATER_EQUAL ${XOP_IGOR_6_MINIMUM})
+  IF(MSVC)
+    SET(igorPath "C:/Program Files (x86)/WaveMetrics/Igor Pro Folder/Igor.exe")
+  ELSEIF(APPLE)
+    MESSAGE(WARNING "Igor 6/7 support is untested with Mac! Try at your own risk!")
+    SET(igorPath "/Applications/Igor\ Pro\ Folder/Igor.app/Contents/MacOS/Igor")
+  ENDIF()
+  SET(DECLARE_ZEROMQ_CONSTANTS_LEGACY 0)  # FALSE
+ELSE()
+  MESSAGE(SEND_ERROR "We only support Igor 6/7 >= 6.37. Not continuing.")
 ENDIF()
 
 # Set igorPath to be a cached variable, tso the user can override it.
@@ -88,13 +84,18 @@ IF(APPLE)
   # use RPATH
   cmake_policy(SET CMP0042 NEW)
   SET(RESOURCES "${PROJECT_NAME}.r")
-  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/mac/xop/${CMAKE_BUILD_TYPE}")
+  SET(RESOURCE_CONFIG "${PROJECT_NAME}.r")
+  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/mac/xop/${CMAKE_BUILD_TYPE}")
   SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/libzmq/mac/${CMAKE_BUILD_TYPE}")
 ELSEIF(WIN32)
   SET(RESOURCES "${PROJECT_NAME}.rc")
-  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
+  SET(RESOURCE_CONFIG "${PROJECT_NAME}WinCustom.rc")
+  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
   SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/libzmq/win/${bitnessLibFolder}/${CMAKE_BUILD_TYPE}")
 ENDIF()
+
+# Create necessary resource files from intermediaries
+CONFIGURE_FILE("${RESOURCE_CONFIG}.in" ${RESOURCE_CONFIG} @ONLY)
 
 # CPP files used for coverage analysis
 SET(COVERAGE_SOURCES

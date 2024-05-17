@@ -129,7 +129,7 @@ variable zeromq_handler_stop();
 ///
 /// Set the JSON text used as template for the JSONL log file.
 ///
-/// This function does not enable logging, use `zeromq_set(ZMQ_SET_FLAGS_LOGGING)` for that.
+/// This function does not enable logging, use `zeromq_set(ZeroMQ_SET_FLAGS_LOGGING)` for that.
 ///
 /// Requirement:
 /// - Valid JSON text
