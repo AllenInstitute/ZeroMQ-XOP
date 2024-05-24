@@ -132,7 +132,7 @@ compile-xop-windows:
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCHITECTURE%
     - md build
     - cd build
-    - cmake -G "Visual Studio 16 2019" -A %GENERATOR_PLATFORM% -DCMAKE_BUILD_TYPE=%CONFIG_TYPE% -DMSVC_RUNTIME_DYNAMIC=ON -DWARNINGS_AS_ERRORS=ON ../src
+    - cmake -G "Visual Studio 16 2019" -A %GENERATOR_PLATFORM% -DMSVC_RUNTIME_DYNAMIC=ON -DWARNINGS_AS_ERRORS=ON ../src
     - cmake --build . --config %CONFIG_TYPE% --target install
   needs:
     - download-xoptoolkit
@@ -147,7 +147,7 @@ compile-xop-release-macosx:
   script:
     - mkdir build
     - cd build
-    - cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DWARNINGS_AS_ERRORS=ON ../src
+    - cmake -G "Xcode" -DWARNINGS_AS_ERRORS=ON ../src
     - cmake --build . --config Release --target install
   needs:
     - download-xoptoolkit
@@ -162,7 +162,7 @@ compile-xop-debug-coverage-macosx:
   script:
     - mkdir build
     - cd build
-    - cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Debug -DWARNINGS_AS_ERRORS=ON -DCOVERAGE=ON -DSANITIZER=ON ../src
+    - cmake -G "Xcode" -DWARNINGS_AS_ERRORS=ON -DCOVERAGE=ON -DSANITIZER=ON ../src
     - cmake --build . --config Debug --target install
   needs:
     - download-xoptoolkit
@@ -181,7 +181,7 @@ clang-tidy:
   script:
     - mkdir build
     - cd build
-    - cmake -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug ../src
+    - cmake -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src
     - cmake --build . --config Debug --target clang-tidy && exit_value=$? || exit_value=$?
     - git commit -m "clang-tidy fixes" ..
     - git format-patch -n1
@@ -343,7 +343,7 @@ coverage:
       - mkdir -p build/coverage
       - mv tests/default.profraw build/coverage
       - cd build
-      - cmake -G "Xcode" -DCOVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ../src
+      - cmake -G "Xcode" -DCOVERAGE=ON ../src
       - cmake --build . --config Debug --target install
       - cmake --build . --target coverage
   coverage: '/^TOTAL.*\s+(\d+\%)$/'
