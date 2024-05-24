@@ -63,7 +63,7 @@ compile-libzmq-windows:
     - cd src/libzmq
     - md build
     - cd build
-    - cmake -G "Visual Studio 16 2019" -A %GENERATOR_PLATFORM% -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DZMQ_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=../../../output/win/libzmq/%ARCHITECTURE%/%CONFIG_TYPE% ..
+    - cmake -G "Visual Studio 16 2019" -A %GENERATOR_PLATFORM% -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DZMQ_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=../../../output/win/%ARCHITECTURE%/libzmq/%CONFIG_TYPE% ..
     - cmake --build . --config %CONFIG_TYPE% --target install
     # - ctest -C %CONFIG_TYPE%
   artifacts:

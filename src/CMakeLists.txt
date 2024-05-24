@@ -1,4 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.15 FATAL_ERROR)
+# Allows setting how we link to the MSVC runtime (i.e., MSCV_RUNTIME_DYNAMIC)
 cmake_policy(SET CMP0091 NEW)
 
 # This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
@@ -61,7 +62,6 @@ IF(XOP_MINIMUM_IGORVERSION GREATER_EQUAL ${XOP_IGOR_8_MINIMUM})
       SET(igorPath "/Applications/Igor\ Pro\ 9\ Folder/Igor64.app/Contents/MacOS/Igor64")
     ENDIF()
   ENDIF()
-  SET(DECLARE_ZEROMQ_CONSTANTS_LEGACY 1)  # TRUE
 ELSEIF(XOP_MINIMUM_IGORVERSION GREATER_EQUAL ${XOP_IGOR_6_MINIMUM})
   IF(MSVC)
     SET(igorPath "C:/Program Files (x86)/WaveMetrics/Igor Pro Folder/Igor.exe")
@@ -69,7 +69,6 @@ ELSEIF(XOP_MINIMUM_IGORVERSION GREATER_EQUAL ${XOP_IGOR_6_MINIMUM})
     MESSAGE(WARNING "Igor 6/7 support is untested with Mac! Try at your own risk!")
     SET(igorPath "/Applications/Igor\ Pro\ Folder/Igor.app/Contents/MacOS/Igor")
   ENDIF()
-  SET(DECLARE_ZEROMQ_CONSTANTS_LEGACY 0)  # FALSE
 ELSE()
   MESSAGE(SEND_ERROR "We only support Igor 6/7 >= 6.37. Not continuing.")
 ENDIF()
@@ -86,12 +85,12 @@ IF(APPLE)
   SET(RESOURCES "${PROJECT_NAME}.r")
   SET(RESOURCE_CONFIG "${PROJECT_NAME}.r")
   SET(installFolder "${CMAKE_SOURCE_DIR}/../output/mac/xop/${CMAKE_BUILD_TYPE}")
-  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/libzmq/mac/${CMAKE_BUILD_TYPE}")
+  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/mac/libzmq/${CMAKE_BUILD_TYPE}")
 ELSEIF(WIN32)
   SET(RESOURCES "${PROJECT_NAME}.rc")
   SET(RESOURCE_CONFIG "${PROJECT_NAME}WinCustom.rc")
   SET(installFolder "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
-  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/libzmq/win/${bitnessLibFolder}/${CMAKE_BUILD_TYPE}")
+  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/libzmq/${CMAKE_BUILD_TYPE}")
 ENDIF()
 
 # Create necessary resource files from intermediaries
@@ -388,6 +387,8 @@ ELSEIF(WIN32)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
     set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
 
+    # This method sets the MSVC runtime linking for all non-interface library
+    # dependencies (either runtime or dynamic, based on MSVC_RUNTIME_DYNAMIC).
     FUNCTION(SET_ALL_TARGETS_LINKTYPE _dir)
       GET_PROPERTY(_subdirs DIRECTORY "${_dir}" PROPERTY SUBDIRECTORIES)
       FOREACH(_subdir IN LISTS _subdirs)
