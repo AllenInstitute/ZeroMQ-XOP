@@ -82,7 +82,7 @@ HOST_IMPORT int XOPMain(IORecHandle ioRecHandle)
     HeartbeatPublisher::Instance().Start();
 
 #ifdef _DEBUG
-    ApplyFlags(ZeroMQ_SET_FLAGS::DEBUG);
+    ApplyFlags(ZMQ_SET_FLAGS::DEBUG);
 #endif // _DEBUG
 
     SetXOPResult(EXIT_SUCCESS);

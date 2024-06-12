@@ -18,7 +18,7 @@ resource 'vers' (2) {						/* Igor version info */
 
 resource 'STR#' (1100) {					/* custom error messages */
 	{
-  "ZeroMQ requires Igor Pro 8.00 or later.",         // OLD_IGOR
+  "ZeroMQ requires Igor Pro 6.20 or later.",         // OLD_IGOR
   "Unhandled C++ exception.",                        // UNHANDLED_CPP_EXCEPTION
   "Unknown zeromq_set flag.",                        // UNKNOWN_SET_FLAG
   "Internal error, this should not happen!",         // INTERNAL_ERROR

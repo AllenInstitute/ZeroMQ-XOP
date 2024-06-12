@@ -8,7 +8,7 @@ Function Init_IGNORE()
 
 	variable ret
 
-	zeromq_set(ZeroMQ_SET_FLAGS_DEBUG | ZeroMQ_SET_FLAGS_DEFAULT | ZeroMQ_SET_FLAGS_LOGGING | ZeroMQ_SET_FLAGS_NOBUSYWAITRECV)
+	zeromq_set(ZMQ_SET_FLAGS_DEBUG | ZMQ_SET_FLAGS_DEFAULT | ZMQ_SET_FLAGS_LOGGING | ZMQ_SET_FLAGS_NOBUSYWAITRECV)
 
 	ret = zeromq_pub_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
@@ -42,7 +42,7 @@ Function ReceivesHeartbeatMessagesWithEverythingFilter()
 
 	Init_IGNORE()
 
-	expected = ZeroMQ_HEARTBEAT
+	expected = ZMQ_HEARTBEAT
 	ret = zeromq_sub_add_filter("")
 	CHECK_EQUAL_VAR(ret, 0)
 
@@ -73,7 +73,7 @@ Function ReceivesHeartbeatMessagesWithCorrectFilter()
 	for(i = 0; i < 200; i += 1)
 		msg = zeromq_sub_recv(filter)
 		if(strlen(msg) > 0 || strlen(filter) > 0)
-			expected = ZeroMQ_HEARTBEAT
+			expected = ZMQ_HEARTBEAT
 			CHECK_EQUAL_STR(filter, expected)
 			CHECK_EMPTY_STR(msg)
 			found += 1
@@ -99,7 +99,7 @@ Function CanOnlySubscribeOnceToFilter()
 		ret = zeromq_sub_add_filter(""); AbortOnRTE
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_MESSAGE_FILTER_DUPLICATED)
+		CheckErrorMessage(err, ZMQ_MESSAGE_FILTER_DUPLICATED)
 		CHECK_EQUAL_VAR(ret, 0)
 	endtry
 End
@@ -118,7 +118,7 @@ Function CanOnlyRemoveExistingFilter()
 		ret = zeromq_sub_remove_filter("a"); AbortOnRTE
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_MESSAGE_FILTER_MISSING)
+		CheckErrorMessage(err, ZMQ_MESSAGE_FILTER_MISSING)
 		CHECK_EQUAL_VAR(ret, 0)
 	endtry
 End
@@ -176,7 +176,7 @@ Function WorksWithCustomMessageAndMultipleFilters()
 				CHECK_EQUAL_STR(msg, expected)
 				foundHi += 1
 			endif
-			if(!cmpstr(filter, ZeroMQ_HEARTBEAT))
+			if(!cmpstr(filter, ZMQ_HEARTBEAT))
 				CHECK_EMPTY_STR(msg)
 				foundHeart += 1
 			endif
@@ -233,7 +233,7 @@ Function AddingAndRemovingFiltersWorks()
 			for(j = 0; j < 200; j += 1)
 				msg = zeromq_sub_recv(filter)
 				if(strlen(msg) > 0 || strlen(filter) > 0)
-					expected = ZeroMQ_HEARTBEAT
+					expected = ZMQ_HEARTBEAT
 					CHECK_EQUAL_STR(filter, expected)
 					CHECK_EMPTY_STR(msg)
 					foundHeart += 1

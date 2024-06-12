@@ -1,6 +1,6 @@
 #pragma TextEncoding = "UTF-8"
 #pragma rtGlobals=3		// Use modern global access method and strict wave access.
-#pragma IgorVersion=8.0
+#pragma IgorVersion=6.2
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
@@ -8,34 +8,34 @@
 /// @anchor ZeroMQSetFlags
 /// @{
 /// Sets the default flags (no debug, no ipv6, busy wait on receive)
-Constant ZeroMQ_SET_FLAGS_DEFAULT  = 0x1
+Constant ZMQ_SET_FLAGS_DEFAULT  = 0x1
 /// Enable debug output
-Constant ZeroMQ_SET_FLAGS_DEBUG    = 0x2
+Constant ZMQ_SET_FLAGS_DEBUG    = 0x2
 /// Enable ipv6 support
-Constant ZeroMQ_SET_FLAGS_IPV6     = 0x4
+Constant ZMQ_SET_FLAGS_IPV6     = 0x4
 /// Don't do busy waiting on zeromq_server_recv() and zeromq_client_recv()
 /// instead immediately return if no messages are available.
-Constant ZeroMQ_SET_FLAGS_NOBUSYWAITRECV = 0x8
+Constant ZMQ_SET_FLAGS_NOBUSYWAITRECV = 0x8
 /// Log incoming and outgoing messages
-Constant ZeroMQ_SET_FLAGS_LOGGING = 0x10
+Constant ZMQ_SET_FLAGS_LOGGING = 0x10
 
 /// @}
 
-StrConstant ZeroMQ_HEARTBEAT = "heartbeat"
+StrConstant ZMQ_HEARTBEAT = "heartbeat"
 
 /// @name Error codes
 /// @anchor ZeroMQErrorCodes
 /// @{
-Constant ZeroMQ_UNKNOWN_SET_FLAG          = 10003
-Constant ZeroMQ_INTERNAL_ERROR            = 10004
-Constant ZeroMQ_INVALID_ARG               = 10005
-Constant ZeroMQ_HANDLER_ALREADY_RUNNING   = 10006
-Constant ZeroMQ_HANDLER_NO_CONNECTION     = 10007
-Constant ZeroMQ_MISSING_PROCEDURE_FILES   = 10008
-Constant ZeroMQ_INVALID_MESSAGE_FORMAT    = 10009
-Constant ZeroMQ_INVALID_LOGGING_TEMPLATE  = 10010
-Constant ZeroMQ_MESSAGE_FILTER_DUPLICATED = 10011
-Constant ZeroMQ_MESSAGE_FILTER_MISSING    = 10012
+Constant ZMQ_UNKNOWN_SET_FLAG          = 10003
+Constant ZMQ_INTERNAL_ERROR            = 10004
+Constant ZMQ_INVALID_ARG               = 10005
+Constant ZMQ_HANDLER_ALREADY_RUNNING   = 10006
+Constant ZMQ_HANDLER_NO_CONNECTION     = 10007
+Constant ZMQ_MISSING_PROCEDURE_FILES   = 10008
+Constant ZMQ_INVALID_MESSAGE_FORMAT    = 10009
+Constant ZMQ_INVALID_LOGGING_TEMPLATE  = 10010
+Constant ZMQ_MESSAGE_FILTER_DUPLICATED = 10011
+Constant ZMQ_MESSAGE_FILTER_MISSING    = 10012
 /// @}
 
 Constant REQ_SUCCESS                         =   0
