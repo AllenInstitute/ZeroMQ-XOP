@@ -82,13 +82,18 @@ SET(libname "${PROJECT_NAME}${bitnessWithDash}")
 IF(APPLE)
   # use RPATH
   cmake_policy(SET CMP0042 NEW)
+
   SET(RESOURCES "${PROJECT_NAME}.r")
+  # Indicate RESOURCES is generated, to avoid file missing checks.
+  SET_SOURCE_FILES_PROPERTIES(${RESOURCES} PROPERTIES GENERATED TRUE)
   SET(RESOURCE_CONFIG "${PROJECT_NAME}.r")
+
   SET(installFolder "${CMAKE_SOURCE_DIR}/../output/mac/xop/${CMAKE_BUILD_TYPE}")
   SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/mac/libzmq/${CMAKE_BUILD_TYPE}")
 ELSEIF(WIN32)
   SET(RESOURCES "${PROJECT_NAME}.rc")
   SET(RESOURCE_CONFIG "${PROJECT_NAME}WinCustom.rc")
+
   SET(installFolder "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
   SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/libzmq/${CMAKE_BUILD_TYPE}")
 ENDIF()
