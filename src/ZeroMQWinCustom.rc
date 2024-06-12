@@ -10,18 +10,18 @@
 
 1100 STR#					// Custom error messages.
 BEGIN
-  "ZeroMQ requires Igor Pro 6.20 or later.\0",                 // OLD_IGOR
-  "Unhandled C++ exception.\0",                                // UNHANDLED_CPP_EXCEPTION
-  "Unknown zeromq_set flag.\0",                                // UNKNOWN_SET_FLAG
-  "Internal error, this should not happen!\0",                 // INTERNAL_ERROR
-  "Invalid argument!\0",                                       // INVALID_ARGUMENT
-  "Message handler already running.\0",                        // HANDLER_ALREADY_RUNNING
-  "Message handler could not find a binded server.\0",         // HANDLER_NO_CONNECTION
-  "Required procedure files are missing.\0",                   // MISSING_PROCEDURE_FILES
-  "Unexpected multi-part message format.\0",                   // INVALID_MESSAGE_FORMAT
-  "Invalid logging template.\0",                               // INVALID_LOGGING_TEMPLATE
-  "Exists already as message filter .\0",                      // MESSAGE_FILTER_DUPLICATED
-  "No such message filter.\0"                                  // MESSAGE_FILTER_MISSING
+  "ZeroMQ requires Igor Pro 8.00 or later (6.37 for Igor6).\0", // OLD_IGOR
+  "Unhandled C++ exception.\0",                                 // UNHANDLED_CPP_EXCEPTION
+  "Unknown zeromq_set flag.\0",                                 // UNKNOWN_SET_FLAG
+  "Internal error, this should not happen!\0",                  // INTERNAL_ERROR
+  "Invalid argument!\0",                                        // INVALID_ARGUMENT
+  "Message handler already running.\0",                         // HANDLER_ALREADY_RUNNING
+  "Message handler could not find a binded server.\0",          // HANDLER_NO_CONNECTION
+  "Required procedure files are missing.\0",                    // MISSING_PROCEDURE_FILES
+  "Unexpected multi-part message format.\0",                    // INVALID_MESSAGE_FORMAT
+  "Invalid logging template.\0",                                // INVALID_LOGGING_TEMPLATE
+  "Exists already as message filter .\0",                       // MESSAGE_FILTER_DUPLICATED
+  "No such message filter.\0"                                   // MESSAGE_FILTER_MISSING
 	0,								// NOTE: 0 required to terminate the resource.
 END
 

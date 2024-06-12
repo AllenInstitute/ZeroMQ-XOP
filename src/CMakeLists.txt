@@ -29,9 +29,12 @@ ENDIF()
 
 # Define minimum version based on XOP Toolkit. If compiling for Igor 6/7,
 # minimum version is lower.
-SET(XOP_MINIMUM_IGOR_VERSION 800)
+SET(XOP_MINIMUM_IGORVERSION 800)
 IF(IGOR6)
-  SET(XOP_MINIMUM_IGORVERSION 620)
+  # In theory, we should be able to support 6.20. Setting to 637 as
+  # a minimum because it is latest Igor6 and anyone using this should be
+  # forced to be on this 'old bleeding edge'.
+  SET(XOP_MINIMUM_IGORVERSION 637)
 ENDIF()
 
 
@@ -51,6 +54,7 @@ ENDIF()
 
 # Set where we expect Igor to be, used to create our launcher.
 IF(IGOR6)
+  SET(igorVersion "igor6")  # Note this is *really* XOP Toolkit 7, which supports Igors 6 and 7.
   IF(MSVC)
     SET(igorPath "C:/Program Files (x86)/WaveMetrics/Igor Pro Folder/Igor.exe")
   ELSEIF(APPLE)
@@ -58,6 +62,7 @@ IF(IGOR6)
     SET(igorPath "/Applications/Igor\ Pro\ Folder/Igor.app/Contents/MacOS/Igor")
   ENDIF()
 ELSE()
+  SET(igorVersion "igor8")  # Note this is *really* XOP Toolkit 8, which supports Igors 8+.
   IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
     IF(MSVC)
       SET(igorPath "C:/Program Files/WaveMetrics/Igor Pro 9 Folder/IgorBinaries_Win32/Igor.exe")
@@ -83,12 +88,12 @@ IF(APPLE)
   # use RPATH
   cmake_policy(SET CMP0042 NEW)
   SET(RESOURCES "${PROJECT_NAME}.r")
-  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/mac/xop/${CMAKE_BUILD_TYPE}")
-  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/mac/libzmq/${CMAKE_BUILD_TYPE}")
+  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/mac/xop/${CMAKE_BUILD_TYPE}")
+  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/libzmq/mac/${CMAKE_BUILD_TYPE}")
 ELSEIF(WIN32)
   SET(RESOURCES "${PROJECT_NAME}.rc")
-  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
-  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/libzmq/${CMAKE_BUILD_TYPE}")
+  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/${igorVersion}/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
+  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/libzmq/win/${bitnessLibFolder}/${CMAKE_BUILD_TYPE}")
 ENDIF()
 
 # CPP files used for coverage analysis

@@ -18,19 +18,20 @@ resource 'vers' (2) {						/* Igor version info */
 
 resource 'STR#' (1100) {					/* custom error messages */
 	{
-  "ZeroMQ requires Igor Pro 6.20 or later.",         // OLD_IGOR
-  "Unhandled C++ exception.",                        // UNHANDLED_CPP_EXCEPTION
-  "Unknown zeromq_set flag.",                        // UNKNOWN_SET_FLAG
-  "Internal error, this should not happen!",         // INTERNAL_ERROR
-  "Invalid argument!",                               // INVALID_ARGUMENT
-  "Message handler already running.",                // HANDLER_ALREADY_RUNNING
-  "Message handler could not find a binded server.", // HANDLER_NO_CONNECTION
-  "Can not handle multipart messages.",              // INVALID_MULTIPART_MSG
-  "Required procedure files are missing.",           // MISSING_PROCEDURE_FILES
-  "Unexpected multi-part message format.",           // INVALID_MESSAGE_FORMAT
-  "Invalid logging template.",                       // INVALID_LOGGING_TEMPLATE
-  "Exists already as message filter .",              // MESSAGE_FILTER_DUPLICATED
-  "No such message filter."                          // MESSAGE_FILTER_MISSING
+
+  "ZeroMQ requires Igor Pro 6.20 or later (6.37 for Igor6).", // OLD_IGOR
+  "Unhandled C++ exception.",                                 // UNHANDLED_CPP_EXCEPTION
+  "Unknown zeromq_set flag.",                                 // UNKNOWN_SET_FLAG
+  "Internal error, this should not happen!",                  // INTERNAL_ERROR
+  "Invalid argument!",                                        // INVALID_ARGUMENT
+  "Message handler already running.",                         // HANDLER_ALREADY_RUNNING
+  "Message handler could not find a binded server.",          // HANDLER_NO_CONNECTION
+  "Can not handle multipart messages.",                       // INVALID_MULTIPART_MSG
+  "Required procedure files are missing.",                    // MISSING_PROCEDURE_FILES
+  "Unexpected multi-part message format.",                    // INVALID_MESSAGE_FORMAT
+  "Invalid logging template.",                                // INVALID_LOGGING_TEMPLATE
+  "Exists already as message filter .",                       // MESSAGE_FILTER_DUPLICATED
+  "No such message filter."                                   // MESSAGE_FILTER_MISSING
 	}
 };
 

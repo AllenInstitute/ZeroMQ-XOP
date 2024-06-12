@@ -44,8 +44,8 @@ Windows
 
   - In "Igor Procedures" a shortcut pointing to "procedures"
   - In "Igor Help Files" a shortcut pointing to "help"
-  - In "Igor Extensions" a shortcut pointing to "output/win/x86"
-  - In "Igor Extensions (64-bit)" a shortcut pointing to "output/win/x64"
+  - In "Igor Extensions" a shortcut pointing to "output/igor8/win/x86"
+  - In "Igor Extensions (64-bit)" a shortcut pointing to "output/igor8/win/x64"
 
 - Start Igor Pro
 
@@ -59,7 +59,7 @@ MacOSX
   - In "Igor Procedures" a symlink pointing to "procedures"
   - In "Igor Help Files" a symlink pointing to "help"
   - In "Igor Extensions" a symlink pointing to "output/mac/ZeroMQ"
-  - In "Igor Extensions (64-bit)" a symlink pointing to "output/mac/ZeroMQ-64"
+  - In "Igor Extensions (64-bit)" a symlink pointing to "output/igor8/mac/ZeroMQ-64"
 
 - Start Igor Pro
 
@@ -617,8 +617,7 @@ The commands below perform this. (See also ``.gitlab.ci.yml`` for up-do-date bui
    cmake --build . --config Release --target install
    # }
 
-
-After cmake 'install', the created libraries will be located in ``$zmq-xop-dir/output/$os``, where ``$os`` is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
+After install, the created libraries will be located in $zmq-xop-dir/output/igor8/$os, where $os is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
 
 Debugging the XOP
 ^^^^^^^^^^^^^^^^
@@ -694,6 +693,9 @@ The differences in installation relate to Igor Pro 6/7's support for 32-bit or 6
 
 In both cases, only a single "Igor Extensions" directory is provided in the user files directory (i.e., there is no "Igor Extensions (64-bit)"). As such, you must symlink **the appropriate** extensions folder **depending on your Igor bitness**:
 
+- If using 32-bit Igor, make a symbolic link/shortcut to "output/igor6/win/x86" for Windows, and "output/igor6/mac/ZeroMQ" for Mac.
+- If using 64-bit Igor, make a symbolic link/shortcut to "output/igor6/win/x64" for Windows, and "output/igor6/mac/ZeroMQ-64" for Mac.
+
 Compilation
 ^^^^^^^^^^^
 
@@ -724,3 +726,5 @@ To compile for Igor Pro 6/7:
    cmake -G Xcode -DCMAKE_BUILD_TYPE=Release -DIGOR6=ON -S .. -B .
    cmake --build . --config Release --target install
    # }
+
+After compilation, the created libraries will be located in $zmq-xop-dir/output/igor6/$os (instead of $zmq-xop-dir/output/igor8).
