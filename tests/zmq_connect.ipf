@@ -60,7 +60,7 @@ static Function ComplainsWithInvalidArg1([string str])
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_INVALID_ARG)
+		CheckErrorMessage(err, ZMQ_INVALID_ARG)
 	endtry
 
 	CHECK_EQUAL_VAR(ret, 0)
@@ -78,7 +78,7 @@ static Function ComplainsWithInvalidArg2([string str])
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_INVALID_ARG)
+		CheckErrorMessage(err, ZMQ_INVALID_ARG)
 	endtry
 
 	CHECK_EQUAL_VAR(ret, 0)

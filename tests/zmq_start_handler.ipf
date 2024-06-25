@@ -13,7 +13,7 @@ Function ComplainsWithNoBind()
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_HANDLER_NO_CONNECTION)
+		CheckErrorMessage(err, ZMQ_HANDLER_NO_CONNECTION)
 	endtry
 
 	CHECK_EQUAL_VAR(ret, 0)
@@ -30,7 +30,7 @@ Function ComplainsWithConnectInsteadBind()
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_HANDLER_NO_CONNECTION)
+		CheckErrorMessage(err, ZMQ_HANDLER_NO_CONNECTION)
 	endtry
 
 	CHECK_EQUAL_VAR(ret, 0)
@@ -59,7 +59,7 @@ Function CannotStartTwice()
 		FAIL()
 	catch
 		err = GetRTError(1)
-		CheckErrorMessage(err, ZeroMQ_HANDLER_ALREADY_RUNNING)
+		CheckErrorMessage(err, ZMQ_HANDLER_ALREADY_RUNNING)
 	endtry
 
 	CHECK_EQUAL_VAR(ret, 0)

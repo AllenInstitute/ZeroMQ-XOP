@@ -1,4 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.15 FATAL_ERROR)
+# Allows setting how we link to the MSVC runtime (i.e., MSCV_RUNTIME_DYNAMIC)
 cmake_policy(SET CMP0091 NEW)
 
 # This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
@@ -6,6 +7,11 @@ cmake_policy(SET CMP0091 NEW)
 if(APPLE)
   # IP8 supports MacOSX 10.10 or higher
   # https://www.wavemetrics.com/products/igorpro
+  # Note:
+  # Igor6 supports OSX 10.4 or later. Igor7 supports OSX 10.9 or later.
+  # Igor8 supports OSX 10.10 - 10.14 (10.15 nos supported).
+  # Igor9 supports 10.13 & 10.14 (and 'partially' 10.15).
+  # TODO: Consider adding min/max constraints in the future?
   SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Minimum MacOSX version")
 endif()
 
@@ -21,46 +27,79 @@ IF(NOT CMAKE_BUILD_TYPE)
   MESSAGE(STATUS "CMAKE_BUILD_TYPE is not set, setting to CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}.")
 ENDIF()
 
-SET(XOP_MINIMUM_IGORVERSION 800)
+# Define minimum version based on XOP Toolkit. If compiling for Igor 6/7,
+# set to 637 when calling cmake: cmake -DXOP_MINIMUM_IGORVERSION=637...
+SET(XOP_IGOR_6_MINIMUM "637")
+SET(XOP_IGOR_8_MINIMUM "800")
+SET(XOP_MINIMUM_IGORVERSION ${XOP_IGOR_8_MINIMUM} CACHE STRING "Select minimum Igor Version")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/CreateLaunchers/cmake")
 include(CreateLaunchers)
 
+# Set bitness
 IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
   SET(bitness "")
   SET(bitnessWithDash "")
   SET(bitnessLibFolder "x86")
-
-  IF(MSVC)
-    SET(igorPath "C:/Program Files/WaveMetrics/Igor Pro 9 Folder/IgorBinaries_Win32/Igor.exe")
-  ELSEIF(APPLE)
-    MESSAGE(FATAL_ERROR "No 32bit support on MacOSX.")
-  ENDIF()
 ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
   SET(bitness "64")
   SET(bitnessWithDash "-64")
   SET(bitnessLibFolder "x64")
-
-  IF(MSVC)
-    SET(igorPath "C:/Program Files/WaveMetrics/Igor Pro 9 Folder/IgorBinaries_x64/Igor64.exe")
-  ELSEIF(APPLE)
-    SET(igorPath "/Applications/Igor\ Pro\ 9\ Folder/Igor64.app/Contents/MacOS/Igor64")
-  ENDIF()
 ENDIF()
+
+# Set where we expect Igor to be, used to create our launcher.
+IF(XOP_MINIMUM_IGORVERSION GREATER_EQUAL ${XOP_IGOR_8_MINIMUM})
+  IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    IF(MSVC)
+      SET(igorPath "C:/Program Files/WaveMetrics/Igor Pro 9 Folder/IgorBinaries_Win32/Igor.exe")
+    ELSEIF(APPLE)
+      MESSAGE(FATAL_ERROR "No 32bit support on MacOSX.")
+    ENDIF()
+  ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    IF(MSVC)
+      SET(igorPath "C:/Program Files/WaveMetrics/Igor Pro 9 Folder/IgorBinaries_x64/Igor64.exe")
+    ELSEIF(APPLE)
+      SET(igorPath "/Applications/Igor\ Pro\ 9\ Folder/Igor64.app/Contents/MacOS/Igor64")
+    ENDIF()
+  ENDIF()
+ELSEIF(XOP_MINIMUM_IGORVERSION GREATER_EQUAL ${XOP_IGOR_6_MINIMUM})
+  IF(MSVC)
+    SET(igorPath "C:/Program Files (x86)/WaveMetrics/Igor Pro Folder/Igor.exe")
+  ELSEIF(APPLE)
+    MESSAGE(WARNING "Igor 6/7 support is untested with Mac! Try at your own risk!")
+    SET(igorPath "/Applications/Igor\ Pro\ Folder/Igor.app/Contents/MacOS/Igor")
+  ENDIF()
+ELSE()
+  MESSAGE(SEND_ERROR "We only support Igor 6/7 >= 6.37. Not continuing.")
+ENDIF()
+
+# Set igorPath to be a cached variable, tso the user can override it.
+SET(igorPath ${igorPath} CACHE FILEPATH "Path to Igor executable of interest. \
+Used by launcher scripts for debugging purposes.")
 
 SET(libname "${PROJECT_NAME}${bitnessWithDash}")
 
 IF(APPLE)
   # use RPATH
   cmake_policy(SET CMP0042 NEW)
+
   SET(RESOURCES "${PROJECT_NAME}.r")
+  # Indicate RESOURCES is generated, to avoid file missing checks.
+  SET_SOURCE_FILES_PROPERTIES(${RESOURCES} PROPERTIES GENERATED TRUE)
+  SET(RESOURCE_CONFIG "${PROJECT_NAME}.r")
+
   SET(installFolder "${CMAKE_SOURCE_DIR}/../output/mac/xop/${CMAKE_BUILD_TYPE}")
   SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/mac/libzmq/${CMAKE_BUILD_TYPE}")
 ELSEIF(WIN32)
   SET(RESOURCES "${PROJECT_NAME}.rc")
+  SET(RESOURCE_CONFIG "${PROJECT_NAME}WinCustom.rc")
+
   SET(installFolder "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
   SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/libzmq/${CMAKE_BUILD_TYPE}")
 ENDIF()
+
+# Create necessary resource files from intermediaries
+CONFIGURE_FILE("${RESOURCE_CONFIG}.in" ${RESOURCE_CONFIG} @ONLY)
 
 # CPP files used for coverage analysis
 SET(COVERAGE_SOURCES
@@ -236,6 +275,8 @@ IF(APPLE)
     COMMAND ${APPLE_RESOURCE}
     ${sysroot}
     -i ${XOP_SUPPORT_PATH}
+    -i ${CMAKE_BINARY_DIR}
+    -i ${CMAKE_SOURCE_DIR}
     -F ${CARBON_LIBRARY}
     -useDF
     ${RESOURCES}
@@ -353,6 +394,8 @@ ELSEIF(WIN32)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
     set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
 
+    # This method sets the MSVC runtime linking for all non-interface library
+    # dependencies (either runtime or dynamic, based on MSVC_RUNTIME_DYNAMIC).
     FUNCTION(SET_ALL_TARGETS_LINKTYPE _dir)
       GET_PROPERTY(_subdirs DIRECTORY "${_dir}" PROPERTY SUBDIRECTORIES)
       FOREACH(_subdir IN LISTS _subdirs)

@@ -25,6 +25,12 @@
 #endif
 
 #include "XOPStandardHeaders.h" // Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
+// Define NORETURN_TYPE (even if using XOP Toolkit 7) to compile
+// properly. Should not hit this in this scenario.
+#ifndef FV_NORETURN_TYPE
+#define FV_NORETURN_TYPE 0x00020000  // Requies Igor Pro 8.00 or later
+#endif
+
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif

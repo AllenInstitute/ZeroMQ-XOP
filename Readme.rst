@@ -26,6 +26,8 @@ The XOP provides the following functions:
 - :cpp:func:`zeromq_sub_recv`
 - :cpp:func:`zeromq_sub_remove_filter`
 
+This XOP primarily supports (and is tested on) Igor Pro versions 8 or above. The code in principle supports Igor Pro 6 and 7, but the test suite does not. Therefore, builds released for Igor 6/7 are considered **EXPERIMENTAL** and should be treated as such. Special instructions for Igor 6/7 are described at the end of this readme.
+
 Installation
 ~~~~~~~~~~~~
 
@@ -532,14 +534,14 @@ Lastly, unit tests requires setup of the following (with instructions on doing s
 
 - `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`__
 
-Building the ZeroMQ.xop
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Building the ZeroMQ XOP
+~~~~~~~~~~~~~~~~~~~~~~~
 
 To get set up, we must install prerequisites, clone our repository, set up our submodules, and 'position' the XOP toolkit.
 
 We will use the following variable names for clarity below:
 
-- ``$xop-toolkit-dir`` is the path to the XOP Toolkit's source directory (e.g. subdirectory IgorXOPs8 for XOP Toolkit 8); and
+- ``$xop-toolkit-dir`` is the path to the XOP Toolkit top-level directory; and
 - ``$zmq-xop-dir`` is the path to our ZeroMQ-XOP code;
 
 Installing prerequisites
@@ -562,26 +564,26 @@ To clone the repository (and clone the required submodules), perform the followi
 XOP toolkit setup
 ^^^^^^^^^^^^^^^^^
 
-Our build system (cmake) must know where the XOP toolkit's main code files are (located in ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport``). By default, cmake will search for them in: ``$zmq-xop-dir/XOPSupport``.
+Our build system (cmake) must know where the XOP toolkit's main code files are (located in ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport``). By default, cmake will search for them in: ``$zmq-xop-dir/XOPSupport``.
 
-If using the default location, one should make a shortcut/symbolic link between ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport`` and ``$zmq-xop-dir/XOPSupport``:
+If using the default location, one should make a shortcut/symbolic link between ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport`` and ``$zmq-xop-dir/XOPSupport``:
 
 .. code-block:: sh
 
     # Windows (Note: mklink requires administrator privileges)
     # {
-    mklink \d $zmq-xop-dir/XOPSupport "$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport"
+    mklink \d $zmq-xop-dir/XOPSupport "$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport"
     # }
     # MacOSX
     # {
-    ln -s "$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport" $zmq-xop-dir/XOPSupport
+    ln -s "$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport" $zmq-xop-dir/XOPSupport
     # }
 
 This can be alternatively be changed by changing cmake's ``${XOP_SUPPORT_PATH}`` variable, either via the UI (cmake-gui for Windows, ccmake for Linux/Mac OSX), or when invoking the generator:
 
 .. code-block:: sh
 
-    cmake -DXOP_SUPPORT_PATH="$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs/XOPSupport"
+    cmake -DXOP_SUPPORT_PATH="$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport"
 
 
 Compilation instructions
@@ -616,6 +618,17 @@ The commands below perform this. (See also ``.gitlab.ci.yml`` for up-do-date bui
    # }
 
 After cmake 'install', the created libraries will be located in ``$zmq-xop-dir/output/$os``, where ``$os`` is mac for Mac, and win for Windows. For Mac, they will be in an xop directory, whereas for Windows they will be in an xop directory *within* a 'bitness' directory (x64 for 64-bit, x86 for 32-bit).
+
+Debugging the XOP
+^^^^^^^^^^^^^^^^
+
+When compiled from source, debugging launchers are created to allow easier debugging of the XOP.
+
+- For Windows, a number of ``launch-ZeroMQ-${CMAKE_BUILD_TYPE}.cmd`` scripts are created, with ``${CMAKE_BUILD_TYPE}`` referring to a compilation mode of interest (e.g., Debug, Release). Running it will launch Igor with the ZeroMQ.xop in debugger mode. The user can then open their VS debugger and debug as needed.
+- For Mac OSX, a ``launch-ZeroMQ.sh`` script is created. Running it will start Igor and a gdb debugger, allowing similar debugging to be done as needed.
+
+In both cases, a knowledge of *where* the Igor executable is located is necessary. The existing CMake files contain hardcoded assumptions for where they are, assuming Igor Pro 9 is installed. However, the user may explicit this path by setting the CMake variable ``${igorPath}`` (see "XOP toolkit setup" for instructions on settings cmake variables).
+
 
 Running the test suite
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -662,3 +675,53 @@ is `JSONL <https://jsonlines.org>`__. Additional static entries can be added to 
 ``zeromq_set_logging_template`` which allows to set a new template JSON text.
 
 The location of the log file on Windows is ``C:\Users\$user\AppData\Roaming\WaveMetrics\Igor Pro $version\Packages\ZeroMQ\Log.jsonl``.
+
+Igor Pro 6/7 Support
+~~~~~~~~~~~~~~~~~~~~
+
+As mentioned previously, this XOP supports Igor versions 6/7 in principle. However, the test suite *does not*. Thus, Igor6/7 builds are **experimental** and should be treated as such.
+
+In what follows, we explicit the differences in installation and compilation for Igor6/7.
+
+Installation
+^^^^^^^^^^^^
+
+The differences in installation relate to Igor Pro 6/7's support for 32-bit or 64-bit extensions.
+
+- Igor Pro 6 and earlier are 32-bit applications, and thus require 32-bit extensions. Note that there is a special 64-bit Igor Pro 6 for Windows, but it is suggested only for special cases. Also note that Igor6 on Mac requires MacOS 10.14 or earlier (as 32-bit support ends with MacOS 10.15).
+- Igor Pro 7 installs both 32-bit and 64-bit versions, with the 64-bit recommended to be used.
+
+In both cases, only a single "Igor Extensions" directory is provided in the user files directory (i.e., there is no "Igor Extensions (64-bit)"). As such, you must symlink **the appropriate** extensions folder **depending on your Igor bitness**:
+
+- If using 32-bit Igor, make a symbolic link/shortcut to "output/win/x86" for Windows, and "output/mac/ZeroMQ" for Mac.
+- If using 64-bit Igor, make a symbolic link/shortcut to "output/win/x64" for Windows, and "output/mac/ZeroMQ-64" for Mac.
+
+Compilation
+^^^^^^^^^^^
+
+To compile for Igor Pro 6/7:
+
+- You must use the proper XOP Toolkit: **Toolkit 7**. Thus, in the *XOP Toolkit Setup* section, replace ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport`` with ``$xop-toolkit-dir/XOP Toolkit 7/IgorXOPs7/XOPSupport`` throughout.
+- You must explicit Igor 6 in the cmake generation stage. In other words, your ``cmake -G ..`` calls (the first cmake call) must include ``-DXOP_MINIMUM_IGORVERSION=637`` (indicating the XOP version).
+- On Windows, you should compile with the officially supported Visual Studio version for XOP Toolki 7: Visual Studio 15 2017. As such, your cmake generation stage should use ``cmake -G "Visual Studio 15 2017" ..`` (instead of 2019).
+
+  Putting these together, the generation steps are (note the lack of x64 build for Windows, as it is not supported generally):
+
+.. code-block:: sh
+
+   # Windows
+   # {
+   cd $zmq-xop-dir/src
+   md build
+   cd build
+   cmake -G "Visual Studio 15 2017" -A Win32 -DCMAKE_BUILD_TYPE=Release -DXOP_MINIMUM_IGORVERSION=637 -S .. -B .
+   cmake --build . --config Release --target install
+   # }
+
+   # MacOSX
+   # {
+   cmake -G Xcode -DCMAKE_BUILD_TYPE=Release -DXOP_MINIMUM_IGORVERSION=637 -S .. -B .
+   cmake --build . --config Release --target install
+   # }
+
+After compilation, the created libraries will be located in $zmq-xop-dir/output/$os.
