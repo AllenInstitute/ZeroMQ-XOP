@@ -275,6 +275,8 @@ IF(APPLE)
     COMMAND ${APPLE_RESOURCE}
     ${sysroot}
     -i ${XOP_SUPPORT_PATH}
+    -i ${CMAKE_BINARY_DIR}
+    -i ${CMAKE_SOURCE_DIR}
     -F ${CARBON_LIBRARY}
     -useDF
     ${RESOURCES}
