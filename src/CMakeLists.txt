@@ -15,17 +15,15 @@ if(APPLE)
   SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Minimum MacOSX version")
 endif()
 
+# Limit multigenerator configs to Debug and Release for now (only ones used).
+SET(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+
 PROJECT(ZeroMQ)
 
 OPTION(COVERAGE "Enable coverage instrumentation" OFF)
 OPTION(SANITIZER "Enable sanitizer instrumentation" OFF)
 OPTION(MSVC_RUNTIME_DYNAMIC "Link dynamically against the MSVC runtime library" OFF)
 OPTION(WARNINGS_AS_ERRORS "Error out on compiler warnings" OFF)
-
-IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE "Debug")
-  MESSAGE(STATUS "CMAKE_BUILD_TYPE is not set, setting to CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}.")
-ENDIF()
 
 # Define minimum version based on XOP Toolkit. If compiling for Igor 6/7,
 # set to 637 when calling cmake: cmake -DXOP_MINIMUM_IGORVERSION=637...
@@ -88,14 +86,14 @@ IF(APPLE)
   SET_SOURCE_FILES_PROPERTIES(${RESOURCES} PROPERTIES GENERATED TRUE)
   SET(RESOURCE_CONFIG "${PROJECT_NAME}.r")
 
-  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/mac/xop/${CMAKE_BUILD_TYPE}")
-  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/mac/libzmq/${CMAKE_BUILD_TYPE}")
+  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/mac/xop/$<CONFIG>")
+  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/mac/libzmq/$<CONFIG>")
 ELSEIF(WIN32)
   SET(RESOURCES "${PROJECT_NAME}.rc")
   SET(RESOURCE_CONFIG "${PROJECT_NAME}WinCustom.rc")
 
-  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/xop/${CMAKE_BUILD_TYPE}")
-  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/libzmq/${CMAKE_BUILD_TYPE}")
+  SET(installFolder "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/xop/$<CONFIG>")
+  SET(installFolderLibZMQ "${CMAKE_SOURCE_DIR}/../output/win/${bitnessLibFolder}/libzmq/$<CONFIG>")
 ENDIF()
 
 # Create necessary resource files from intermediaries
@@ -466,19 +464,34 @@ CONFIGURE_FILE(git_version.cpp.in git_version.cpp @ONLY)
 CONFIGURE_FILE(cmake_config.h.in cmake_config.h @ONLY)
 
 IF(MSVC)
-  IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    SET(CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY TRUE)
-    SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
-  ENDIF()
+  # Get runtime libraries (debug and not) to configure for install.
+  SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)  # We will call ourselves
 
-  SET(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION ${installFolder})
+  # Get release libraries
   INCLUDE(InstallRequiredSystemLibraries)
+  SET(WIN_RUNTIME_RELEASE ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
+
+  # Reset module variable between calls.
+  SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS "")
+
+  # Get debug libraries
+  SET(CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY TRUE)
+  SET(CMAKE_INSTALL_DEBUG_LIBRARIES TRUE)
+  INCLUDE(InstallRequiredSystemLibraries)
+  SET(WIN_RUNTIME_DEBUG ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS})
+
+  INSTALL(PROGRAMS ${WIN_RUNTIME_DEBUG}
+          DESTINATION ${installFolder}
+          CONFIGURATIONS Debug)
+  INSTALL(PROGRAMS ${WIN_RUNTIME_RELEASE}
+          DESTINATION ${installFolder}
+          CONFIGURATIONS Release)
 
   INSTALL(TARGETS ${libname}
           RUNTIME
           DESTINATION ${installFolder})
 
-  INSTALL(FILES ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${libname}.pdb
+  INSTALL(FILES ${CMAKE_BINARY_DIR}/$<CONFIG>/${libname}.pdb
           DESTINATION ${installFolder})
 
   INSTALL(FILES ${installFolderLibZMQ}/bin/libzmq-v142-mt-gd-4_3_4.dll
