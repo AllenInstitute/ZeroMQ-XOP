@@ -337,32 +337,26 @@ IF(APPLE)
 
     SET(coveragePath "${CMAKE_BINARY_DIR}/coverage")
 
-    FIND_PROGRAM(LLVM_PROFDATA NAMES llvm-profdata PATHS ${LLVM_BREW} REQUIRED)
-
     ADD_CUSTOM_TARGET(coverage-merge
-                      COMMAND ${LLVM_PROFDATA} merge -output=code.profdata default.profraw
+                      COMMAND xcrun llvm-profdata merge -output=code.profdata default.profraw
                       WORKING_DIRECTORY ${coveragePath}
                       COMMENT "Generating coverage profraw files" VERBATIM)
 
-    FIND_PROGRAM(LLVM_COV NAMES llvm-cov PATHS ${LLVM_BREW} REQUIRED)
-    FIND_PROGRAM(CXX_DEMANGLER NAMES llvm-cxxfilt c++filt PATHS ${LLVM_BREW} REQUIRED)
-
     ADD_CUSTOM_TARGET(coverage-show
-                      COMMAND ${LLVM_COV} show
+                      COMMAND xcrun llvm-cov show
                       ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${libname}.xop/Contents/MacOS/${libname}
-                      -instr-profile=${coveragePath}/code.profdata
-                      -show-instantiation-summary
+                      --instr-profile=${coveragePath}/code.profdata
+                      --show-instantiation-summary
                       ${COVERAGE_SOURCES}
-                      -path-equivalence -use-color --format html
-                      -Xdemangler=${CXX_DEMANGLER}
+                      --use-color --format html
                       --output-dir=${coveragePath}
                       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                       COMMENT "Generating coverage HTML" VERBATIM)
 
     ADD_CUSTOM_TARGET(coverage-report
-                      COMMAND ${LLVM_COV} report
+                      COMMAND xcrun llvm-cov report
                       ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${libname}.xop/Contents/MacOS/${libname}
-                      -instr-profile=${coveragePath}/code.profdata
+                      --instr-profile=${coveragePath}/code.profdata
                       ${COVERAGE_SOURCES}
                       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                       COMMENT "Generating coverage summary" VERBATIM)
