@@ -1,4 +1,4 @@
-#pragma TextEncoding = "UTF-8"
+#pragma TextEncoding="UTF-8"
 #pragma rtGlobals=3
 #pragma ModuleName=zmq_pub_sub
 
@@ -43,7 +43,7 @@ Function ReceivesHeartbeatMessagesWithEverythingFilter()
 	Init_IGNORE()
 
 	expected = ZMQ_HEARTBEAT
-	ret = zeromq_sub_add_filter("")
+	ret      = zeromq_sub_add_filter("")
 	CHECK_EQUAL_VAR(ret, 0)
 
 	for(i = 0; i < 200; i += 1)

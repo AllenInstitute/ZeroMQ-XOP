@@ -1,4 +1,4 @@
-#pragma TextEncoding = "UTF-8"
+#pragma TextEncoding="UTF-8"
 #pragma rtGlobals=3
 #pragma IgorVersion=8.0
 
@@ -46,9 +46,9 @@ Function CheckErrorMessage(returnedError, xopError)
 	string errorMessage = GetErrMessage(returnedError)
 	CHECK(strlen(errorMessage) > 0)
 
-//	From http://www.igorexchange.com/node/7286:
-//	I'm not sure, but I believe that, if you AND with 0xFFFF and add FIRST_XOP_ERR,
-//	you will get your error code. This is an implementation detail and subject to change.
+	//	From http://www.igorexchange.com/node/7286:
+	//	I'm not sure, but I believe that, if you AND with 0xFFFF and add FIRST_XOP_ERR,
+	//	you will get your error code. This is an implementation detail and subject to change.
 	CHECK_EQUAL_VAR((returnedError & 0xFFFF) + 10000, xopError)
 End
 
@@ -87,7 +87,7 @@ Function GetListeningStatus_IGNORE(port, tcpVersion)
 	NewPath/Q $(symbDirPath), tmpDir
 	AbortOnValue (V_flag), 5
 
-	sprintf filename "igor_port_listening_%s.txt", Hash(num2istr(DateTime), 1)
+	sprintf filename, "igor_port_listening_%s.txt", Hash(num2istr(DateTime), 1)
 
 	// Add a path separator character to the end of the path, if necessary, and add on the file name.
 	fullPath = ParseFilePath(2, tmpDir, ":", 0, 0) + filename
@@ -174,13 +174,13 @@ Function ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_STR(actual, expected)
 
 	FindValue/TXOP=4/TEXT="value" T_TokenText
-	CHECK_NEQ_VAR(V_value,-1)
+	CHECK_NEQ_VAR(V_value, -1)
 
 	errorCode = str2num(T_TokenText[V_value + 1])
 
 	if(errorCode != REQ_SUCCESS)
 		FindValue/TXOP=4/TEXT="msg" T_TokenText
-		CHECK_NEQ_VAR(V_value,-1)
+		CHECK_NEQ_VAR(V_value, -1)
 		CHECK(strlen(T_TokenText[V_Value + 1]) > 0)
 	endif
 
@@ -207,20 +207,20 @@ Function/S ExtractMessageID(replyMessage)
 	CHECK_WAVE(W_TokenType, NUMERIC_WAVE)
 
 	FindValue/TXOP=4/TEXT="messageID" T_TokenText
-	CHECK_NEQ_VAR(V_value,-1)
+	CHECK_NEQ_VAR(V_value, -1)
 	CHECK_EQUAL_VAR(W_TokenType[V_value + 1], 3)
 
 	return T_TokenText[V_value + 1]
 End
 
 Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave, resultWave])
-	string replyMessage
-	variable &var
-	string &str
-	string &dfr
+	string                 replyMessage
+	variable              &var
+	string                &str
+	string                &dfr
 	STRUCT WaveProperties &wvProp
-	WAVE/T passByRefWave
-	WAVE/T resultWave
+	WAVE/T                 passByRefWave
+	WAVE/T                 resultWave
 
 	variable lastPassByRefRow, firstPassByRefRow
 	variable i, idx, resultRow
@@ -271,7 +271,7 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave,
 	CHECK(W_TokenType[resultRow + 1] == 1 || W_TokenType[resultRow + 1] == 2)
 
 	FindValue/TXOP=4/TEXT="type"/S=(resultRow) T_TokenText
-	CHECK_NEQ_VAR(V_value,-1)
+	CHECK_NEQ_VAR(V_value, -1)
 
 	if(strlen(type) > 0)
 		actual   = T_TokenText[V_value + 1]
@@ -298,13 +298,13 @@ Function ExtractReturnValue(replyMessage, [var, str, dfr, wvProp, passByRefWave,
 	if(!ParamIsDefault(passByRefWave))
 		FindValue/TXOP=4/TEXT="passByReference" T_TokenText
 		firstPassByRefRow = V_value
-		CHECK_NEQ_VAR(firstPassByRefRow,-1)
+		CHECK_NEQ_VAR(firstPassByRefRow, -1)
 		Redimension/N=(W_TokenSize[firstPassByRefRow + 1]) passByRefWave
 
 		FindValue/TXOP=4/TEXT="result" T_TokenText
 		CHECK_NEQ_VAR(lastPassByRefRow, -1)
 
-		idx = 0
+		idx              = 0
 		lastPassByRefRow = V_Value
 		for(i = firstPassByRefRow; i < lastPassByRefRow; i += 1)
 			if(!cmpstr(T_TokenText[i], "value"))
@@ -335,7 +335,7 @@ End
 
 Function TestFunction1ArgAndOpt(var1, [opt])
 	variable var1
-	string opt
+	string   opt
 
 	return 1
 End
@@ -444,8 +444,8 @@ End
 
 Function/DF TestFunctionReturnLargeDataFolder()
 
-	DFREF dfr = NewFreeDataFolder()
-	WAVE largeWave = TestFunctionReturnLargeFreeWave()
+	DFREF dfr       = NewFreeDataFolder()
+	WAVE  largeWave = TestFunctionReturnLargeFreeWave()
 	MoveWave largeWave, dfr
 
 	return dfr
@@ -533,7 +533,7 @@ Function TestFunctionAbort2()
 End
 
 Function TestFunctionPassByRef1(var)
-	variable& var
+	variable &var
 
 	var = 4711
 
@@ -541,7 +541,7 @@ Function TestFunctionPassByRef1(var)
 End
 
 Function TestFunctionPassByRef2(str)
-	string& str
+	string &str
 
 	str = "hi there"
 
@@ -549,8 +549,8 @@ Function TestFunctionPassByRef2(str)
 End
 
 Function TestFunctionPassByRef3(var, str)
-	variable& var
-	string& str
+	variable &var
+	string   &str
 
 	var = NaN
 	str = "hi there"
@@ -559,8 +559,8 @@ Function TestFunctionPassByRef3(var, str)
 End
 
 Function TestFunctionPassByRef4(var, str)
-	variable& var
-	string& str
+	variable &var
+	string   &str
 
 	Abort
 
@@ -568,8 +568,8 @@ Function TestFunctionPassByRef4(var, str)
 End
 
 Function TestFunctionPassByRef5(str, var)
-	string& str
-	variable& var
+	string   &str
+	variable &var
 
 	var = NUM_BYTES_LEAK_TESTING
 	str = ""
@@ -583,7 +583,7 @@ Function TestFunctionPassByRef6([s])
 
 	return 42
 End
-Function TestFunctionPassByRef7(WAVE& wv)
+Function TestFunctionPassByRef7(WAVE &wv)
 
 	Make/FREE/D freeWave = {4711}
 	WAVE wv = freeWave
@@ -627,12 +627,12 @@ Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValues
 
 End
 
-Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid6(variable inputVar, string& inputStr)
+Function [variable outputVar, string outputStr] TestFunctionMultipleReturnValuesValid6(variable inputVar, string &inputStr)
 
 	outputVar = 23 + inputVar
 	outputStr = inputStr + "!!"
 
-	inputStr  = "dummy text"
+	inputStr = "dummy text"
 End
 
 Structure WaveProperties
@@ -659,7 +659,7 @@ Function FindLastEntry(WAVE/T wv, string entry)
 End
 
 Function ParseSerializedWave(replyMessage, s)
-	string& replyMessage
+	string                &replyMessage
 	STRUCT WaveProperties &s
 
 	variable numTokens, start, index
@@ -697,7 +697,7 @@ Function ParseSerializedWave(replyMessage, s)
 	if(index != -1)
 
 		dimLine = ReplaceString(" ", trimString(T_TokenText[index + 1], 2), "")
-		string/g root:str = dimLine
+		string/G root:str = dimLine
 
 		SplitString/E="\"size\":\[([[:digit:]]*),?([[:digit:]]*),?([[:digit:]]*),?([[:digit:]]*),?\]" dimLine, size0, size1, size2, size3
 		CHECK(V_Flag >= 1)
@@ -734,7 +734,7 @@ Function ParseSerializedWave(replyMessage, s)
 		endif
 	endif
 
-	WAVE/T/Z s.raw = raw
+	WAVE/Z/T s.raw = raw
 
 	print s
 	print s.raw
@@ -750,12 +750,12 @@ Function/S GetWaveTypeString(wv)
 	variable type = WaveType(wv)
 
 	if(type & COMPLEX_WAVE)
-		type = type & ~COMPLEX_WAVE
+		type      = type & ~COMPLEX_WAVE
 		modifier += " | NT_CMPLX"
 	endif
 
 	if(type & UNSIGNED_WAVE)
-		type = type & ~UNSIGNED_WAVE
+		type      = type & ~UNSIGNED_WAVE
 		modifier += " | NT_UNSIGNED"
 	endif
 
@@ -803,8 +803,8 @@ Function/S GetWaveTypeString(wv)
 End
 
 Function CompareWaveWithSerialized(wv, s)
-	WAVE/Z wv
-	STRUCT WaveProperties& s
+	WAVE/Z                 wv
+	STRUCT WaveProperties &s
 
 	string expectedType, actualType
 	variable numPoints, type
@@ -824,7 +824,7 @@ Function CompareWaveWithSerialized(wv, s)
 	endif
 
 	// type
-	type = WaveType(wv)
+	type         = WaveType(wv)
 	expectedType = GetWaveTypeString(wv)
 	actualType   = s.type
 	CHECK_EQUAL_STR(expectedType, actualType)
@@ -844,7 +844,7 @@ Function CompareWaveWithSerialized(wv, s)
 					// work around JSONSimple bug
 					convWaveText[] = ReplaceString("\\\"", s.raw[p], "\"")
 					Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWaveText
-					CHECK_EQUAL_WAVES(wv, convWaveText, mode=WAVE_DATA)
+					CHECK_EQUAL_WAVES(wv, convWaveText, mode = WAVE_DATA)
 					break
 				case 3: // dfref wave
 				case 4: // wave wave
@@ -855,16 +855,16 @@ Function CompareWaveWithSerialized(wv, s)
 			endswitch
 
 		elseif(type & COMPLEX_WAVE)
-			Make/FREE/N=(numPoints/2)/Y=(type)/C convWaveComplex
+			Make/FREE/N=(numPoints / 2)/Y=(type)/C convWaveComplex
 			convWaveComplex[] = cmplx(str2num(s.raw[p]), str2num(s.raw[numPoints / 2 + p]))
 			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWaveComplex
-			CHECK_EQUAL_WAVES(wv, convWaveComplex, mode=WAVE_DATA)
+			CHECK_EQUAL_WAVES(wv, convWaveComplex, mode = WAVE_DATA)
 		else
 			Make/FREE/N=(numPoints)/Y=(type) convWave
 			convWave[] = str2num(s.raw[p])
 			Redimension/N=(dims[0], dims[1], dims[2], dims[3]) convWave
 			// workaround IP9 bug when converting text containing NaN to numbers
-			CHECK_EQUAL_WAVES(wv, convWave, mode=WAVE_DATA, tol = 1e-15)
+			CHECK_EQUAL_WAVES(wv, convWave, mode = WAVE_DATA, tol = 1e-15)
 		endif
 	endif
 End
@@ -875,7 +875,7 @@ End
 Function ExhaustMemory(amountOfFreeMemoryLeft)
 	variable amountOfFreeMemoryLeft
 
-	variable i, expo=10, err
+	variable i, expo = 10, err
 	string str
 
 	for(i = expo; i >= 0;)
@@ -897,7 +897,7 @@ End
 
 Function/WAVE TestFunctionReturnExistingWave()
 
-	WAVE/SDFR=root: bigWave
+	WAVE/SDFR=root:bigWave 
 
 	return bigWave
 End
@@ -931,18 +931,18 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	endif
 
 	// sorted list
-	list = AddListItem("zmq_bind.ipf", list, ";", inf)
-	list = AddListItem("zmq_connect.ipf", list, ";", inf)
-	list = AddListItem("zmq_memory_leaks.ipf", list, ";", inf)
-	list = AddListItem("zmq_pub_sub.ipf", list, ";", inf)
-	list = AddListItem("zmq_set_logging_template.ipf", list, ";", inf)
-	list = AddListItem("zmq_set.ipf", list, ";", inf)
-	list = AddListItem("zmq_start_handler.ipf", list, ";", inf)
-	list = AddListItem("zmq_stop.ipf", list, ";", inf)
-	list = AddListItem("zmq_stop_handler.ipf", list, ";", inf)
-	list = AddListItem("zmq_test_callfunction.ipf", list, ";", inf)
-	list = AddListItem("zmq_test_interop.ipf", list, ";", inf)
-	list = AddListItem("zmq_test_serializeWave.ipf", list, ";", inf)
+	list = AddListItem("zmq_bind.ipf", list, ";", Inf)
+	list = AddListItem("zmq_connect.ipf", list, ";", Inf)
+	list = AddListItem("zmq_memory_leaks.ipf", list, ";", Inf)
+	list = AddListItem("zmq_pub_sub.ipf", list, ";", Inf)
+	list = AddListItem("zmq_set_logging_template.ipf", list, ";", Inf)
+	list = AddListItem("zmq_set.ipf", list, ";", Inf)
+	list = AddListItem("zmq_start_handler.ipf", list, ";", Inf)
+	list = AddListItem("zmq_stop.ipf", list, ";", Inf)
+	list = AddListItem("zmq_stop_handler.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_callfunction.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_interop.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_serializeWave.ipf", list, ";", Inf)
 
 	if(ParamIsDefault(testsuite))
 		testsuite = list
@@ -951,8 +951,8 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	endif
 
 	if(strlen(testcase) == 0)
-		RunTest(testsuite, name = name, enableJU = 1, debugMode= debugMode)
+		RunTest(testsuite, name = name, enableJU = 1, debugMode = debugMode)
 	else
-		RunTest(testsuite, name = name, enableJU = 1, debugMode= debugMode, testcase = testcase)
+		RunTest(testsuite, name = name, enableJU = 1, debugMode = debugMode, testcase = testcase)
 	endif
 End

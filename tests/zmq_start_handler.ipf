@@ -1,4 +1,4 @@
-#pragma TextEncoding = "UTF-8"
+#pragma TextEncoding="UTF-8"
 #pragma rtGlobals=3
 #pragma ModuleName=zmq_handler_start
 
@@ -89,14 +89,14 @@ Function CallsFunctionsAtIdleEventOnly()
 
 	variable err, ret, errorValue, resultVariable
 	variable expected
-	string replyMessage
+	string   replyMessage
 
-	string msg = "{                    " + \
-	"\"version\" : 1,                  " + \
-	 "\"CallFunction\" : {             " + \
-	   "\"name\" : \"FunctionToCall\"  " + \
-	"}                                 " + \
-	"}"
+	string msg = "{                    "              + \
+	             "\"version\" : 1,                  " + \
+	             "\"CallFunction\" : {             "  + \
+	             "\"name\" : \"FunctionToCall\"  "    + \
+	             "}                                 " + \
+	             "}"
 
 	zeromq_stop()
 	zeromq_server_bind("tcp://127.0.0.1:5555")
@@ -114,7 +114,7 @@ Function CallsFunctionsAtIdleEventOnly()
 	errorValue = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
-	ExtractReturnValue(replyMessage, var=resultVariable)
+	ExtractReturnValue(replyMessage, var = resultVariable)
 	expected = FunctionToCall()
 	CHECK_EQUAL_VAR(resultVariable, expected)
 End

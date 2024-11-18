@@ -1,4 +1,4 @@
-#pragma TextEncoding = "UTF-8"
+#pragma TextEncoding="UTF-8"
 #pragma rtGlobals=3
 #pragma ModuleName=zqm_set
 
@@ -94,7 +94,6 @@ Function AcceptsRecvWaitFlag()
 
 	CHECK_EQUAL_VAR(ret, 0)
 End
-
 
 Function AcceptsMultipleFLags()
 

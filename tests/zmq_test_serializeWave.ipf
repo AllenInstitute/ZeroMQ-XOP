@@ -1,4 +1,4 @@
-#pragma TextEncoding = "UTF-8"
+#pragma TextEncoding="UTF-8"
 #pragma rtGlobals=3
 #pragma ModuleName=zmq_test_serializeWave
 
@@ -81,7 +81,7 @@ End
 Function WorksWithNonEmptyWaveWave()
 
 	string actual
-	Make/Free data = p
+	Make/FREE data = p
 	Make/N=(1)/WAVE wv = data
 	actual = zeromq_test_serializeWave(wv)
 
@@ -206,7 +206,7 @@ End
 Function WorksWithComplexInt()
 
 	string actual
-	Make/C/N=(1)/I wv = cmplx(1,2)
+	Make/C/N=(1)/I wv = cmplx(1, 2)
 	actual = zeromq_test_serializeWave(wv)
 	print actual
 	STRUCT WaveProperties s
@@ -217,7 +217,7 @@ End
 Function WorksWithCmplxIntUnsigned()
 
 	string actual
-	Make/I/U/C/N=(1)/I wv = cmplx(1,2)
+	Make/I/U/C/N=(1)/I wv = cmplx(1, 2)
 	actual = zeromq_test_serializeWave(wv)
 	STRUCT WaveProperties s
 	ParseSerializedWave(actual, s)
@@ -234,7 +234,7 @@ Function DoesNotIncludeDefaultProperties()
 	ParseSerializedWave(actual, s)
 	CompareWaveWithSerialized(wv, s)
 
-	Wave/T T_TokenText
+	WAVE/T T_TokenText
 	FindValue/TXOP=4/TEXT="unit" T_TokenText
 	CHECK_EQUAL_VAR(V_Value, -1)
 
@@ -262,14 +262,14 @@ Function DoesIncludeDataUnitsAndFull()
 	ParseSerializedWave(actual, s)
 	CompareWaveWithSerialized(wv, s)
 
-	Wave/T T_TokenText
+	WAVE/T T_TokenText
 	FindValue/TXOP=4/TEXT="unit" T_TokenText
 	CHECK_NEQ_VAR(V_Value, -1)
 	expected = "myUnit"
 	actual   = T_TokenText[V_Value + 1]
 	CHECK_EQUAL_STR(expected, actual)
 
-	Wave/T T_TokenText
+	WAVE/T T_TokenText
 	FindValue/TXOP=4/TEXT="fullScale" T_TokenText
 	CHECK_NEQ_VAR(V_Value, -1)
 	actual = T_TokenText[V_value + 2]
@@ -292,7 +292,7 @@ Function DoesIncludeWaveNote()
 	ParseSerializedWave(actual, s)
 	CompareWaveWithSerialized(wv, s)
 
-	Wave/T T_TokenText
+	WAVE/T T_TokenText
 	FindValue/TXOP=4/TEXT="note" T_TokenText
 	CHECK_NEQ_VAR(V_Value, -1)
 	actual = T_TokenText[V_value + 1]
@@ -314,7 +314,7 @@ Function DoesIncludeDimensionUnit()
 	ParseSerializedWave(replyMessage, s)
 	CompareWaveWithSerialized(wv, s)
 
-	Wave/T T_TokenText
+	WAVE/T T_TokenText
 	FindValue/TXOP=4/TEXT="unit" T_TokenText
 	CHECK_NEQ_VAR(V_Value, -1)
 
@@ -347,7 +347,7 @@ Function DoesIncludeDimensionScaling()
 	ParseSerializedWave(replyMessage, s)
 	CompareWaveWithSerialized(wv, s)
 
-	Wave/T T_TokenText
+	WAVE/T T_TokenText
 	FindValue/TXOP=4/TEXT="offset" T_TokenText
 	CHECK_NEQ_VAR(V_Value, -1)
 
@@ -381,7 +381,7 @@ Function DoesIncludeDimensionLabelFull()
 	ParseSerializedWave(replyMessage, s)
 	CompareWaveWithSerialized(wv, s)
 
-	Wave/T T_TokenText
+	WAVE/T T_TokenText
 
 	FindValue/TXOP=4/TEXT="each" T_TokenText
 	CHECK_EQUAL_VAR(V_Value, -1)
@@ -399,8 +399,8 @@ Function DoesIncludeDimensionLabelEach()
 
 	string actual, expected
 	string replyMessage
-	                                                  // Col0
-	Make/FREE/T lbls = {"myLabelRow0", "myLabelRow1", "",      "myLabelCol1", "myLabelCol2"}
+	// Col0
+	Make/FREE/T lbls = {"myLabelRow0", "myLabelRow1", "", "myLabelCol1", "myLabelCol2"}
 
 	Make/O/T wv = {"00", "10", "01", "11", "02", "12"}
 	Redimension/N=(2, 3) wv
@@ -416,7 +416,7 @@ Function DoesIncludeDimensionLabelEach()
 	ParseSerializedWave(replyMessage, s)
 	CompareWaveWithSerialized(wv, s)
 
-	Wave/T T_TokenText
+	WAVE/T T_TokenText
 
 	FindValue/TXOP=4/TEXT="full" T_TokenText
 	CHECK_EQUAL_VAR(V_Value, -1)
@@ -428,20 +428,20 @@ Function DoesIncludeDimensionLabelEach()
 	expected = lbls[0]
 	CHECK_EQUAL_STR(actual, expected)
 
-	actual = T_TokenText[V_value + 3]
+	actual   = T_TokenText[V_value + 3]
 	expected = lbls[1]
 	CHECK_EQUAL_STR(actual, expected)
 
-	actual = T_TokenText[V_value + 4]
+	actual   = T_TokenText[V_value + 4]
 	expected = lbls[2]
 	CHECK_EQUAL_STR(actual, expected)
 
 #if IgorVersion() >= 9.0
-	actual = T_TokenText[V_value + 5]
+	actual   = T_TokenText[V_value + 5]
 	expected = lbls[3]
 	CHECK_EQUAL_STR(actual, expected)
 
-	actual = T_TokenText[V_value + 6]
+	actual   = T_TokenText[V_value + 6]
 	expected = lbls[4]
 	CHECK_EQUAL_STR(actual, expected)
 #else
