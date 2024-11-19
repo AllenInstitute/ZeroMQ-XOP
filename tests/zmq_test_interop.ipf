@@ -1,4 +1,4 @@
-#pragma TextEncoding = "UTF-8"
+#pragma TextEncoding="UTF-8"
 #pragma rtGlobals=3
 #pragma ModuleName=zmq_test_interop
 
@@ -14,42 +14,42 @@ Function ReturnsTrueForExistingWave()
 	Make data
 	path = GetWavesDataFolder(data, 2)
 
-	msg = "{\"version\"     : 1, "                   + \
-		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"ZeroMQ_WaveExists\"," + \
-		  "\"params\"       : [\"" + path + "\"]}}"
+	msg = "{\"version\"     : 1, "                    + \
+	      "\"CallFunction\" : {"                      + \
+	      "\"name\"         : \"ZeroMQ_WaveExists\"," + \
+	      "\"params\"       : [\"" + path + "\"]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
-	errorValue = ExtractErrorValue(replyMessage)
+	errorValue   = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
-	ExtractReturnValue(replyMessage, var=result)
+	ExtractReturnValue(replyMessage, var = result)
 	expected = 1
 	CHECK_EQUAL_VAR(result, expected)
 End
 
 Function ReturnsFalseForNonExistingWave()
 
-	string msg
-	string replyMessage
+	string   msg
+	string   replyMessage
 	variable errorValue
-	string path
+	string   path
 	variable result, expected
 
 	Make data
 	path = GetWavesDataFolder(data, 2)
 	KillWaves data
 
-	msg = "{\"version\"     : 1, "                   + \
-		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"ZeroMQ_WaveExists\"," + \
-		  "\"params\"       : [\"" + path + "\"]}}"
+	msg = "{\"version\"     : 1, "                    + \
+	      "\"CallFunction\" : {"                      + \
+	      "\"name\"         : \"ZeroMQ_WaveExists\"," + \
+	      "\"params\"       : [\"" + path + "\"]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
-	errorValue = ExtractErrorValue(replyMessage)
+	errorValue   = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
-	ExtractReturnValue(replyMessage, var=result)
+	ExtractReturnValue(replyMessage, var = result)
 	expected = 0
 	CHECK_EQUAL_VAR(result, expected)
 End
@@ -65,26 +65,26 @@ Function ReturnsTrueForExistingDF()
 	DFREF dfr = ttest
 	path = GetDataFolder(1, dfr)
 
-	msg = "{\"version\"     : 1, "                   + \
-		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"ZeroMQ_DataFolderExists\"," + \
-		  "\"params\"       : [\"" + path + "\"]}}"
+	msg = "{\"version\"     : 1, "                          + \
+	      "\"CallFunction\" : {"                            + \
+	      "\"name\"         : \"ZeroMQ_DataFolderExists\"," + \
+	      "\"params\"       : [\"" + path + "\"]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
-	errorValue = ExtractErrorValue(replyMessage)
+	errorValue   = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
-	ExtractReturnValue(replyMessage, var=result)
+	ExtractReturnValue(replyMessage, var = result)
 	expected = 1
 	CHECK_EQUAL_VAR(result, expected)
 End
 
 Function ReturnsFalseForNonExistingDF()
 
-	string msg
-	string replyMessage
+	string   msg
+	string   replyMessage
 	variable errorValue
-	string path
+	string   path
 	variable result, expected
 
 	NewDataFolder ttest
@@ -92,24 +92,24 @@ Function ReturnsFalseForNonExistingDF()
 	path = GetDataFolder(1, dfr)
 	KillDataFolder ttest
 
-	msg = "{\"version\"     : 1, "                   + \
-		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"ZeroMQ_DataFolderExists\"," + \
-		  "\"params\"       : [\"" + path + "\"]}}"
+	msg = "{\"version\"     : 1, "                          + \
+	      "\"CallFunction\" : {"                            + \
+	      "\"name\"         : \"ZeroMQ_DataFolderExists\"," + \
+	      "\"params\"       : [\"" + path + "\"]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
-	errorValue = ExtractErrorValue(replyMessage)
+	errorValue   = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
-	ExtractReturnValue(replyMessage, var=result)
+	ExtractReturnValue(replyMessage, var = result)
 	expected = 0
 	CHECK_EQUAL_VAR(result, expected)
 End
 
 Function FunctionListWorks()
 
-	string msg
-	string replyMessage
+	string   msg
+	string   replyMessage
 	variable errorValue
 	string path, resultString, expected
 
@@ -118,24 +118,24 @@ Function FunctionListWorks()
 	path = GetDataFolder(1, dfr)
 	KillDataFolder ttest
 
-	msg = "{\"version\"     : 1, "                   + \
-		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"ZeroMQ_FunctionList\"," + \
-		  "\"params\"       : [\"FunctionListWorks\"]}}"
+	msg = "{\"version\"     : 1, "                      + \
+	      "\"CallFunction\" : {"                        + \
+	      "\"name\"         : \"ZeroMQ_FunctionList\"," + \
+	      "\"params\"       : [\"FunctionListWorks\"]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
-	errorValue = ExtractErrorValue(replyMessage)
+	errorValue   = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
-	ExtractReturnValue(replyMessage, str=resultString)
+	ExtractReturnValue(replyMessage, str = resultString)
 	expected = "FunctionListWorks;"
 	CHECK_EQUAL_STR(resultString, expected)
 End
 
 Function FunctionInfoWorks()
 
-	string msg
-	string replyMessage
+	string   msg
+	string   replyMessage
 	variable errorValue
 	string path, resultString, expected
 
@@ -144,16 +144,16 @@ Function FunctionInfoWorks()
 	path = GetDataFolder(1, dfr)
 	KillDataFolder ttest
 
-	msg = "{\"version\"     : 1, "                   + \
-		  "\"CallFunction\" : {"                     + \
-		  "\"name\"         : \"ZeroMQ_FunctionInfo\"," + \
-		  "\"params\"       : [\"FunctionInfoWorks\"]}}"
+	msg = "{\"version\"     : 1, "                      + \
+	      "\"CallFunction\" : {"                        + \
+	      "\"name\"         : \"ZeroMQ_FunctionInfo\"," + \
+	      "\"params\"       : [\"FunctionInfoWorks\"]}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
-	errorValue = ExtractErrorValue(replyMessage)
+	errorValue   = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
-	ExtractReturnValue(replyMessage, str=resultString)
+	ExtractReturnValue(replyMessage, str = resultString)
 	expected = FunctionInfo("FunctionInfoWorks")
 	CHECK_EQUAL_STR(resultString, expected)
 End

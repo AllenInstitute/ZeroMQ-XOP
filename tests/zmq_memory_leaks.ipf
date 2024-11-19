@@ -1,4 +1,4 @@
-﻿#pragma TextEncoding = "UTF-8"
+#pragma TextEncoding="UTF-8"
 #pragma rtGlobals=3
 #pragma ModuleName=ZMQ_LEAK_TESTING
 
@@ -10,9 +10,9 @@
 /// - We allocate roughly NUM_BYTES_LEAK_TESTING * NUM_RUNS bytes (10MB with current values)
 /// - We later check that the amount of used memory only increased by a smaller margin
 
-Constant NUM_BYTES_LEAK_TESTING = 1e5
+Constant        NUM_BYTES_LEAK_TESTING = 1e5
 static Constant ADDITIONAL_MEMORY_USED = 8e6
-static Constant NUM_RUNS = 100
+static Constant NUM_RUNS               = 100
 
 // Memory allocation works differently on MacOSX so we only can test that on Windows.
 
@@ -27,7 +27,7 @@ End
 static Function TEST_CASE_BEGIN_OVERRIDE(name)
 	string name
 
-	CHECK(	NUM_BYTES_LEAK_TESTING * NUM_RUNS > ADDITIONAL_MEMORY_USED)
+	CHECK(NUM_BYTES_LEAK_TESTING * NUM_RUNS > ADDITIONAL_MEMORY_USED)
 
 	zeromq_stop()
 	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
@@ -68,16 +68,16 @@ static Function/WAVE GenerateMessage()
 	contents = PadString("", NUM_BYTES_LEAK_TESTING, 0x20)
 
 	messages[2] = "{\"version\"     : 1, "                      + \
-		          "\"CallFunction\" : {"                        + \
-		          "\"name\"         : \"TestFunction1StrArg\"," + \
-		          "\"params\"       : [\"" + contents + "\"]}}"
+	              "\"CallFunction\" : {"                        + \
+	              "\"name\"         : \"TestFunction1StrArg\"," + \
+	              "\"params\"       : [\"" + contents + "\"]}}"
 
 	SetDimLabel 0, 2, StringParameter, messages
 
 	messages[3] = "{\"version\"     : 1, "                         + \
-		          "\"CallFunction\" : {"                           + \
-		          "\"name\"         : \"TestFunctionPassByRef5\"," + \
-		          "\"params\" : [\"nothing\", 123]}}"
+	              "\"CallFunction\" : {"                           + \
+	              "\"name\"         : \"TestFunctionPassByRef5\"," + \
+	              "\"params\" : [\"nothing\", 123]}}"
 
 	SetDimLabel 0, 3, StringPassByRefParameter, messages
 

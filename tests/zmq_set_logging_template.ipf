@@ -1,4 +1,4 @@
-﻿#pragma TextEncoding = "UTF-8"
+#pragma TextEncoding="UTF-8"
 #pragma rtGlobals=3
 #pragma ModuleName=ZMQ_LOGGING
 
@@ -47,7 +47,7 @@ End
 static Function/S ReadFile(string path)
 
 	variable refNum
-	string contents
+	string   contents
 
 	Open/R/Z=1 refNum as path
 
@@ -88,7 +88,7 @@ End
 Function InvalidJSONTemplates([string str])
 
 	variable err
-	string path
+	string   path
 
 	path = GetLogFilePath_IGNORE()
 	GetFileFolderInfo/Q/Z=1 path
@@ -122,12 +122,12 @@ Function WorksInBothDirections()
 	CHECK_EQUAL_STR(actual, expected)
 
 	msg = "{\"version\"     : 1, "                    + \
-		  "\"CallFunction\" : {"                      + \
-		  "\"name\"         : \"TestFunctionNoArgs\"" + \
-		  "}}"
+	      "\"CallFunction\" : {"                      + \
+	      "\"name\"         : \"TestFunctionNoArgs\"" + \
+	      "}}"
 
 	replyMessage = zeromq_test_callfunction(msg)
-	errorValue = ExtractErrorValue(replyMessage)
+	errorValue   = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
 
 	logfile = ReadFile(path)
@@ -139,6 +139,6 @@ Function WorksInBothDirections()
 	actual   = "{\"blahh\":\"blubb\",\"direction\":\"Incoming\",\"json\":{\"CallFunction\":{\"name\":\"TestFunctionNoArgs\"},\"version\":1}}"
 	expected = StringFromList(1, logfile, "\n")
 
-	actual   =	"{\"blahh\":\"blubb\",\"direction\":\"Outgoing\",\"json\":{\"errorCode\":{\"value\":0},\"result\":{\"type\":\"variable\",\"value\":\"nan\"}}}"
+	actual   = "{\"blahh\":\"blubb\",\"direction\":\"Outgoing\",\"json\":{\"errorCode\":{\"value\":0},\"result\":{\"type\":\"variable\",\"value\":\"nan\"}}}"
 	expected = StringFromList(2, logfile, "\n")
 End
