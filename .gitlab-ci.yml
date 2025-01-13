@@ -232,7 +232,7 @@ testing-macosx:
       - ln -s $(pwd)/utf/procedures "$HOME/Documents/WaveMetrics/Igor Pro ${IGORPRO_VERSION} User Files/User Procedures/utf"
       - cd tests
       - touch DO_AUTORUN.TXT
-      - export UBSAN_OPTIONS=print_stacktrace=1,suppressions=$(pwd)/UBSAN.supp,log_path=$(pwd)/sanitizer.log
+      - export UBSAN_OPTIONS=print_stacktrace=1,suppressions=$(pwd)/UBSAN.supp,report_error_type=1,log_path=$(pwd)/sanitizer.log
       - DYLD_INSERT_LIBRARIES=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/${MACOSX_XCODE_VERSION}/lib/darwin/libclang_rt.asan_osx_dynamic.dylib
         /Applications/Igor\ Pro\ ${IGORPRO_VERSION}\ Folder/Igor64.app/Contents/MacOS/Igor64 /I RunTests.pxp
       - export SANIFILE=$(find . -name sanitizer.log.*)
