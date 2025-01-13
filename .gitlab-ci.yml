@@ -78,7 +78,7 @@ compile-libzmq-macosx:
         - Release
         - Debug
   script:
-    - cmake -B build -S src/libzmq -G "Xcode" -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DCMAKE_INSTALL_PREFIX=../../../output/mac/libzmq/${CONFIG_TYPE}
+    - cmake -B build -S src/libzmq -G "Xcode" -DCMAKE_OSX_ARCHITECTURES="x86_64" -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DCMAKE_INSTALL_PREFIX=../../../output/mac/libzmq/${CONFIG_TYPE}
     - cmake --build build --config ${CONFIG_TYPE} --target install
   artifacts:
     paths:
@@ -133,7 +133,7 @@ compile-xop-release-macosx:
   tags:
     - macosx, xcode, sonoma, arm64
   script:
-    - cmake -B build -S src -G "Xcode" -DWARNINGS_AS_ERRORS=ON
+    - cmake -B build -S src -G "Xcode" -DCMAKE_OSX_ARCHITECTURES="x86_64" -DWARNINGS_AS_ERRORS=ON
     - cmake --build build --config Release --target install
   needs:
     - download-xoptoolkit
@@ -146,7 +146,7 @@ compile-xop-debug-coverage-macosx:
   tags:
     - macosx, xcode, sonoma, arm64
   script:
-    - cmake -B build -S src -G "Xcode" -DWARNINGS_AS_ERRORS=ON -DCOVERAGE=ON -DSANITIZER=ON
+    - cmake -B build -S src -G "Xcode" -DCMAKE_OSX_ARCHITECTURES="x86_64" -DWARNINGS_AS_ERRORS=ON -DCOVERAGE=ON -DSANITIZER=ON
     - cmake --build build --config Debug --target install
   needs:
     - download-xoptoolkit
@@ -324,7 +324,7 @@ coverage:
   script:
       - mkdir -p build/coverage
       - mv tests/default.profraw build/coverage
-      - cmake -B build -S src -G "Xcode" -DCOVERAGE=ON
+      - cmake -B build -S src -G "Xcode" -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCOVERAGE=ON
       - cmake --build build --config Debug --target install
       - cmake --build build --target coverage
   coverage: '/^TOTAL.*\s+(\d+\%)$/'
