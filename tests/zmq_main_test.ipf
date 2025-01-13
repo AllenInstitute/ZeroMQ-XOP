@@ -897,7 +897,7 @@ End
 
 Function/WAVE TestFunctionReturnExistingWave()
 
-	WAVE/SDFR=root:bigWave 
+	WAVE/SDFR=root: bigWave
 
 	return bigWave
 End
