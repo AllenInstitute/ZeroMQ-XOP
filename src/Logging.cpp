@@ -65,7 +65,7 @@ struct fmt::formatter<MessageDirection> : fmt::formatter<std::string>
 {
   // parse is inherited from formatter<std::string>.
   template <typename FormatContext>
-  auto format(const MessageDirection& mode, FormatContext &ctx) const
+  auto format(const MessageDirection &mode, FormatContext &ctx) const
   {
     std::string name;
     switch(mode)

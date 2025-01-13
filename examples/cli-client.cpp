@@ -1,23 +1,22 @@
-#include <zmq.h>
-#include <string>
 #include <iostream>
+#include <string>
+#include <zmq.h>
 
-// This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
+// This file is part of the `ZeroMQ-XOP` project and licensed under
+// BSD-3-Clause.
 
-#define ZEROMQ_ASSERT(A)                                             \
-  if(!(A))                                                           \
-  {                                                                  \
-    auto err = zmq_errno();                                          \
-    fprintf(stderr, "The zmq library call in %s line %d file "       \
-            "%s failed with errno=%d and msg=\"%s\"\r",              \
-            __func__, __LINE__, __FILE__, err, zmq_strerror(err));   \
-    exit(1);                                                         \
+#define ZEROMQ_ASSERT(A)                                                       \
+  if (!(A)) {                                                                  \
+    auto err = zmq_errno();                                                    \
+    fprintf(stderr,                                                            \
+            "The zmq library call in %s line %d file "                         \
+            "%s failed with errno=%d and msg=\"%s\"\r",                        \
+            __func__, __LINE__, __FILE__, err, zmq_strerror(err));             \
+    exit(1);                                                                   \
   }
 
-int main(int argc, char** argv)
-{
-  if(argc < 3)
-  {
+int main(int argc, char **argv) {
+  if (argc < 3) {
     std::cerr << "Expected exactly two arguments." << std::endl;
     std::cerr << "First argument: remote point to connect to" << std::endl;
     std::cerr << "Second argument: JSON message to send" << std::endl;
@@ -28,7 +27,7 @@ int main(int argc, char** argv)
   const std::string payload(argv[2]);
 
   std::cout << "Remote point: " << remotePoint << std::endl;
-  std::cout << "JSON Message: " << payload     << std::endl;
+  std::cout << "JSON Message: " << payload << std::endl;
 
   auto zmq_context = zmq_ctx_new();
   ZEROMQ_ASSERT(zmq_context != nullptr);
@@ -41,7 +40,8 @@ int main(int argc, char** argv)
   ZEROMQ_ASSERT(rc == 0);
 
   const char identity[] = "cli client for xop: dealer";
-  rc = zmq_setsockopt(zmq_client_socket, ZMQ_IDENTITY, &identity, strlen(identity));
+  rc = zmq_setsockopt(zmq_client_socket, ZMQ_IDENTITY, &identity,
+                      strlen(identity));
   ZEROMQ_ASSERT(rc == 0);
 
   rc = zmq_connect(zmq_client_socket, remotePoint.c_str());
@@ -68,7 +68,8 @@ int main(int argc, char** argv)
   // payload
   numBytes = zmq_msg_recv(&payloadMsg, zmq_client_socket, 0);
 
-  std::string reply(static_cast<char*>(zmq_msg_data(&payloadMsg)), zmq_msg_size(&payloadMsg));
+  std::string reply(static_cast<char *>(zmq_msg_data(&payloadMsg)),
+                    zmq_msg_size(&payloadMsg));
 
   std::cout << "Reply: " << reply << std::endl;
 
