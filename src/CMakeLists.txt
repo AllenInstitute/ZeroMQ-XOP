@@ -12,7 +12,7 @@ if(APPLE)
   # Igor8 supports OSX 10.10 - 10.14 (10.15 nos supported).
   # Igor9 supports 10.13 & 10.14 (and 'partially' 10.15).
   # TODO: Consider adding min/max constraints in the future?
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Minimum MacOSX version")
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum MacOSX version")
 endif()
 
 # Limit multigenerator configs to Debug and Release for now (only ones used).

@@ -4,7 +4,6 @@
 variables:
   GIT_SUBMODULE_STRATEGY: "recursive"
   MACOSX_XCODE_VERSION: "15.0.0"
-  CMAKE_OSX_DEPLOYMENT_TARGET: "10.10"
 
 stages:
   - first
