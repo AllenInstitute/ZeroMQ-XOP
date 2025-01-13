@@ -58,12 +58,8 @@ compile-libzmq-windows:
         GENERATOR_PLATFORM: "Win32"
       when: manual
   script:
-    - del /S /Q output
-    - cd src/libzmq
-    - md build
-    - cd build
-    - cmake -G "Visual Studio 17 2022" -A %GENERATOR_PLATFORM% -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DZMQ_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=../../../output/win/%ARCHITECTURE%/libzmq/%CONFIG_TYPE% ..
-    - cmake --build . --config %CONFIG_TYPE% --target install
+    - cmake -B build -S src/libzmq -G "Visual Studio 17 2022" -A %GENERATOR_PLATFORM% -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DZMQ_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=../../../output/win/%ARCHITECTURE%/libzmq/%CONFIG_TYPE%
+    - cmake --build build --config %CONFIG_TYPE% --target install
     # - ctest -C %CONFIG_TYPE%
   artifacts:
     paths:
@@ -82,12 +78,8 @@ compile-libzmq-macosx:
         - Release
         - Debug
   script:
-    - rm -rf output
-    - cd src/libzmq
-    - mkdir build
-    - cd build
-    - cmake -G "Xcode" -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DCMAKE_INSTALL_PREFIX=../../../output/mac/libzmq/${CONFIG_TYPE} ..
-    - cmake --build . --config ${CONFIG_TYPE} --target install
+    - cmake -B build -S src/libzmq -G "Xcode" -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DCMAKE_INSTALL_PREFIX=../../../output/mac/libzmq/${CONFIG_TYPE}
+    - cmake --build build --config ${CONFIG_TYPE} --target install
   artifacts:
     paths:
       - output/mac
@@ -128,10 +120,8 @@ compile-xop-windows:
       variables:
         GENERATOR_PLATFORM: "Win32"
   script:
-    - md build
-    - cd build
-    - cmake -G "Visual Studio 17 2022" -A %GENERATOR_PLATFORM% -DMSVC_RUNTIME_DYNAMIC=ON -DWARNINGS_AS_ERRORS=ON ../src
-    - cmake --build . --config %CONFIG_TYPE% --target install
+    - cmake -B build -S src -G "Visual Studio 17 2022" -A %GENERATOR_PLATFORM% -DMSVC_RUNTIME_DYNAMIC=ON -DWARNINGS_AS_ERRORS=ON
+    - cmake --build build --config %CONFIG_TYPE% --target install
   needs:
     - download-xoptoolkit
   artifacts:
@@ -143,10 +133,8 @@ compile-xop-release-macosx:
   tags:
     - macosx, xcode, sonoma, arm64
   script:
-    - mkdir build
-    - cd build
-    - cmake -G "Xcode" -DWARNINGS_AS_ERRORS=ON ../src
-    - cmake --build . --config Release --target install
+    - cmake -B build -S src -G "Xcode" -DWARNINGS_AS_ERRORS=ON
+    - cmake --build build --config Release --target install
   needs:
     - download-xoptoolkit
   artifacts:
@@ -158,10 +146,8 @@ compile-xop-debug-coverage-macosx:
   tags:
     - macosx, xcode, sonoma, arm64
   script:
-    - mkdir build
-    - cd build
-    - cmake -G "Xcode" -DWARNINGS_AS_ERRORS=ON -DCOVERAGE=ON -DSANITIZER=ON ../src
-    - cmake --build . --config Debug --target install
+    - cmake -B build -S src -G "Xcode" -DWARNINGS_AS_ERRORS=ON -DCOVERAGE=ON -DSANITIZER=ON
+    - cmake --build build --config Debug --target install
   needs:
     - download-xoptoolkit
   artifacts:
@@ -177,11 +163,9 @@ clang-tidy:
       GIT_AUTHOR_NAME:  "ci"
       GIT_AUTHOR_EMAIL: "bots@byte-physics.de"
   script:
-    - mkdir build
-    - cd build
-    - cmake -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src
-    - cmake --build . --config Debug --target clang-tidy && exit_value=$? || exit_value=$?
-    - git commit -m "clang-tidy fixes" ..
+    - cmake -B build -S src -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    - cmake --build build --config Debug --target clang-tidy && exit_value=$? || exit_value=$?
+    - git commit -m "clang-tidy fixes" .
     - git format-patch -n1
     - exit ${exit_value}
   needs:
@@ -340,10 +324,9 @@ coverage:
   script:
       - mkdir -p build/coverage
       - mv tests/default.profraw build/coverage
-      - cd build
-      - cmake -G "Xcode" -DCOVERAGE=ON ../src
-      - cmake --build . --config Debug --target install
-      - cmake --build . --target coverage
+      - cmake -B build -S src -G "Xcode" -DCOVERAGE=ON
+      - cmake --build build --config Debug --target install
+      - cmake --build build --target coverage
   coverage: '/^TOTAL.*\s+(\d+\%)$/'
   artifacts:
     paths:
