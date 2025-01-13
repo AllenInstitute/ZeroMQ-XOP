@@ -312,6 +312,7 @@ packaging:
   needs:
     - compile-xop-windows
     - compile-xop-release-macosx
+    - testing-macosx
   artifacts:
     paths:
       - package
