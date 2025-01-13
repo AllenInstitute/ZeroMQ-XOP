@@ -59,11 +59,10 @@ compile-libzmq-windows:
       when: manual
   script:
     - del /S /Q output
-    - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCHITECTURE%
     - cd src/libzmq
     - md build
     - cd build
-    - cmake -G "Visual Studio 16 2019" -A %GENERATOR_PLATFORM% -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DZMQ_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=../../../output/win/%ARCHITECTURE%/libzmq/%CONFIG_TYPE% ..
+    - cmake -G "Visual Studio 17 2022" -A %GENERATOR_PLATFORM% -DENABLE_CURVE=OFF -DENABLE_DRAFTS=OFF -DWITH_DOC=OFF -DZMQ_BUILD_TESTS=OFF -DCMAKE_INSTALL_PREFIX=../../../output/win/%ARCHITECTURE%/libzmq/%CONFIG_TYPE% ..
     - cmake --build . --config %CONFIG_TYPE% --target install
     # - ctest -C %CONFIG_TYPE%
   artifacts:
@@ -129,10 +128,9 @@ compile-xop-windows:
       variables:
         GENERATOR_PLATFORM: "Win32"
   script:
-    - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCHITECTURE%
     - md build
     - cd build
-    - cmake -G "Visual Studio 16 2019" -A %GENERATOR_PLATFORM% -DMSVC_RUNTIME_DYNAMIC=ON -DWARNINGS_AS_ERRORS=ON ../src
+    - cmake -G "Visual Studio 17 2022" -A %GENERATOR_PLATFORM% -DMSVC_RUNTIME_DYNAMIC=ON -DWARNINGS_AS_ERRORS=ON ../src
     - cmake --build . --config %CONFIG_TYPE% --target install
   needs:
     - download-xoptoolkit
