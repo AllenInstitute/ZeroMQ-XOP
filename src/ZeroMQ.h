@@ -81,6 +81,7 @@ using LockGuard = std::lock_guard<std::recursive_mutex>;
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 #pragma clang diagnostic ignored "-Wc++2a-compat"
 #pragma clang diagnostic ignored "-Wfloat-equal"
+#pragma clang diagnostic ignored "-Wduplicate-enum"
 #endif
 
 #ifdef _MSC_VER

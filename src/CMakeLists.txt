@@ -12,7 +12,7 @@ if(APPLE)
   # Igor8 supports OSX 10.10 - 10.14 (10.15 nos supported).
   # Igor9 supports 10.13 & 10.14 (and 'partially' 10.15).
   # TODO: Consider adding min/max constraints in the future?
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Minimum MacOSX version")
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum MacOSX version")
 endif()
 
 # Limit multigenerator configs to Debug and Release for now (only ones used).
@@ -318,15 +318,17 @@ IF(APPLE)
     MESSAGE(STATUS "Building with sanitizer support.")
     TARGET_COMPILE_OPTIONS(${libname} PRIVATE $<$<CONFIG:DEBUG>:-g -O2
                            -fsanitize=address -fsanitize=undefined -fsanitize=integer
+                           -fno-sanitize=unsigned-shift-base
                            -fsanitize=nullability -fno-omit-frame-pointer -fno-sanitize-recover=all
                            -fsanitize-recover=unsigned-integer-overflow>)
     TARGET_LINK_OPTIONS(${libname} PRIVATE $<$<CONFIG:DEBUG>:-fsanitize=address
                         -fsanitize=undefined -fsanitize=integer -fsanitize=nullability
+                        -fno-sanitize=unsigned-shift-base
                         -fno-omit-frame-pointer -fno-sanitize-recover=all
                         -fsanitize-recover=unsigned-integer-overflow>)
   ENDIF()
 
-  SET(LLVM_BREW "/usr/local/opt/llvm/bin" "/usr/local/Cellar/llvm/11.1.0/share/clang")
+  SET(LLVM_BREW "/opt/homebrew/opt/llvm/bin")
 
   IF(${COVERAGE})
     MESSAGE(STATUS "Building with coverage instrumentation")
@@ -335,32 +337,26 @@ IF(APPLE)
 
     SET(coveragePath "${CMAKE_BINARY_DIR}/coverage")
 
-    FIND_PROGRAM(LLVM_PROFDATA NAMES llvm-profdata PATHS ${LLVM_BREW} REQUIRED)
-
     ADD_CUSTOM_TARGET(coverage-merge
-                      COMMAND ${LLVM_PROFDATA} merge -output=code.profdata default.profraw
+                      COMMAND xcrun llvm-profdata merge -output=code.profdata default.profraw
                       WORKING_DIRECTORY ${coveragePath}
                       COMMENT "Generating coverage profraw files" VERBATIM)
 
-    FIND_PROGRAM(LLVM_COV NAMES llvm-cov PATHS ${LLVM_BREW} REQUIRED)
-    FIND_PROGRAM(CXX_DEMANGLER NAMES llvm-cxxfilt c++filt PATHS ${LLVM_BREW} REQUIRED)
-
     ADD_CUSTOM_TARGET(coverage-show
-                      COMMAND ${LLVM_COV} show
+                      COMMAND xcrun llvm-cov show
                       ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${libname}.xop/Contents/MacOS/${libname}
-                      -instr-profile=${coveragePath}/code.profdata
-                      -show-instantiation-summary
+                      --instr-profile=${coveragePath}/code.profdata
+                      --show-instantiation-summary
                       ${COVERAGE_SOURCES}
-                      -path-equivalence -use-color --format html
-                      -Xdemangler=${CXX_DEMANGLER}
+                      --use-color --format html
                       --output-dir=${coveragePath}
                       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                       COMMENT "Generating coverage HTML" VERBATIM)
 
     ADD_CUSTOM_TARGET(coverage-report
-                      COMMAND ${LLVM_COV} report
+                      COMMAND xcrun llvm-cov report
                       ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${libname}.xop/Contents/MacOS/${libname}
-                      -instr-profile=${coveragePath}/code.profdata
+                      --instr-profile=${coveragePath}/code.profdata
                       ${COVERAGE_SOURCES}
                       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                       COMMENT "Generating coverage summary" VERBATIM)

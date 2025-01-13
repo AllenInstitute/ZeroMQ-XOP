@@ -34,7 +34,7 @@ struct fmt::formatter<RequestInterface> : fmt::formatter<std::string>
 {
   // parse is inherited from formatter<std::string>.
   template <typename FormatContext>
-  auto format(const RequestInterface &req, FormatContext &ctx)
+  auto format(const RequestInterface &req, FormatContext &ctx) const
   {
     return format_to(
         ctx.out(),

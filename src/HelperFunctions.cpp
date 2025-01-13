@@ -646,7 +646,7 @@ struct fmt::formatter<OutputMode> : fmt::formatter<std::string>
 {
   // parse is inherited from formatter<std::string>.
   template <typename FormatContext>
-  auto format(OutputMode mode, FormatContext &ctx)
+  auto format(const OutputMode& mode, FormatContext &ctx) const
   {
     std::string name;
     switch(mode)

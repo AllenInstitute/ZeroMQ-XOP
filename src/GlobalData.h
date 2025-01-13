@@ -95,7 +95,7 @@ struct fmt::formatter<SocketTypes> : fmt::formatter<std::string>
 {
   // parse is inherited from formatter<std::string>.
   template <typename FormatContext>
-  auto format(SocketTypes st, FormatContext &ctx)
+  auto format(const SocketTypes &st, FormatContext &ctx) const
   {
     std::string name;
     switch(st)

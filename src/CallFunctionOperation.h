@@ -28,7 +28,7 @@ struct fmt::formatter<CallFunctionOperation> : fmt::formatter<std::string>
 {
   // parse is inherited from formatter<std::string>.
   template <typename FormatContext>
-  auto format(CallFunctionOperation op, FormatContext &ctx)
+  auto format(const CallFunctionOperation &op, FormatContext &ctx) const
   {
     return format_to(ctx.out(), "name={}, params={}", op.m_name, op.m_params);
   }
