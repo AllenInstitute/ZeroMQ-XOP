@@ -326,7 +326,7 @@ IF(APPLE)
                         -fsanitize-recover=unsigned-integer-overflow>)
   ENDIF()
 
-  SET(LLVM_BREW "/usr/local/opt/llvm/bin" "/usr/local/Cellar/llvm/11.1.0/share/clang")
+  SET(LLVM_BREW "/opt/homebrew/opt/llvm/bin")
 
   IF(${COVERAGE})
     MESSAGE(STATUS "Building with coverage instrumentation")
