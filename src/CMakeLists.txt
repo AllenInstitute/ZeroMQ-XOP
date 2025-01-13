@@ -318,10 +318,12 @@ IF(APPLE)
     MESSAGE(STATUS "Building with sanitizer support.")
     TARGET_COMPILE_OPTIONS(${libname} PRIVATE $<$<CONFIG:DEBUG>:-g -O2
                            -fsanitize=address -fsanitize=undefined -fsanitize=integer
+                           -fno-sanitize=unsigned-shift-base
                            -fsanitize=nullability -fno-omit-frame-pointer -fno-sanitize-recover=all
                            -fsanitize-recover=unsigned-integer-overflow>)
     TARGET_LINK_OPTIONS(${libname} PRIVATE $<$<CONFIG:DEBUG>:-fsanitize=address
                         -fsanitize=undefined -fsanitize=integer -fsanitize=nullability
+                        -fno-sanitize=unsigned-shift-base
                         -fno-omit-frame-pointer -fno-sanitize-recover=all
                         -fsanitize-recover=unsigned-integer-overflow>)
   ENDIF()
