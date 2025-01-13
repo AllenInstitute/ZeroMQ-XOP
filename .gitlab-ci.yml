@@ -3,7 +3,7 @@
 
 variables:
   GIT_SUBMODULE_STRATEGY: "recursive"
-  MACOSX_XCODE_VERSION: "12.0.0"
+  MACOSX_XCODE_VERSION: "15.0.0"
   CMAKE_OSX_DEPLOYMENT_TARGET: "10.10"
 
 stages:
@@ -73,7 +73,7 @@ compile-libzmq-macosx:
   stage: first
   when: manual
   tags:
-    - macosx, xcode, catalina, amd64
+    - macosx, xcode, sonoma, arm64
   variables:
       GIT_SUBMODULE_STRATEGY: "none"
   parallel:
@@ -141,7 +141,7 @@ compile-xop-windows:
 compile-xop-release-macosx:
   stage: second
   tags:
-    - macosx, xcode, catalina, amd64
+    - macosx, xcode, sonoma, arm64
   script:
     - mkdir build
     - cd build
@@ -156,7 +156,7 @@ compile-xop-release-macosx:
 compile-xop-debug-coverage-macosx:
   stage: second
   tags:
-    - macosx, xcode, catalina, amd64
+    - macosx, xcode, sonoma, arm64
   script:
     - mkdir build
     - cd build
@@ -172,7 +172,7 @@ compile-xop-debug-coverage-macosx:
 clang-tidy:
   stage: second
   tags:
-    - macosx, xcode, catalina, amd64
+    - macosx, xcode, sonoma, arm64
   variables:
       GIT_AUTHOR_NAME:  "ci"
       GIT_AUTHOR_EMAIL: "bots@byte-physics.de"
@@ -195,7 +195,7 @@ clang-tidy:
 
 # codesign-and-notarize-xop-macosx:
 #   tags:
-#     - macosx, xcode, catalina, amd64
+#     - macosx, xcode, sonoma, arm64
 #   stage: second
 #   script:
 #     - cd output/mac
@@ -234,7 +234,7 @@ clang-tidy:
 #
 testing-macosx:
   tags:
-    - macosx, igorpro, catalina, amd64
+    - macosx, igorpro, sonoma, arm64
   stage: third
   parallel:
     matrix:
@@ -336,7 +336,7 @@ packaging:
 coverage:
   stage: fourth
   tags:
-    - macosx, xcode, catalina, amd64
+    - macosx, xcode, sonoma, arm64
   script:
       - mkdir -p build/coverage
       - mv tests/default.profraw build/coverage
