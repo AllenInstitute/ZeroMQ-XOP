@@ -327,7 +327,7 @@ coverage:
       - cmake -B build -S src -G "Xcode" -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCOVERAGE=ON
       - cmake --build build --config Debug --target install
       - cmake --build build --target coverage
-  coverage: '/^TOTAL.*\s+(\d+\%)$/'
+  coverage: '/^TOTAL.*\s+(\d+.\d+\%)$/'
   artifacts:
     paths:
       - build/coverage
