@@ -136,14 +136,9 @@ SET(COVERAGE_SOURCES
   zeromq_test_serializeWave.cpp
 )
 
-# CPP files used for clang-format
 SET(SOURCES
   ${COVERAGE_SOURCES}
   functions.cpp
-)
-
-# CPP files *not* used for clang-format
-SET(SOURCES_EXT
   git_version.cpp
   cmake_config.h
 )
@@ -241,7 +236,7 @@ IF(APPLE)
     InfoPlist.strings
     ${CMAKE_BINARY_DIR}/${libname}.rsrc)
 
-  ADD_EXECUTABLE(${libname} MACOSX_BUNDLE ${SOURCES} ${SOURCES_EXT} ${HEADERS} ${RESOURCES} ${MISC})
+  ADD_EXECUTABLE(${libname} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} ${MISC})
 
   SET_TARGET_PROPERTIES(${libname} PROPERTIES PREFIX "")
   SET_TARGET_PROPERTIES(${libname} PROPERTIES BUNDLE_EXTENSION "xop")
@@ -370,7 +365,7 @@ IF(APPLE)
   ENDIF()
 ELSEIF(WIN32)
 
-  ADD_LIBRARY(${libname} SHARED ${SOURCES} ${SOURCES_EXT} ${HEADERS} ${RESOURCES})
+  ADD_LIBRARY(${libname} SHARED ${SOURCES} ${HEADERS} ${RESOURCES})
 
   SET_TARGET_PROPERTIES(${libname} PROPERTIES SUFFIX ".xop")
 
@@ -419,17 +414,6 @@ TARGET_LINK_LIBRARIES(${libname} PRIVATE nlohmann_json::nlohmann_json)
 ADD_SUBDIRECTORY(fmt EXCLUDE_FROM_ALL)
 
 TARGET_LINK_LIBRARIES(${libname} PRIVATE fmt-header-only)
-
-FIND_PROGRAM(CLANG_FORMAT NAMES clang-format)
-
-IF(CLANG_FORMAT)
-  # run clang-format before building
-  ADD_CUSTOM_COMMAND(TARGET ${libname}
-                     PRE_BUILD
-                     COMMAND ${CLANG_FORMAT} -i ${SOURCES} ${HEADERS}
-                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                     COMMENT "Running clang-format" VERBATIM)
-ENDIF()
 
 FIND_PROGRAM(RUN_CLANG_TIDY PATHS ${LLVM_BREW} NAMES run-clang-tidy.py)
 FIND_PROGRAM(CLANG_TIDY PATHS ${LLVM_BREW} NAMES clang-tidy)
