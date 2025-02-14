@@ -5,6 +5,14 @@
 XOPIORecResult RegisterFunction();
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct DPComplexNum
+{
+  double real;
+  double imag;
+};
+#pragma pack() // Reset structure alignment to default.
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_client_connectParams
 {
   Handle remotePoint;
@@ -68,6 +76,16 @@ struct zeromq_pub_sendParams
   double result;
 };
 typedef struct zeromq_pub_sendParams zeromq_pub_sendParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_pub_send_multiParams
+{
+  waveHndl payload;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_pub_send_multiParams zeromq_pub_send_multiParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
@@ -162,6 +180,16 @@ typedef struct zeromq_sub_recvParams zeromq_sub_recvParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_sub_recv_multiParams
+{
+  waveHndl payload;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_sub_recv_multiParams zeromq_sub_recv_multiParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_sub_remove_filterParams
 {
   Handle filter;
@@ -212,6 +240,9 @@ extern "C" int zeromq_pub_bind(zeromq_pub_bindParams *p);
 // variable zeromq_pub_send(string filter, string msg)
 extern "C" int zeromq_pub_send(zeromq_pub_sendParams *p);
 
+// variable zeromq_pub_send_multi(WAVEWAVE payload)
+extern "C" int zeromq_pub_send_multi(zeromq_pub_send_multiParams *p);
+
 // variable zeromq_server_bind(string localPoint)
 extern "C" int zeromq_server_bind(zeromq_server_bindParams *p);
 
@@ -239,6 +270,9 @@ extern "C" int zeromq_sub_connect(zeromq_sub_connectParams *p);
 
 // string zeromq_sub_recv(string *filter)
 extern "C" int zeromq_sub_recv(zeromq_sub_recvParams *p);
+
+// variable zeromq_sub_recv_multi(WAVEWAVE payload)
+extern "C" int zeromq_sub_recv_multi(zeromq_sub_recv_multiParams *p);
 
 // variable zeromq_sub_remove_filter(string filter)
 extern "C" int zeromq_sub_remove_filter(zeromq_sub_remove_filterParams *p);

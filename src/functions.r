@@ -62,6 +62,14 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   HSTRING_TYPE,      // parameter 2
   },
 
+  // variable zeromq_pub_send_multi(WAVEWAVE payload)
+  "zeromq_pub_send_multi",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  WAVE_TYPE,      // parameter 1
+  },
+
   // variable zeromq_server_bind(string localPoint)
   "zeromq_server_bind",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
@@ -133,6 +141,14 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   HSTRING_TYPE,          // Return value type
   {
   FV_REF_TYPE | HSTRING_TYPE,      // parameter 1
+  },
+
+  // variable zeromq_sub_recv_multi(WAVEWAVE payload)
+  "zeromq_sub_recv_multi",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  WAVE_TYPE,      // parameter 1
   },
 
   // variable zeromq_sub_remove_filter(string filter)

@@ -95,6 +95,9 @@ THREADSAFE variable zeromq_pub_bind(string localPoint);
 /// (by default 1000) will be kept.
 THREADSAFE variable zeromq_pub_send(string filter, string msg);
 
+/// @brief Multipart variant of zeromq_pub_send
+THREADSAFE variable zeromq_pub_send_multi(WAVEWAVE payload);
+
 /// @brief Connect to a ZMQ_PUB socket as ZMQ_SUB
 ///
 /// @param remotePoint Protocol and address of the server, usually something
@@ -123,6 +126,10 @@ THREADSAFE variable zeromq_sub_remove_filter(string filter);
 
 /// @brief Receive subscribed messages
 THREADSAFE string zeromq_sub_recv(string *filter);
+/// @}
+
+/// @brief Receive subscribed messages (multipart)
+THREADSAFE variable zeromq_sub_recv_multi(WAVEWAVE payload);
 /// @}
 
 /// @name Message handler
