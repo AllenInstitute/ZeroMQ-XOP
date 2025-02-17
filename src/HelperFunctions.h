@@ -85,6 +85,8 @@ void WaveClear(waveHndl wv);
 /// @return	std::string containing the same data
 std::string GetStringFromHandle(Handle strHandle);
 
+std::string GetStringFromHandleWithDispose(Handle strHandle);
+
 void SetDimensionLabels(waveHndl h, int Dimension,
                         const std::vector<std::string> &dimLabels);
 
@@ -381,3 +383,16 @@ T *GetWaveDataPtr(waveHndl waveH)
 
   return reinterpret_cast<T *>(reinterpret_cast<char *>(*waveH) + dataOffset);
 }
+
+/// @brief Retrieves dimensions of a wave.
+/// @param[in] w wave handle of wave
+/// @return vector with size of each dimension. The vector has size
+/// MAX_DIMENSIONS + 1 and the first unused dimension is set to size 0
+std::vector<CountInt> GetWaveDimension(waveHndl w);
+
+/// @brief Retrieves dimensions and number of dimensions of a wave.
+/// @param[in] w wave handle of wave
+/// @param[out] numDims number of dimensions
+/// @return vector with size of each dimension. The vector has size
+/// MAX_DIMENSIONS + 1.
+std::vector<CountInt> GetWaveDimension(waveHndl w, int &numDims);

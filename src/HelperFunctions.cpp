@@ -36,6 +36,22 @@ std::string GetStringFromHandle(Handle strHandle)
   return std::string(*strHandle, strLen);
 }
 
+/// @brief Returns a string from an Igor string Handle and disposes the Handle
+///
+/// Returns a string from an Igor string Handle
+/// returns an empty string if the sring handle is nullptr
+/// use e.g. for FUNCTION parameters (ownership by XOP)
+///
+/// @param strHandle Igor string handle
+/// @return string with the content of the Igor string Handle
+std::string GetStringFromHandleWithDispose(Handle strHandle)
+{
+  auto str = GetStringFromHandle(strHandle);
+  WMDisposeHandle(strHandle);
+
+  return str;
+}
+
 /// @brief Set dimension labels on wave
 ///
 /// @param	h	Wave to set dimension labels on
@@ -800,4 +816,271 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   DEBUG_OUTPUT("type={}, point={}, rc={}", st, point, rc);
   GlobalData::Instance().AddToListOfBindsOrConnections(
       GetLastEndPoint(socket.get()), st);
+}
+
+/// @brief Returns a Igor string Handle from a C++ string
+///
+/// Returns a Igor string Handle from a C++ string
+/// returns nullptr if the Handle could not be created or any other error
+/// occured
+///
+/// @param str C++ string
+/// @return Igor string handle with the content of the C++ string
+Handle GetHandleFromString(const std::string &str)
+{
+  Handle h = nullptr;
+  if(!(h = WMNewHandle(To<BCInt>(str.size()))))
+  {
+    return nullptr;
+  }
+  if(PutCStringInHandle(str.c_str(), h))
+  {
+    return nullptr;
+  }
+  return h;
+}
+
+bool IsFreeDataFolder(DataFolderHandle dfr)
+{
+  DataFolderHandle rootDFR = nullptr;
+
+  int rc = GetRootDataFolder(0, &rootDFR);
+  ASSERT(rc == 0);
+
+  if(rootDFR == dfr)
+  {
+    return false;
+  }
+
+  DataFolderHandle parentDFR = nullptr;
+  rc                         = GetParentDataFolder(dfr, &parentDFR);
+  if(rc == NO_PARENT_DATAFOLDER)
+  {
+    return true;
+  }
+
+  ASSERT(rc == 0);
+
+  return false;
+}
+
+size_t GetWaveIndexInMemory(waveHndl w, std::vector<IndexInt> &dims)
+{
+  if(!w)
+  {
+    throw IgorException(NOWAV);
+  }
+
+  ASSERT(dims.size() == MAX_DIMENSIONS);
+
+  int numDims = 0;
+  std::vector<CountInt> dimSizes(MAX_DIMENSIONS + 1, 0);
+  int ret = MDGetWaveDimensions(w, &numDims, dimSizes.data());
+  ASSERT(ret == 0);
+
+  dimSizes.resize(To<size_t>(numDims));
+
+  size_t index = 0;
+  size_t i     = 0;
+  size_t block = 1;
+  for(auto &e : dimSizes)
+  {
+    auto dimIndex = To<size_t>(dims[i]);
+    ASSERT(dimIndex < To<size_t>(e));
+    index += block * dimIndex;
+    block *= To<size_t>(e);
+    i++;
+  }
+
+  return index;
+}
+
+template <>
+void SetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims, const std::string &value)
+{
+  if(!w)
+  {
+    throw IgorException(NOWAV);
+  }
+
+  ASSERT(dims.size() == MAX_DIMENSIONS);
+
+  if(WaveType(w) == TEXT_WAVE_TYPE)
+  {
+    Handle textH = GetHandleFromString(value);
+    int err      = MDSetTextWavePointValue(w, dims.data(), textH);
+    WMDisposeHandle(textH);
+    if(err)
+    {
+      throw IgorException(err, "Error writing values to text wave");
+    }
+  }
+  else
+  {
+    throw IgorException(ERR_INVALID_TYPE, "Wave is not a text wave.");
+  }
+}
+
+template <>
+void SetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexInt> &dims, const DataFolderHandle &value)
+{
+  if(!w)
+  {
+    throw IgorException(NOWAV);
+  }
+
+  ASSERT(dims.size() == MAX_DIMENSIONS);
+
+  if(WaveType(w) == DATAFOLDER_TYPE)
+  {
+    auto *address = static_cast<DataFolderHandle *>(WaveData(w));
+    address += GetWaveIndexInMemory(w, dims); // NOLINT
+
+    DataFolderHandle target = *address;
+    if(target != nullptr && IsFreeDataFolder(target))
+    {
+      auto err = ReleaseDataFolder(&target);
+      ASSERT(err == 0);
+    }
+
+    *address = value;
+  }
+  else
+  {
+    throw IgorException(ERR_INVALID_TYPE, "Wave is not of data folder reference type.");
+  }
+}
+
+template <>
+void SetWaveElement<waveHndl>(waveHndl w, std::vector<IndexInt> &dims, const waveHndl &value)
+{
+  if(!w)
+  {
+    throw IgorException(NOWAV);
+  }
+
+  ASSERT(dims.size() == MAX_DIMENSIONS);
+
+  if(WaveType(w) == WAVE_TYPE)
+  {
+    auto *address = static_cast<waveHndl *>(WaveData(w));
+    address += GetWaveIndexInMemory(w, dims); // NOLINT
+
+    waveHndl target = *address;
+    if(target != nullptr && IsFreeWave(target))
+    {
+      auto err = ReleaseWave(&target);
+      ASSERT(err == 0);
+    }
+
+    *address = value;
+  }
+  else
+  {
+    throw IgorException(ERR_INVALID_TYPE, "Wave is not of wave reference type.");
+  }
+}
+
+template <>
+DataFolderHandle GetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexInt> &dims)
+{
+  if(!w)
+  {
+    throw IgorException(NOWAV);
+  }
+
+  ASSERT(dims.size() == MAX_DIMENSIONS);
+
+  if(WaveType(w) == WAVE_TYPE)
+  {
+    auto *address = static_cast<DataFolderHandle *>(WaveData(w));
+
+    address += GetWaveIndexInMemory(w, dims); // NOLINT
+    return *address;
+  }
+
+  throw IgorException(ERR_INVALID_TYPE, "XOP Bug: Wave is not of data folder reference type.");
+}
+
+template <>
+waveHndl GetWaveElement<waveHndl>(waveHndl w, std::vector<IndexInt> &dims)
+{
+  if(!w)
+  {
+    throw IgorException(NOWAV);
+  }
+
+  ASSERT(dims.size() == MAX_DIMENSIONS);
+
+  if(WaveType(w) == WAVE_TYPE)
+  {
+    auto *address = static_cast<waveHndl *>(WaveData(w));
+
+    address += GetWaveIndexInMemory(w, dims); // NOLINT
+    return *address;
+  }
+
+  throw IgorException(ERR_INVALID_TYPE, "XOP Bug: Wave is not of wave reference type.");
+}
+
+template <>
+std::string GetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims)
+{
+  if(!w)
+  {
+    throw IgorException(NOWAV);
+  }
+
+  ASSERT(dims.size() == MAX_DIMENSIONS);
+
+  if(WaveType(w) == TEXT_WAVE_TYPE)
+  {
+    Handle textH = nullptr;
+    if(!(textH = WMNewHandle(0L)))
+    {
+      throw IgorException(NOMEM, "Error creating Igor Handle.");
+    }
+    if(int err = MDGetTextWavePointValue(w, dims.data(), textH))
+    {
+      WMDisposeHandle(textH);
+      throw IgorException(err, "Error reading value from text wave");
+    }
+    return GetStringFromHandleWithDispose(textH);
+  }
+
+  throw IgorException(ERR_INVALID_TYPE, "XOP Bug: Wave is not a text wave.");
+}
+
+void CheckWaveDimension(waveHndl w, const std::vector<CountInt> &expectedDims, const std::string &errorMsg)
+{
+  std::vector<CountInt> compDims(MAX_DIMENSIONS + 1, 0);
+  auto size = To<std::ptrdiff_t>(expectedDims.size() < compDims.size() - 1 ? expectedDims.size() : compDims.size() - 1);
+  std::copy(expectedDims.begin(), expectedDims.begin() + size, compDims.begin());
+
+  std::vector<CountInt> dims = GetWaveDimension(w);
+  if(compDims != dims)
+  {
+    throw IgorException(ERR_INVALID_TYPE, errorMsg);
+  }
+}
+
+std::vector<CountInt> GetWaveDimension(waveHndl w)
+{
+  int numDims = 0;
+  return GetWaveDimension(w, numDims);
+}
+
+std::vector<CountInt> GetWaveDimension(waveHndl w, int &numDims)
+{
+  if(!w)
+  {
+    throw IgorException(NOWAV);
+  }
+  std::vector<CountInt> dims(MAX_DIMENSIONS + 1, 0);
+  if(int err = MDGetWaveDimensions(w, &numDims, dims.data()))
+  {
+    throw IgorException(err, "Error retrieving wave dimension.");
+  }
+
+  return dims;
 }
