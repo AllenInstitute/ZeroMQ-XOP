@@ -12,11 +12,38 @@
 
 #include "Errors.h"
 
+#ifdef MACIGOR64
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wdouble-promotion"
+#endif
+
+#include "SafeInt/SafeInt.hpp"
+
+#ifdef MACIGOR64
+#pragma clang diagnostic pop
+#endif
+
 bool IsBitSet(int val, int bit);
 int ClearBit(int val, int bit);
 int SetBit(int val, int bit);
 
 const int DEFAULT_INDENT = 4;
+
+/// @brief Safe type conversion
+template <typename T, typename U>
+T To(U val)
+{
+  T result;
+
+  if(!SafeCast(val, result))
+  {
+    throw IgorException(PNTS_INCOMPATIBLE);
+  }
+
+  return result;
+}
+
 /// @brief Converts a double value to a specified integer type.
 ///
 /// Returns an error if:
