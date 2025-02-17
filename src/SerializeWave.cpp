@@ -98,22 +98,6 @@ std::string GetWaveTypeString(int waveType)
   return result;
 }
 
-template <typename T>
-T *GetWaveDataPtr(waveHndl waveH)
-{
-  BCInt dataOffset     = 0;
-  const int accessMode = kMDWaveAccessMode0;
-  const int ret = MDAccessNumericWaveData(waveH, accessMode, &dataOffset);
-
-  if(ret != 0)
-  {
-    throw std::runtime_error(
-        fmt::format("MDAccessNumericWaveData returned error {}", ret));
-  }
-
-  return reinterpret_cast<T *>(reinterpret_cast<char *>(*waveH) + dataOffset);
-}
-
 template <typename T, int withComma>
 struct WriteIntoStream
 {

@@ -211,3 +211,173 @@ void EnsureDirectoryExists(const std::string &path);
 
 bool IsFreeWave(waveHndl wv);
 void DoBindOrConnect(Handle &h, SocketTypes st);
+
+std::vector<CountInt> GetDimensionSizes(waveHndl waveHandle);
+
+Handle GetHandleFromString(const std::string &str);
+
+/// @brief Sets an element of a wave. Supports numeric, text, Int64, UInt64
+/// waves (Not WaveRef and DatafolderRef)
+///        The template type must fit the wave type.
+/// @param[in] w handle of target wave
+/// @param[in] dims IndexInt vector of MAX_DIMENSIONS size that points to the
+/// elements location within the wave.
+/// @param[in] value value that should be written to the location given by dims
+/// in w
+template <typename T,
+          typename std::enable_if_t<std::is_same<DataFolderHandle, T>::value || std::is_same<waveHndl, T>::value ||
+                                        std::is_same<std::string, T>::value || std::is_same<float, T>::value ||
+                                        std::is_same<double, T>::value || std::is_integral<T>::value,
+                                    int> = 0>
+void SetWaveElement(waveHndl w, std::vector<IndexInt> &dims, const T &value)
+{
+  int err;
+
+  if(!w)
+  {
+    throw IgorException(NOWAV);
+  }
+
+  ASSERT(dims.size() == MAX_DIMENSIONS);
+
+  const int type = WaveType(w);
+  if(((type == NT_FP32) && std::is_same<float, T>::value) || ((type == NT_FP64) && std::is_same<double, T>::value) ||
+     ((type & NT_I8) && std::is_integral<T>::value && (sizeof(T) == sizeof(int8_t))) ||
+     ((type & NT_I16) && std::is_integral<T>::value && (sizeof(T) == sizeof(int16_t))) ||
+     ((type & NT_I32) && std::is_integral<T>::value && (sizeof(T) == sizeof(int32_t))))
+
+  {
+    std::array<double, 2> v;
+    v[0] = static_cast<double>(value);
+    if(err = MDSetNumericWavePointValue(w, dims.data(), v.data()))
+    {
+      throw IgorException(err, "Error writing values to numeric wave");
+    }
+  }
+  else if((type == NT_I64) && std::is_integral<T>::value && (sizeof(T) == sizeof(int64_t)) && std::is_signed<T>::value)
+  {
+    std::array<SInt64, 2> v;
+    v[0] = static_cast<SInt64>(value);
+    if(err = MDSetNumericWavePointValueSInt64(w, dims.data(), v.data()))
+    {
+      throw IgorException(err, "Error writing values to INT64 wave");
+    }
+  }
+  else if((type == (NT_I64 | NT_UNSIGNED)) && std::is_integral<T>::value && (sizeof(T) == sizeof(uint64_t)) &&
+          std::is_unsigned<T>::value)
+  {
+    std::array<UInt64, 2> v;
+    v[0] = static_cast<UInt64>(value);
+    if(err = MDSetNumericWavePointValueUInt64(w, dims.data(), v.data()))
+    {
+      throw IgorException(err, "Error writing values to UINT64 wave");
+    }
+  }
+  else
+  {
+    throw IgorException(ERR_INVALID_TYPE, "XOP Bug: Unsupported wave type or wave type and input "
+                                          "type are not the same.");
+  }
+}
+
+template <>
+void SetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims, const std::string &value);
+
+template <>
+void SetWaveElement<waveHndl>(waveHndl w, std::vector<IndexInt> &dims, const waveHndl &value);
+
+template <>
+void SetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexInt> &dims, const DataFolderHandle &value);
+
+/// @brief Gets an element of a wave. Supports numeric, text, Int64, UInt64
+/// waves (Not WaveRef and DatafolderRef)
+///        The template type must fit the wave type.
+/// @param[in] w handle of target wave
+/// @param[in] dims IndexInt vector of MAX_DIMENSIONS size that points to the
+/// elements location within the wave.
+/// @return value value that is read at the location given by dims in w
+template <typename T,
+          typename std::enable_if_t<std::is_same<DataFolderHandle, T>::value || std::is_same<waveHndl, T>::value ||
+                                        std::is_same<std::string, T>::value || std::is_same<float, T>::value ||
+                                        std::is_same<double, T>::value || std::is_integral<T>::value,
+                                    int> = 0>
+T GetWaveElement(waveHndl w, std::vector<IndexInt> &dims)
+{
+  int err;
+
+  if(!w)
+  {
+    throw IgorException(NOWAV);
+  }
+
+  ASSERT(dims.size() == MAX_DIMENSIONS);
+
+  const int type = WaveType(w);
+  if(((type == NT_FP32) && std::is_same<float, T>::value) || ((type == NT_FP64) && std::is_same<double, T>::value) ||
+     ((type & NT_I8) && std::is_integral<T>::value && (sizeof(T) == sizeof(int8_t))) ||
+     ((type & NT_I16) && std::is_integral<T>::value && (sizeof(T) == sizeof(int16_t))) ||
+     ((type & NT_I32) && std::is_integral<T>::value && (sizeof(T) == sizeof(int32_t))))
+
+  {
+    std::array<double, 2> v;
+    if(err = MDGetNumericWavePointValue(w, dims.data(), v.data()))
+    {
+      throw IgorException(err, "Error reading values from numeric wave");
+    }
+    return static_cast<T>(v[0]);
+  }
+  if((type == NT_I64) && std::is_integral<T>::value && (sizeof(T) == sizeof(int64_t)) && std::is_signed<T>::value)
+  {
+    std::array<SInt64, 2> v;
+    if(err = MDGetNumericWavePointValueSInt64(w, dims.data(), v.data()))
+    {
+      throw IgorException(err, "Error reading values from INT64 wave");
+    }
+    return static_cast<T>(v[0]);
+  }
+  if((type == (NT_I64 | NT_UNSIGNED)) && std::is_integral<T>::value && (sizeof(T) == sizeof(uint64_t)) &&
+     std::is_unsigned<T>::value)
+  {
+    std::array<UInt64, 2> v;
+    if(err = MDGetNumericWavePointValueUInt64(w, dims.data(), v.data()))
+    {
+      throw IgorException(err, "Error reading values from UINT64 wave");
+    }
+    return static_cast<T>(v[0]);
+  }
+  throw IgorException(ERR_INVALID_TYPE, "XOP Bug: Unsupported wave type or wave type and "
+                                        "template type are not the same.");
+}
+
+template <>
+std::string GetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims);
+
+template <>
+waveHndl GetWaveElement<waveHndl>(waveHndl w, std::vector<IndexInt> &dims);
+
+template <>
+DataFolderHandle GetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexInt> &dims);
+
+/// @brief Compares expected wave dimensions vs actual wave dimensions. Throws
+/// an IgorException when not equal.
+/// @param[in] w wave handle of wave
+/// @param[in] expectedDims vector with expected dimension sizes, only up to
+/// MAX_DIMENSIONS entries will be considered
+/// @param[in] errorMsg string containing a custom error message
+void CheckWaveDimension(waveHndl w, const std::vector<CountInt> &expectedDims, const std::string &errorMsg);
+
+template <typename T>
+T *GetWaveDataPtr(waveHndl waveH)
+{
+  BCInt dataOffset     = 0;
+  const int accessMode = kMDWaveAccessMode0;
+  const int ret = MDAccessNumericWaveData(waveH, accessMode, &dataOffset);
+
+  if(ret != 0)
+  {
+    throw std::runtime_error(
+        fmt::format("MDAccessNumericWaveData returned error {}", ret));
+  }
+
+  return reinterpret_cast<T *>(reinterpret_cast<char *>(*waveH) + dataOffset);
+}
