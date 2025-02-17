@@ -343,19 +343,6 @@ std::string WaveToString(int waveType, waveHndl waveHandle)
       WaveToStringImpl(waveType, waveHandle, WavePoints(waveHandle)));
 }
 
-std::vector<CountInt> GetDimensionSizes(waveHndl waveHandle)
-{
-  int numDimensions = 0;
-  std::vector<CountInt> dimensionSizes(MAX_DIMENSIONS + 1);
-  auto rc =
-      MDGetWaveDimensions(waveHandle, &numDimensions, dimensionSizes.data());
-  ASSERT(rc == 0);
-
-  dimensionSizes.resize(numDimensions);
-
-  return dimensionSizes;
-}
-
 std::string DimensionSizesToString(std::vector<CountInt> dimensionSizes)
 {
   if(dimensionSizes.empty())
@@ -564,7 +551,10 @@ json SerializeWave(waveHndl waveHandle)
   const auto modDate        = GetModificationDate(waveHandle);
   const auto type           = GetWaveTypeString(waveType);
   const auto rawData        = WaveToString(waveType, waveHandle);
-  const auto dimSizes       = GetDimensionSizes(waveHandle);
+
+  int numDims;
+  auto dimSizes = GetWaveDimension(waveHandle, numDims);
+  dimSizes.resize(numDims);
   const auto dimSizesString = DimensionSizesToString(dimSizes);
 
   DEBUG_OUTPUT(

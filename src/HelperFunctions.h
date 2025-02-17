@@ -241,8 +241,6 @@ void EnsureDirectoryExists(const std::string &path);
 bool IsFreeWave(waveHndl wv);
 void DoBindOrConnect(Handle &h, SocketTypes st);
 
-std::vector<CountInt> GetDimensionSizes(waveHndl waveHandle);
-
 Handle GetHandleFromString(const std::string &str);
 
 /// @brief Sets an element of a wave. Supports numeric, text, Int64, UInt64
