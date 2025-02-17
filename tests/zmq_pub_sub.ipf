@@ -4,7 +4,7 @@
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
-Function Init_IGNORE()
+static Function Init_IGNORE()
 
 	variable ret
 
