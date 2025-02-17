@@ -71,7 +71,7 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
     }
     else
     {
-      auto ptr = GetWaveDataPtr<void>(wv);
+      auto ptr            = GetWaveDataPtr<void>(wv);
       const auto numBytes = WavePoints(wv) * GetWaveElementSize(waveType);
       sendStorage.emplace_back(SendStorage(ptr, numBytes));
     }

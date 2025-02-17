@@ -547,10 +547,10 @@ json SerializeWave(waveHndl waveHandle)
     return nullptr;
   }
 
-  const auto waveType       = WaveType(waveHandle);
-  const auto modDate        = GetModificationDate(waveHandle);
-  const auto type           = GetWaveTypeString(waveType);
-  const auto rawData        = WaveToString(waveType, waveHandle);
+  const auto waveType = WaveType(waveHandle);
+  const auto modDate  = GetModificationDate(waveHandle);
+  const auto type     = GetWaveTypeString(waveType);
+  const auto rawData  = WaveToString(waveType, waveHandle);
 
   int numDims;
   auto dimSizes = GetWaveDimension(waveHandle, numDims);

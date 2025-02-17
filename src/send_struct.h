@@ -12,16 +12,16 @@
 class SendStorage
 {
 public:
-  SendStorage(const void* ptr_param, size_t len_param)
-    : ptr(ptr_param),
-      len(len_param)
-  {}
+  SendStorage(const void *ptr_param, size_t len_param)
+      : ptr(ptr_param), len(len_param)
+  {
+  }
 
-  SendStorage(std::string str)
-    : storage(str)
-  {}
+  SendStorage(std::string str) : storage(str)
+  {
+  }
 
-  const void * GetPtr() const
+  const void *GetPtr() const
   {
     if(storage.has_value())
     {
@@ -42,7 +42,7 @@ public:
   }
 
 private:
-  const void* ptr{nullptr};
+  const void *ptr{nullptr};
   size_t len{0};
   std::optional<std::string> storage;
 };

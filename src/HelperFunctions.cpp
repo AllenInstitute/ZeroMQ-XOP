@@ -901,7 +901,8 @@ size_t GetWaveIndexInMemory(waveHndl w, std::vector<IndexInt> &dims)
 }
 
 template <>
-void SetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims, const std::string &value)
+void SetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims,
+                                 const std::string &value)
 {
   if(!w)
   {
@@ -927,7 +928,8 @@ void SetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims, const 
 }
 
 template <>
-void SetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexInt> &dims, const DataFolderHandle &value)
+void SetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexInt> &dims,
+                                      const DataFolderHandle &value)
 {
   if(!w)
   {
@@ -952,12 +954,14 @@ void SetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexInt> &dims, c
   }
   else
   {
-    throw IgorException(ERR_INVALID_TYPE, "Wave is not of data folder reference type.");
+    throw IgorException(ERR_INVALID_TYPE,
+                        "Wave is not of data folder reference type.");
   }
 }
 
 template <>
-void SetWaveElement<waveHndl>(waveHndl w, std::vector<IndexInt> &dims, const waveHndl &value)
+void SetWaveElement<waveHndl>(waveHndl w, std::vector<IndexInt> &dims,
+                              const waveHndl &value)
 {
   if(!w)
   {
@@ -982,12 +986,14 @@ void SetWaveElement<waveHndl>(waveHndl w, std::vector<IndexInt> &dims, const wav
   }
   else
   {
-    throw IgorException(ERR_INVALID_TYPE, "Wave is not of wave reference type.");
+    throw IgorException(ERR_INVALID_TYPE,
+                        "Wave is not of wave reference type.");
   }
 }
 
 template <>
-DataFolderHandle GetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexInt> &dims)
+DataFolderHandle GetWaveElement<DataFolderHandle>(waveHndl w,
+                                                  std::vector<IndexInt> &dims)
 {
   if(!w)
   {
@@ -1004,7 +1010,8 @@ DataFolderHandle GetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexI
     return *address;
   }
 
-  throw IgorException(ERR_INVALID_TYPE, "XOP Bug: Wave is not of data folder reference type.");
+  throw IgorException(ERR_INVALID_TYPE,
+                      "XOP Bug: Wave is not of data folder reference type.");
 }
 
 template <>
@@ -1025,7 +1032,8 @@ waveHndl GetWaveElement<waveHndl>(waveHndl w, std::vector<IndexInt> &dims)
     return *address;
   }
 
-  throw IgorException(ERR_INVALID_TYPE, "XOP Bug: Wave is not of wave reference type.");
+  throw IgorException(ERR_INVALID_TYPE,
+                      "XOP Bug: Wave is not of wave reference type.");
 }
 
 template <>
@@ -1056,11 +1064,15 @@ std::string GetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims)
   throw IgorException(ERR_INVALID_TYPE, "XOP Bug: Wave is not a text wave.");
 }
 
-void CheckWaveDimension(waveHndl w, const std::vector<CountInt> &expectedDims, const std::string &errorMsg)
+void CheckWaveDimension(waveHndl w, const std::vector<CountInt> &expectedDims,
+                        const std::string &errorMsg)
 {
   std::vector<CountInt> compDims(MAX_DIMENSIONS + 1, 0);
-  auto size = To<std::ptrdiff_t>(expectedDims.size() < compDims.size() - 1 ? expectedDims.size() : compDims.size() - 1);
-  std::copy(expectedDims.begin(), expectedDims.begin() + size, compDims.begin());
+  auto size = To<std::ptrdiff_t>(expectedDims.size() < compDims.size() - 1
+                                     ? expectedDims.size()
+                                     : compDims.size() - 1);
+  std::copy(expectedDims.begin(), expectedDims.begin() + size,
+            compDims.begin());
 
   std::vector<CountInt> dims = GetWaveDimension(w);
   if(compDims != dims)
