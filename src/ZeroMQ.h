@@ -69,6 +69,9 @@ using StringVector = std::vector<std::string>;
 
 using LockGuard = std::lock_guard<std::recursive_mutex>;
 
+class SendStorage;
+using SendStorageVec = std::vector<SendStorage>;
+
 #ifdef MACIGOR64
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wpadded"

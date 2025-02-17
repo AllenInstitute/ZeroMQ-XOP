@@ -369,22 +369,27 @@ int ZeroMQServerSend(const std::string &identity, const std::string &payload)
   return rc;
 }
 
-int ZeroMQPublisherSend(const std::string &filter, const std::string &payload)
+int ZeroMQPublisherSend(const SendStorageVec &vec)
 {
   GET_SOCKET(socket, SocketTypes::Publisher);
+  DEBUG_OUTPUT("socket={}", socket.get());
 
-  DEBUG_OUTPUT("filterLength={}, payloadLength={}, socket={}", filter.length(),
-               payload.length(), socket.get());
+  const auto vecLen = vec.size();
+  ASSERT(vecLen >= 2);
 
-  // filter
-  int rc = zmq_send(socket.get(), filter.c_str(), filter.length(), ZMQ_SNDMORE);
-  ZEROMQ_ASSERT(rc >= 0);
+  int rc = 0;
+  for(size_t i = 0; i < vecLen; i++)
+  {
+    const int flag = i < (vecLen - 1) ? ZMQ_SNDMORE : 0;
 
-  // payload
-  rc = zmq_send(socket.get(), payload.c_str(), payload.length(), 0);
-  ZEROMQ_ASSERT(rc >= 0);
+    const auto ptr    = vec[i].GetPtr();
+    const auto msgLen = vec[i].GetLength();
 
-  DEBUG_OUTPUT("rc={}", rc);
+    DEBUG_OUTPUT("element[{}]: ptr={}, len={}, flag={}", i, ptr, msgLen, flag);
+
+    rc = zmq_send(socket.get(), ptr, msgLen, flag);
+    ZEROMQ_ASSERT(rc >= 0);
+  }
 
   return rc;
 }

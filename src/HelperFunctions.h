@@ -11,6 +11,7 @@
 #endif
 
 #include "Errors.h"
+#include "send_struct.h"
 
 #ifdef MACIGOR64
 #pragma clang diagnostic push
@@ -179,7 +180,7 @@ json CallIgorFunctionFromMessage(const std::string &msg);
 json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req);
 
 int ZeroMQClientSend(const std::string &payload);
-int ZeroMQPublisherSend(const std::string &filter, const std::string &payload);
+int ZeroMQPublisherSend(const SendStorageVec &vec);
 int ZeroMQServerSend(const std::string &identity, const std::string &payload);
 int ZeroMQClientReceive(zmq_msg_t *payloadMsg);
 int ZeroMQSubscriberReceive(zmq_msg_t *filterMsg, zmq_msg_t *payloadMsg);

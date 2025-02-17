@@ -17,7 +17,12 @@ extern "C" int zeromq_pub_send(zeromq_pub_sendParams *p)
 
   GlobalData::Instance().AddLogEntry(filter + ":" + msg,
                                      MessageDirection::Outgoing);
-  ZeroMQPublisherSend(filter, msg);
+
+  SendStorageVec sendStorage;
+  sendStorage.emplace_back(SendStorage{filter});
+  sendStorage.emplace_back(SendStorage{msg});
+
+  ZeroMQPublisherSend(sendStorage);
 
   END_OUTER_CATCH
 }

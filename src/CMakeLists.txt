@@ -114,6 +114,7 @@ SET(COVERAGE_SOURCES
   RequestInterface.cpp
   RequestInterfaceException.cpp
   SerializeWave.cpp
+  send_struct.cpp
   ZeroMQ.cpp
   zeromq_client_connect.cpp
   zeromq_client_recv.cpp
