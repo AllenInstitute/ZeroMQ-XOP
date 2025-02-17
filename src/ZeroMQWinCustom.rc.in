@@ -22,6 +22,7 @@ BEGIN
   "Invalid logging template.\0",                                // INVALID_LOGGING_TEMPLATE
   "Exists already as message filter .\0",                       // MESSAGE_FILTER_DUPLICATED
   "No such message filter.\0"                                   // MESSAGE_FILTER_MISSING
+  "Invalid type encountered.\0",                                // ERR_INVALID_TYPE
 	0,								// NOTE: 0 required to terminate the resource.
 END
 
