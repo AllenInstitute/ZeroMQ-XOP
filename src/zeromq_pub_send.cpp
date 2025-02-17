@@ -9,12 +9,10 @@ extern "C" int zeromq_pub_send(zeromq_pub_sendParams *p)
 {
   BEGIN_OUTER_CATCH
 
-  const auto msg = GetStringFromHandle(p->msg);
-  WMDisposeHandle(p->msg);
+  const auto msg = GetStringFromHandleWithDispose(p->msg);
   p->msg = nullptr;
 
-  const auto filter = GetStringFromHandle(p->filter);
-  WMDisposeHandle(p->filter);
+  const auto filter = GetStringFromHandleWithDispose(p->filter);
   p->filter = nullptr;
 
   GlobalData::Instance().AddLogEntry(filter + ":" + msg,
