@@ -1,5 +1,8 @@
 #pragma once
 
+// This file is part of the `ZeroMQ-XOP` project and licensed under
+// BSD-3-Clause.
+
 #include <sstream>
 #include <iomanip>
 
@@ -14,10 +17,6 @@ int ClearBit(int val, int bit);
 int SetBit(int val, int bit);
 
 const int DEFAULT_INDENT = 4;
-
-// This file is part of the `ZeroMQ-XOP` project and licensed under
-// BSD-3-Clause.
-
 /// @brief Converts a double value to a specified integer type.
 ///
 /// Returns an error if:
