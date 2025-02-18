@@ -98,22 +98,6 @@ std::string GetWaveTypeString(int waveType)
   return result;
 }
 
-template <typename T>
-T *GetWaveDataPtr(waveHndl waveH)
-{
-  BCInt dataOffset     = 0;
-  const int accessMode = kMDWaveAccessMode0;
-  const int ret = MDAccessNumericWaveData(waveH, accessMode, &dataOffset);
-
-  if(ret != 0)
-  {
-    throw std::runtime_error(
-        fmt::format("MDAccessNumericWaveData returned error {}", ret));
-  }
-
-  return reinterpret_cast<T *>(reinterpret_cast<char *>(*waveH) + dataOffset);
-}
-
 template <typename T, int withComma>
 struct WriteIntoStream
 {
@@ -359,19 +343,6 @@ std::string WaveToString(int waveType, waveHndl waveHandle)
       WaveToStringImpl(waveType, waveHandle, WavePoints(waveHandle)));
 }
 
-std::vector<CountInt> GetDimensionSizes(waveHndl waveHandle)
-{
-  int numDimensions = 0;
-  std::vector<CountInt> dimensionSizes(MAX_DIMENSIONS + 1);
-  auto rc =
-      MDGetWaveDimensions(waveHandle, &numDimensions, dimensionSizes.data());
-  ASSERT(rc == 0);
-
-  dimensionSizes.resize(numDimensions);
-
-  return dimensionSizes;
-}
-
 std::string DimensionSizesToString(std::vector<CountInt> dimensionSizes)
 {
   if(dimensionSizes.empty())
@@ -576,11 +547,14 @@ json SerializeWave(waveHndl waveHandle)
     return nullptr;
   }
 
-  const auto waveType       = WaveType(waveHandle);
-  const auto modDate        = GetModificationDate(waveHandle);
-  const auto type           = GetWaveTypeString(waveType);
-  const auto rawData        = WaveToString(waveType, waveHandle);
-  const auto dimSizes       = GetDimensionSizes(waveHandle);
+  const auto waveType = WaveType(waveHandle);
+  const auto modDate  = GetModificationDate(waveHandle);
+  const auto type     = GetWaveTypeString(waveType);
+  const auto rawData  = WaveToString(waveType, waveHandle);
+
+  int numDims;
+  auto dimSizes = GetWaveDimension(waveHandle, numDims);
+  dimSizes.resize(numDims);
   const auto dimSizesString = DimensionSizesToString(dimSizes);
 
   DEBUG_OUTPUT(

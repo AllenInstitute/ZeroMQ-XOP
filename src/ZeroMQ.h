@@ -17,6 +17,8 @@
 #include <numeric>
 #include <mutex>
 
+#include "zeromq_helper.h"
+
 #include "zmq.h"
 
 #ifdef __GNUC__
@@ -68,6 +70,12 @@ using RequestInterfacePtr = std::shared_ptr<RequestInterface>;
 using StringVector = std::vector<std::string>;
 
 using LockGuard = std::lock_guard<std::recursive_mutex>;
+
+class SendStorage;
+using SendStorageVec = std::vector<SendStorage>;
+
+class ZeroMQMessage;
+using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
 
 #ifdef MACIGOR64
 #pragma clang diagnostic push

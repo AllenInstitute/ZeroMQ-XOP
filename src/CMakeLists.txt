@@ -114,14 +114,17 @@ SET(COVERAGE_SOURCES
   RequestInterface.cpp
   RequestInterfaceException.cpp
   SerializeWave.cpp
+  send_struct.cpp
   ZeroMQ.cpp
   zeromq_client_connect.cpp
   zeromq_client_recv.cpp
   zeromq_client_send.cpp
   zeromq_handler_start.cpp
   zeromq_handler_stop.cpp
+  zeromq_helper.cpp
   zeromq_pub_bind.cpp
   zeromq_pub_send.cpp
+  zeromq_pub_send_multi.cpp
   zeromq_server_bind.cpp
   zeromq_server_recv.cpp
   zeromq_server_send.cpp
@@ -131,6 +134,7 @@ SET(COVERAGE_SOURCES
   zeromq_sub_add_filter.cpp
   zeromq_sub_connect.cpp
   zeromq_sub_recv.cpp
+  zeromq_sub_recv_multi.cpp
   zeromq_sub_remove_filter.cpp
   zeromq_test_callfunction.cpp
   zeromq_test_serializeWave.cpp
@@ -224,7 +228,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${installFolderLibZMQ}/include)
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
-SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -248,8 +252,6 @@ IF(APPLE)
   IF(CMAKE_OSX_SYSROOT)
     SET(sysroot -isysroot ${CMAKE_OSX_SYSROOT})
   ENDIF()
-
-  SET_TARGET_PROPERTIES(${libname} PROPERTIES CXX_STANDARD 14)
 
   FIND_LIBRARY(CARBON_LIBRARY Carbon)
   FIND_LIBRARY(COCOA_LIBRARY Cocoa)

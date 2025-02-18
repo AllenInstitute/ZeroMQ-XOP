@@ -54,6 +54,13 @@ BEGIN
   HSTRING_TYPE,      // parameter 2
   0,
 
+  // variable zeromq_pub_send_multi(WAVEWAVE payload)
+  "zeromq_pub_send_multi\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  WAVE_TYPE,      // parameter 1
+  0,
+
   // variable zeromq_server_bind(string localPoint)
   "zeromq_server_bind\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
@@ -116,6 +123,13 @@ BEGIN
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   HSTRING_TYPE,          // Return value type
   FV_REF_TYPE | HSTRING_TYPE,      // parameter 1
+  0,
+
+  // variable zeromq_sub_recv_multi(WAVEWAVE payload)
+  "zeromq_sub_recv_multi\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  WAVE_TYPE,      // parameter 1
   0,
 
   // variable zeromq_sub_remove_filter(string filter)

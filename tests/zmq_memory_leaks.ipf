@@ -27,7 +27,7 @@ End
 static Function TEST_CASE_BEGIN_OVERRIDE(name)
 	string name
 
-	CHECK(NUM_BYTES_LEAK_TESTING * NUM_RUNS > ADDITIONAL_MEMORY_USED)
+	CHECK_GT_VAR(NUM_BYTES_LEAK_TESTING * NUM_RUNS, ADDITIONAL_MEMORY_USED)
 
 	zeromq_stop()
 	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
@@ -98,7 +98,7 @@ Function DoesNotHaveMemoryLeaks([string msg])
 
 	memAfter = NumberByKey("USEDPHYSMEM", IgorInfo(0))
 
-	CHECK(memAfter < (memBefore + ADDITIONAL_MEMORY_USED))
+	CHECK_LT_VAR(memAfter, memBefore + ADDITIONAL_MEMORY_USED)
 End
 
 #endif

@@ -13,3 +13,6 @@
 [submodule "src/cmake/CreateLaunchers"]
 	path = src/cmake/CreateLaunchers
 	url = https://github.com/caseymcc/CreateLaunchers.git
+[submodule "src/SafeInt"]
+	path = src/SafeInt
+	url = https://github.com/dcleblanc/SafeInt

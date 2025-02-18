@@ -32,6 +32,7 @@ resource 'STR#' (1100) {					/* custom error messages */
   "Invalid logging template.",                                // INVALID_LOGGING_TEMPLATE
   "Exists already as message filter .",                       // MESSAGE_FILTER_DUPLICATED
   "No such message filter."                                   // MESSAGE_FILTER_MISSING
+  "Invalid type encountered.",                                // ERR_INVALID_TYPE
 	}
 };
 

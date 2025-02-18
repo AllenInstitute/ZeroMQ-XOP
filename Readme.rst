@@ -15,6 +15,7 @@ The XOP provides the following functions:
 - :cpp:func:`zeromq_handler_stop()`
 - :cpp:func:`zeromq_pub_bind`
 - :cpp:func:`zeromq_pub_send`
+- :cpp:func:`zeromq_pub_send_multi`
 - :cpp:func:`zeromq_server_bind()`
 - :cpp:func:`zeromq_server_recv()`
 - :cpp:func:`zeromq_server_send()`
@@ -24,6 +25,7 @@ The XOP provides the following functions:
 - :cpp:func:`zeromq_sub_add_filter`
 - :cpp:func:`zeromq_sub_connect`
 - :cpp:func:`zeromq_sub_recv`
+- :cpp:func:`zeromq_sub_recv_multi`
 - :cpp:func:`zeromq_sub_remove_filter`
 
 This XOP primarily supports (and is tested on) Igor Pro versions 8 or above. The code in principle supports Igor Pro 6 and 7, but the test suite does not. Therefore, builds released for Igor 6/7 are considered **EXPERIMENTAL** and should be treated as such. Special instructions for Igor 6/7 are described at the end of this readme.
@@ -495,7 +497,7 @@ Direction: Igor Pro -> World
 The XOP implements Publisher/Subscriber sockets. This allows applications outside of Igor Pro to be notified about events
 in Igor Pro. The implementation uses plain PUB/SUB sockets, but XPUB/XSUB sockets should be compatible as well.
 
-The published messages will be a multipart message with two frames, see also the official `documentation
+The published messages will be a multipart message with at least two frames, see also the official `documentation
 <https://zguide.zeromq.org/docs/chapter2/#Pub-Sub-Message-Envelopes>`__:
 
 .. code-block:: sh
@@ -503,8 +505,9 @@ The published messages will be a multipart message with two frames, see also the
    Frame 1: Filter
    Frame 2: Data
 
-where ``Filter`` is the message type and ``Data`` the payload. No serialization format of ``Data`` is enforced, but users are
-encouraged to use standard serialization formats like JSON.
+where ``Filter`` is the message type and ``Data`` the string payload. No serialization format of ``Data`` is enforced, but users are
+encouraged to use standard serialization formats like JSON. Additional binary data can be sent with the
+`zeromq_sub_recv_multi`/`zeromq_pub_send_multi` variants.
 
 Subscriber sockets will only receive messages from their subscribed filters. By default there are no subscriptions to
 any filters.
@@ -519,7 +522,7 @@ Dependencies
 
 zeromq-xop has the following 3rd party dependencies, which must be installed to compile:
 
-- (Windows only) Visual Studio 2019 - Windows development environment.
+- (Windows only) Visual Studio 2022 - Windows development environment.
 - (MacOSX only) Xcode - Mac OSX development environment.
 - `CMake <https://cmake.org>`__ (version 3.15 or later) - build system.
 - `XOPToolkit 8 <https://www.wavemetrics.com/products/xoptoolkit/xoptoolkit.htm>`__ - toolkit for creating XOPs (such as this one), to communicate with Igor Pro.
@@ -532,7 +535,7 @@ zeromq-xop also depends on a couple of additional repositories, which are includ
 
 Lastly, unit tests requires setup of the following (with instructions on doing so further below):
 
-- `Igor Unit Testing Framework <https://github.com/byte-physics/igor-unit-testing-framework>`__
+- `Igor Pro Universal Testing Framework <https://github.com/byte-physics/igortest>`__
 
 Building the ZeroMQ XOP
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -604,10 +607,10 @@ The commands below perform this. (See also ``.gitlab.ci.yml`` for up-do-date bui
    cd $zmq-xop-dir/src
    md build build-64
    cd build
-   cmake -G "Visual Studio 16 2019" -A Win32 -S .. -B .
+   cmake -G "Visual Studio 16 2022" -A Win32 -S .. -B .
    cmake --build . --config Release --target install
    cd ../build-64
-   cmake -G "Visual Studio 16 2019" -A x64 -S .. -B .
+   cmake -G "Visual Studio 16 2022" -A x64 -S .. -B .
    cmake --build . --config Release --target install
    # }
 
@@ -703,7 +706,7 @@ To compile for Igor Pro 6/7:
 
 - You must use the proper XOP Toolkit: **Toolkit 7**. Thus, in the *XOP Toolkit Setup* section, replace ``$xop-toolkit-dir/XOP Toolkit 8/IgorXOPs8/XOPSupport`` with ``$xop-toolkit-dir/XOP Toolkit 7/IgorXOPs7/XOPSupport`` throughout.
 - You must explicit Igor 6 in the cmake generation stage. In other words, your ``cmake -G ..`` calls (the first cmake call) must include ``-DXOP_MINIMUM_IGORVERSION=637`` (indicating the XOP version).
-- On Windows, you should compile with the officially supported Visual Studio version for XOP Toolki 7: Visual Studio 15 2017. As such, your cmake generation stage should use ``cmake -G "Visual Studio 15 2017" ..`` (instead of 2019).
+- On Windows, you should compile with the officially supported Visual Studio version for XOP Toolki 7: Visual Studio 15 2017. As such, your cmake generation stage should use ``cmake -G "Visual Studio 15 2017" ..`` (instead of 2022).
 
   Putting these together, the generation steps are (note the lack of x64 build for Windows, as it is not supported generally):
 
