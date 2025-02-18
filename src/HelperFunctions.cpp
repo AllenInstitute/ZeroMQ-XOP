@@ -1101,3 +1101,28 @@ std::vector<CountInt> GetWaveDimension(waveHndl w, int &numDims)
 
   return dims;
 }
+
+/// @brief Simple wave redimension that keeps type and reshapes accordingly.
+void RedimensionWave(waveHndl w, std::vector<CountInt> dims)
+{
+  if(MDChangeWave2(w, -1, dims.data(), 0))
+  {
+    throw IgorException(INTERNAL_ERROR, "Error on wave size change.");
+  }
+}
+
+waveHndl MakeFreeWave(std::vector<CountInt> dims, int type)
+{
+  dims.resize(MAX_DIMENSIONS + 1, 0);
+
+  waveHndl wv = nullptr;
+  auto ret    = MDMakeWave(&wv, "free", reinterpret_cast<DataFolderHandle>(-1),
+                           dims.data(), type, -1);
+
+  if(ret || wv == nullptr)
+  {
+    throw IgorException(GENERAL_BAD_VIBS, "Could not create free wave");
+  }
+
+  return wv;
+}

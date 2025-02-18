@@ -446,3 +446,9 @@ std::vector<CountInt> GetWaveDimension(waveHndl w);
 /// @return vector with size of each dimension. The vector has size
 /// MAX_DIMENSIONS + 1.
 std::vector<CountInt> GetWaveDimension(waveHndl w, int &numDims);
+
+/// @brief Simple wave redimension that keeps type and reshapes accordingly.
+void RedimensionWave(waveHndl w, std::vector<CountInt> dims);
+
+/// @brief Make a free wave with the given dimension and type
+waveHndl MakeFreeWave(std::vector<CountInt> dims, int type);
