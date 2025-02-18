@@ -121,6 +121,7 @@ SET(COVERAGE_SOURCES
   zeromq_client_send.cpp
   zeromq_handler_start.cpp
   zeromq_handler_stop.cpp
+  zeromq_helper.cpp
   zeromq_pub_bind.cpp
   zeromq_pub_send.cpp
   zeromq_pub_send_multi.cpp
