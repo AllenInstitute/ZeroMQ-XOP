@@ -123,12 +123,9 @@ static Function SendChecksInput()
 	endtry
 End
 
-static Function SendingWithOnlyTwoWavesWorks()
+static Function [WAVE/T elem0, WAVE/T elem1] MinimalSetupPub()
 
-	int ret, i
-	string msg, filter
-
-	Init_IGNORE()
+	int ret
 
 	Make/FREE/WAVE/N=(2) contents
 
@@ -138,12 +135,212 @@ static Function SendingWithOnlyTwoWavesWorks()
 	Make/FREE/N=(1)/T elem1 = "hi there!"
 	contents[1] = elem1
 
+	ret = zeromq_sub_remove_filter("")
+	CHECK_EQUAL_VAR(ret, 0)
+
 	ret = zeromq_sub_add_filter("abcd")
+	CHECK_EQUAL_VAR(ret, 0)
 
 	ret = zeromq_pub_send_multi(contents)
 	CHECK_EQUAL_VAR(ret, 0)
 
-	msg = zeromq_sub_recv(filter)
-	CHECK_EQUAL_STR(filter, elem0[0])
-	CHECK_EQUAL_STR(msg, elem1[0])
+	return [elem0, elem1]
+End
+
+static Function ReceiveChecksErrors()
+
+	int ret
+
+	Init_IGNORE()
+
+	WAVE/T elem0, elem1
+	[elem0, elem1] = MinimalSetupPub()
+
+	// null wave
+	try
+		ret = zeromq_sub_recv_multi($""); AbortOnRTE
+		FAIL()
+	catch
+		CHECK_RTE(ERR_NOWAV)
+	endtry
+
+	[elem0, elem1] = MinimalSetupPub()
+
+	// wrong container wave type
+	try
+		Make/FREE wvFloat
+		ret = zeromq_sub_recv_multi(wvFloat); AbortOnRTE
+		FAIL()
+	catch
+		CheckErrorMessage(GetRTError(0), ZMQ_MESSAGE_INVALID_TYPE)
+		CHECK_ANY_RTE()
+	endtry
+
+	[elem0, elem1] = MinimalSetupPub()
+
+	// contained wave has the wrong type (WAVE)
+	try
+		Make/FREE/WAVE/N=2 wv
+		Make/FREE/DF wvWave
+		wv[0] = wvWave
+		ret = zeromq_sub_recv_multi(wv); AbortOnRTE
+		FAIL()
+	catch
+		CheckErrorMessage(GetRTError(0), ZMQ_MESSAGE_INVALID_TYPE)
+		CHECK_ANY_RTE()
+	endtry
+
+	[elem0, elem1] = MinimalSetupPub()
+
+	// first and second contained wave have to be text
+	try
+		Make/FREE/WAVE/N=2 wv
+		Make/FREE/D wvDouble
+		wv[0] = wvDouble
+		ret = zeromq_sub_recv_multi(wv); AbortOnRTE
+		FAIL()
+	catch
+		CheckErrorMessage(GetRTError(0), ZMQ_MESSAGE_INVALID_TYPE)
+		CHECK_ANY_RTE()
+	endtry
+End
+
+static Function ReceiveWithOnlyTwoWavesWorks()
+
+	int ret
+
+	Init_IGNORE()
+
+	WAVE/T elem0, elem1
+	[elem0, elem1] = MinimalSetupPub()
+
+	Make/WAVE/N=0 contentsReceived
+	ret = zeromq_sub_recv_multi(contentsReceived)
+	CHECK_EQUAL_VAR(ret, 0)
+
+	CHECK_EQUAL_VAR(DimSize(contentsReceived, 0), 2)
+	CHECK_EQUAL_WAVES(contentsReceived[0], elem0)
+	CHECK_EQUAL_WAVES(contentsReceived[1], elem1)
+End
+
+static Function ReceiveWithThreeTextWavesWorks()
+
+	int ret
+
+	Init_IGNORE()
+
+	Make/FREE/WAVE/N=(3) contents
+
+	Make/FREE/N=(1)/T elem0 = "abcd"
+	contents[0] = elem0
+
+	Make/FREE/N=(1)/T elem1 = "hi there!"
+	contents[1] = elem1
+
+	Make/FREE/N=(1)/T elem2 = "and again"
+	contents[2] = elem2
+
+	ret = zeromq_sub_add_filter("abcd")
+	CHECK_EQUAL_VAR(ret, 0)
+
+	ret = zeromq_pub_send_multi(contents)
+	CHECK_EQUAL_VAR(ret, 0)
+
+	// we need to feed in three text waves initally so that we also get
+	// a text wave for the third one
+	Make/WAVE/N=(3) contentsReceived
+	Make/FREE/N=(1)/T elemReceived0, elemReceived1, elemReceived2
+
+	contentsReceived[0] = elemReceived0
+	contentsReceived[1] = elemReceived1
+	contentsReceived[2] = elemReceived2
+
+	ret = zeromq_sub_recv_multi(contentsReceived)
+	CHECK_EQUAL_VAR(ret, 0)
+
+	CHECK_EQUAL_VAR(DimSize(contentsReceived, 0), 3)
+	CHECK_EQUAL_WAVES(contentsReceived[0], elem0)
+	CHECK_EQUAL_WAVES(contentsReceived[1], elem1)
+	CHECK_EQUAL_WAVES(contentsReceived[2], elem2)
+End
+
+static Function ReceiveTextAndFloatsWorks()
+
+	int ret
+
+	Init_IGNORE()
+
+	Make/FREE/WAVE/N=(3) contents
+
+	Make/FREE/N=(1)/T elem0 = "abcd"
+	contents[0] = elem0
+
+	Make/FREE/N=(1)/T elem1 = "hi there!"
+	contents[1] = elem1
+
+	Make/FREE/N=(2, 3)/D elem2 = (p + q)^2
+	contents[2] = elem2
+
+	ret = zeromq_sub_add_filter("abcd")
+	CHECK_EQUAL_VAR(ret, 0)
+
+	ret = zeromq_pub_send_multi(contents)
+	CHECK_EQUAL_VAR(ret, 0)
+
+	Make/WAVE/N=(0)/FREE contentsReceived
+	ret = zeromq_sub_recv_multi(contentsReceived)
+	CHECK_EQUAL_VAR(ret, 0)
+
+	CHECK_EQUAL_VAR(DimSize(contentsReceived, 0), 3)
+	CHECK_EQUAL_WAVES(contentsReceived[0], elem0)
+	CHECK_EQUAL_WAVES(contentsReceived[1], elem1)
+	CHECK_WAVE(contentsReceived[2], NUMERIC_WAVE | FREE_WAVE, minorType = INT8_WAVE | UNSIGNED_WAVE)
+
+	WAVE wv = contentsReceived[2]
+	Redimension/N=(2, 3)/E=1/D wv
+	CHECK_EQUAL_WAVES(wv, elem2)
+End
+
+static Function ReceiveTextAndFloatsPreExistingWorks()
+
+	int ret
+
+	Init_IGNORE()
+
+	Make/FREE/WAVE/N=(3) contents
+
+	Make/FREE/N=(1)/T elem0 = "abcd"
+	contents[0] = elem0
+
+	Make/FREE/N=(1)/T elem1 = "hi there!"
+	contents[1] = elem1
+
+	Make/FREE/N=(2, 3)/D elem2 = (p + q)^2
+	contents[2] = elem2
+
+	ret = zeromq_sub_add_filter("abcd")
+	CHECK_EQUAL_VAR(ret, 0)
+
+	ret = zeromq_pub_send_multi(contents)
+	CHECK_EQUAL_VAR(ret, 0)
+
+	Make/WAVE/N=(3)/FREE contentsReceived
+	Make/FREE/N=(1)/T elemReceived0, elemReceived1
+	Make/FREE/D elemReceived2
+
+	contentsReceived[0] = elemReceived0
+	contentsReceived[1] = elemReceived1
+	contentsReceived[2] = elemReceived2
+
+	ret = zeromq_sub_recv_multi(contentsReceived)
+	CHECK_EQUAL_VAR(ret, 0)
+
+	CHECK_EQUAL_VAR(DimSize(contentsReceived, 0), 3)
+	CHECK_EQUAL_WAVES(contentsReceived[0], elem0)
+	CHECK_EQUAL_WAVES(contentsReceived[1], elem1)
+	CHECK_WAVE(contentsReceived[2], NUMERIC_WAVE | FREE_WAVE, minorType = DOUBLE_WAVE)
+
+	WAVE wv = contentsReceived[2]
+	Redimension/N=(2, 3)/E=1 wv
+	CHECK_EQUAL_WAVES(wv, elem2)
 End

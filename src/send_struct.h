@@ -48,3 +48,5 @@ private:
 };
 
 SendStorageVec GatherPubData(waveHndl containerWaveHandle);
+void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
+                    waveHndl containerWaveHandle);
