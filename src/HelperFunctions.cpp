@@ -460,32 +460,62 @@ int ZeroMQClientReceive(zmq_msg_t *payloadMsg)
   return numBytes;
 }
 
-/// Expect two frames:
+/// Expect at least two frames:
 /// - filter
 /// - payload
-int ZeroMQSubscriberReceive(zmq_msg_t *filterMsg, zmq_msg_t *payloadMsg)
+/// - [optionally, more payload]
+///
+/// Return error code `< 0` or success `0`
+int ZeroMQSubscriberReceive(ZeroMQMessageSharedPtrVec &vec,
+                            bool allowAdditionalFrames)
 {
+  vec.resize(0);
+
   GET_SOCKET(socket, SocketTypes::Subscriber);
-  auto numBytes = zmq_msg_recv(filterMsg, socket.get(), 0);
+  DEBUG_OUTPUT("socket={}", socket.get());
 
-  if(numBytes < 0)
+  auto filter = std::make_shared<ZeroMQMessage>();
+
+  auto ret = zmq_msg_recv(filter->get(), socket.get(), 0);
+  vec.push_back(filter);
+
+  if(ret < 0)
   {
-    return numBytes;
+    return ret;
   }
 
-  if(!zmq_msg_more(filterMsg))
-  {
-    throw IgorException(INVALID_MESSAGE_FORMAT);
-  }
-
-  numBytes = zmq_msg_recv(payloadMsg, socket.get(), 0);
-
-  if(numBytes < 0 || zmq_msg_more(payloadMsg))
+  if(!zmq_msg_more(filter->get()))
   {
     throw IgorException(INVALID_MESSAGE_FORMAT);
   }
 
-  return numBytes;
+  for(;;)
+  {
+    auto payload = std::make_shared<ZeroMQMessage>();
+    ret          = zmq_msg_recv(payload->get(), socket.get(), 0);
+    vec.push_back(payload);
+
+    if(ret < 0)
+    {
+      return ret;
+    }
+
+    auto moreData = zmq_msg_more(payload->get());
+
+    if(moreData)
+    {
+      if(!allowAdditionalFrames)
+      {
+        throw IgorException(INVALID_MESSAGE_FORMAT);
+      }
+    }
+    else
+    {
+      break;
+    }
+  }
+
+  return 0;
 }
 
 std::string SerializeDataFolder(DataFolderHandle dataFolderHandle)

@@ -8,21 +8,14 @@ extern "C" int zeromq_sub_recv(zeromq_sub_recvParams *p)
 {
   BEGIN_OUTER_CATCH
 
-  zmq_msg_t filterMsg;
-  int rc = zmq_msg_init(&filterMsg);
-  ZEROMQ_ASSERT(rc == 0);
-
-  zmq_msg_t payloadMsg;
-  rc = zmq_msg_init(&payloadMsg);
-  ZEROMQ_ASSERT(rc == 0);
-
   auto wait = GlobalData::Instance().GetRecvBusyWaitingFlag();
 
   for(;;)
   {
-    int numBytes = ZeroMQSubscriberReceive(&filterMsg, &payloadMsg);
+    ZeroMQMessageSharedPtrVec vec;
+    int ret = ZeroMQSubscriberReceive(vec, false);
 
-    if(numBytes == -1 && zmq_errno() == EAGAIN) // timeout
+    if(ret == -1 && zmq_errno() == EAGAIN) // timeout
     {
       if(!wait || SpinProcess()) // user requested abort or we should not wait
       {
@@ -39,26 +32,23 @@ extern "C" int zeromq_sub_recv(zeromq_sub_recvParams *p)
       continue;
     }
 
-    ZEROMQ_ASSERT(numBytes >= 0);
+    ZEROMQ_ASSERT(ret == 0);
 
-    WriteZMsgIntoHandle(&(p->result), &payloadMsg);
-    WriteZMsgIntoHandle(p->filter, &filterMsg);
+    auto filterMsg  = vec[0]->get();
+    auto payloadMsg = vec[1]->get();
 
-    auto msg    = CreateStringFromZMsg(&filterMsg);
-    auto filter = CreateStringFromZMsg(&payloadMsg);
+    WriteZMsgIntoHandle(&(p->result), payloadMsg);
+    WriteZMsgIntoHandle(p->filter, filterMsg);
+
+    auto msg    = CreateStringFromZMsg(payloadMsg);
+    auto filter = CreateStringFromZMsg(filterMsg);
 
     GlobalData::Instance().AddLogEntry(filter + ":" + msg,
                                        MessageDirection::Incoming);
 
-    DEBUG_OUTPUT("numBytes={}", numBytes);
+    DEBUG_OUTPUT("ret={}", ret);
     break;
   }
-
-  rc = zmq_msg_close(&payloadMsg);
-  ZEROMQ_ASSERT(rc == 0);
-
-  rc = zmq_msg_close(&filterMsg);
-  ZEROMQ_ASSERT(rc == 0);
 
   END_OUTER_CATCH
 }
