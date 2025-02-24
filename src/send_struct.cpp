@@ -30,6 +30,7 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
   }
 
   SendStorageVec sendStorage;
+  std::string filter, payload;
 
   for(CountInt i = 0; i < numRows; i += 1)
   {
@@ -68,6 +69,15 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
       std::string elem = GetWaveElement<std::string>(wv, dims);
 
       sendStorage.emplace_back(SendStorage(elem));
+
+      if(i == 0)
+      {
+        filter = elem;
+      }
+      else if(i == 1)
+      {
+        payload = elem;
+      }
     }
     else
     {
@@ -76,6 +86,9 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
       sendStorage.emplace_back(SendStorage(ptr, numBytes));
     }
   }
+
+  GlobalData::Instance().AddLogEntry(filter + ":" + payload + " + [...]",
+                                     MessageDirection::Outgoing);
 
   return sendStorage;
 }
