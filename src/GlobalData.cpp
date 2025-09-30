@@ -11,6 +11,7 @@ constexpr char PACKAGE_NAME[] = "ZeroMQ";
 void ApplySocketDefaults(void *s, SocketTypes st)
 {
   int valZero = 0;
+  int valOne  = 1;
   int rc      = 0;
 
   rc = zmq_setsockopt(s, ZMQ_LINGER, &valZero, sizeof(valZero));
@@ -19,7 +20,7 @@ void ApplySocketDefaults(void *s, SocketTypes st)
   rc = zmq_setsockopt(s, ZMQ_SNDTIMEO, &valZero, sizeof(valZero));
   ZEROMQ_ASSERT(rc == 0);
 
-  rc = zmq_setsockopt(s, ZMQ_RCVTIMEO, &valZero, sizeof(valZero));
+  rc = zmq_setsockopt(s, ZMQ_RCVTIMEO, &valOne, sizeof(valOne));
   ZEROMQ_ASSERT(rc == 0);
 
   switch(st)
@@ -36,8 +37,6 @@ void ApplySocketDefaults(void *s, SocketTypes st)
     return;
   case SocketTypes::Server:
   {
-    int valOne = 1;
-
     rc = zmq_setsockopt(s, ZMQ_ROUTER_MANDATORY, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
 
