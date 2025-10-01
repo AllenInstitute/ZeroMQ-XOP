@@ -51,7 +51,11 @@ public:
   bool GetLoggingFlag() const;
 
   void AddLogEntry(const json &doc, MessageDirection dir);
+  void AddLogEntry(const json &doc, const std::string &identity,
+                   MessageDirection dir);
   void AddLogEntry(const std::string &str, MessageDirection dir);
+  void AddLogEntry(const std::string &str, const std::string &identity,
+                   MessageDirection dir);
   void SetLoggingTemplate(const std::string &loggingTemplate);
   void InitLogging();
 
