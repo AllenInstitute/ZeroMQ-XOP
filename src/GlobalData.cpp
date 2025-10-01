@@ -260,6 +260,18 @@ void GlobalData::AddLogEntry(const json &doc, const std::string &identity,
   m_loggingSink->AddLogEntry(doc, identity, dir);
 }
 
+void GlobalData::AddLogEntry(const std::string &str)
+{
+  if(!GetLoggingFlag())
+  {
+    return;
+  }
+
+  LockGuard lock(m_loggingLock);
+
+  m_loggingSink->AddLogEntry(str);
+}
+
 void GlobalData::AddLogEntry(const std::string &str, MessageDirection dir)
 {
   if(!GetLoggingFlag())

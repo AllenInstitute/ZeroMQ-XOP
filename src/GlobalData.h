@@ -53,6 +53,7 @@ public:
   void AddLogEntry(const json &doc, MessageDirection dir);
   void AddLogEntry(const json &doc, const std::string &identity,
                    MessageDirection dir);
+  void AddLogEntry(const std::string &str);
   void AddLogEntry(const std::string &str, MessageDirection dir);
   void AddLogEntry(const std::string &str, const std::string &identity,
                    MessageDirection dir);

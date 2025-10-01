@@ -173,6 +173,9 @@ void MessageHandler::HandleAllQueuedMessages()
     return;
   }
 
+  auto msg = fmt::format("IDLE event messages: #{}", reqQueue.size());
+  GlobalData::Instance().AddLogEntry(msg);
+
   reqQueue.apply_to_all(CallAndReply);
 }
 
