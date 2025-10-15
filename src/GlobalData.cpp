@@ -37,6 +37,10 @@ void ApplySocketDefaults(void *s, SocketTypes st)
     return;
   case SocketTypes::Server:
   {
+    const char identity[] = "zeromq xop: router";
+    rc = zmq_setsockopt(s, ZMQ_IDENTITY, &identity, strlen(identity));
+    ZEROMQ_ASSERT(rc == 0);
+
     rc = zmq_setsockopt(s, ZMQ_ROUTER_MANDATORY, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
 

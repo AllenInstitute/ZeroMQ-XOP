@@ -655,7 +655,7 @@ The default socket options are:
 - ``ZMQ_RCVTIMEO``         = ``1`` (milliseconds)
 - ``ZMQ_ROUTER_MANDATORY`` = ``1`` (``Router`` only)
 - ``ZMQ_MAXMSGSIZE``       = ``1024`` (in bytes, ``Router`` only)
-- ``ZMQ_IDENTITY``         = ``zeromq xop: dealer`` (``Dealer`` only)
+- ``ZMQ_IDENTITY``         = ``zeromq xop: dealer`` (``Dealer``) and ``zeromq xop: router`` (``Router``)
 
 The ``Router``/Server expects three frames (identity, empty, payload) and the
 ``Dealer``/Client expects two frames (empty, payload) when sending/receiving
