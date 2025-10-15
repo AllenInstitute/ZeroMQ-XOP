@@ -12,7 +12,8 @@
 /// The error values are defined at @ref ZeroMQErrorCodes.
 /// - The XOP applies the following settings:
 ///   - Message pattern: DEALER/ROUTER
-///   - DEALER/ROUTER: ZMQ_SNDTIMEO = ZMQ_RCVTIMEO = 0
+///   - DEALER/ROUTER: ZMQ_SNDTIMEO = 0
+///   - DEALER/ROUTER: ZMQ_RCVTIMEO = 1
 ///   - DEALER/ROUTER: ZMQ_LINGER = 0
 ///   - ROUTER: ZMQ_ROUTER_MANDATORY = 1
 ///   - ROUTER: ZMQ_MAXMSGSIZE = 1024 byte

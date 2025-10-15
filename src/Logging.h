@@ -21,7 +21,12 @@ public:
   ~Logging();
 
   void AddLogEntry(const json &doc, MessageDirection dir) const;
+  void AddLogEntry(const json &doc, const std::string &identity,
+                   MessageDirection dir) const;
+  void AddLogEntry(const std::string &str) const;
   void AddLogEntry(const std::string &str, MessageDirection dir) const;
+  void AddLogEntry(const std::string &doc, const std::string &identity,
+                   MessageDirection dir) const;
 
 private:
   Logging(const Logging &)        = delete;

@@ -32,6 +32,13 @@ public:
     return m_queue.empty();
   }
 
+  size_t size() const
+  {
+    Lock lock(m_mutex);
+
+    return m_queue.size();
+  }
+
   bool try_pop(T &popped_value)
   {
     Lock lock(m_mutex);

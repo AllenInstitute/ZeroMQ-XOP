@@ -54,7 +54,6 @@ void WorkerThread()
 
       if(numBytes == -1 && zmq_errno() == EAGAIN) // timeout
       {
-        std::this_thread::sleep_for(10ms);
         continue;
       }
 
@@ -173,6 +172,9 @@ void MessageHandler::HandleAllQueuedMessages()
   {
     return;
   }
+
+  auto msg = fmt::format("IDLE event messages: #{}", reqQueue.size());
+  GlobalData::Instance().AddLogEntry(msg);
 
   reqQueue.apply_to_all(CallAndReply);
 }

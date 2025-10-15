@@ -1,9 +1,12 @@
 #include "ZeroMQ.h"
 
+#include <optional>
+
 namespace
 {
 constexpr char DEFAULT_TEMPLATE[]     = "{}";
 constexpr char SESSION_START_MARKER[] = "{}";
+constexpr char IDENTITY_KEY[]         = "remote identity";
 
 constexpr char TEMPLATE_KEY_JSON[]      = "json";
 constexpr char TEMPLATE_KEY_STR[]       = "str";
@@ -99,12 +102,22 @@ public:
 
   template <typename T>
   void AddLogEntry(const std::string &key, const T &entry,
-                   MessageDirection dir) const
+                   const std::optional<std::string> &identity,
+                   std::optional<MessageDirection> dir) const
   {
     json j = m_template;
 
-    j[key]                    = entry;
-    j[TEMPLATE_KEY_DIRECTION] = fmt::to_string(dir);
+    j[key] = entry;
+
+    if(dir.has_value())
+    {
+      j[TEMPLATE_KEY_DIRECTION] = fmt::to_string(dir.value());
+    }
+
+    if(identity.has_value() && !identity->empty())
+    {
+      j[IDENTITY_KEY] = identity.value();
+    }
 
     const auto now = std::chrono::system_clock::now();
     // see https://stackoverflow.com/a/67076017
@@ -185,10 +198,31 @@ Logging::~Logging() = default;
 
 void Logging::AddLogEntry(const json &doc, MessageDirection dir) const
 {
-  m_impl->AddLogEntry(TEMPLATE_KEY_JSON, doc, dir);
+  std::optional<std::string> identity;
+  m_impl->AddLogEntry(TEMPLATE_KEY_JSON, doc, identity, dir);
+}
+
+void Logging::AddLogEntry(const json &doc, const std::string &identity,
+                          MessageDirection dir) const
+{
+  m_impl->AddLogEntry(TEMPLATE_KEY_JSON, doc, identity, dir);
+}
+
+void Logging::AddLogEntry(const std::string &str) const
+{
+  std::optional<std::string> identity;
+  std::optional<MessageDirection> dir;
+  m_impl->AddLogEntry(TEMPLATE_KEY_STR, str, identity, dir);
 }
 
 void Logging::AddLogEntry(const std::string &str, MessageDirection dir) const
 {
-  m_impl->AddLogEntry(TEMPLATE_KEY_STR, str, dir);
+  std::optional<std::string> identity;
+  m_impl->AddLogEntry(TEMPLATE_KEY_STR, str, identity, dir);
+}
+
+void Logging::AddLogEntry(const std::string &str, const std::string &identity,
+                          MessageDirection dir) const
+{
+  m_impl->AddLogEntry(TEMPLATE_KEY_STR, str, identity, dir);
 }

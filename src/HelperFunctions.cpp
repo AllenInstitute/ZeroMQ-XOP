@@ -293,7 +293,8 @@ json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
       DEBUG_OUTPUT("Function return value is {:.255s}",
                    reply.dump(DEFAULT_INDENT));
 
-      GlobalData::Instance().AddLogEntry(reply, MessageDirection::Outgoing);
+      GlobalData::Instance().AddLogEntry(reply, req->GetCallerIdentity(),
+                                         MessageDirection::Outgoing);
 
       return reply;
     }
@@ -318,7 +319,8 @@ json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
       reply[HISTORY_KEY] = history;
     }
 
-    GlobalData::Instance().AddLogEntry(reply, MessageDirection::Outgoing);
+    GlobalData::Instance().AddLogEntry(reply, req->GetCallerIdentity(),
+                                       MessageDirection::Outgoing);
 
     return reply;
   }

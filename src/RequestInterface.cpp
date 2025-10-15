@@ -30,12 +30,14 @@ RequestInterface::RequestInterface(std::string callerIdentity,
   }
   catch(const std::exception &)
   {
-    GlobalData::Instance().AddLogEntry(payload, MessageDirection::Incoming);
+    GlobalData::Instance().AddLogEntry(payload, m_callerIdentity,
+                                       MessageDirection::Incoming);
     throw RequestInterfaceException(REQ_INVALID_JSON_OBJECT);
   }
 
   // the idea is to log the incoming payload as json document if possible
-  GlobalData::Instance().AddLogEntry(doc, MessageDirection::Incoming);
+  GlobalData::Instance().AddLogEntry(doc, m_callerIdentity,
+                                     MessageDirection::Incoming);
 
   DEBUG_OUTPUT("JSON Document is valid, data={}", doc.dump());
   FillFromJSON(doc);

@@ -51,7 +51,8 @@ extern "C" int zeromq_server_recv(zeromq_server_recvParams *p)
     DEBUG_OUTPUT("numBytes={}, identity={}, msg={:.255s}", numBytes, identity,
                  msg);
 
-    GlobalData::Instance().AddLogEntry(msg, MessageDirection::Incoming);
+    GlobalData::Instance().AddLogEntry(msg, identity,
+                                       MessageDirection::Incoming);
 
     break;
   }

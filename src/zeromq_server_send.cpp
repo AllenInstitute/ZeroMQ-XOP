@@ -14,7 +14,7 @@ extern "C" int zeromq_server_send(zeromq_server_sendParams *p)
   const auto msg = GetStringFromHandle(p->msg);
   WMDisposeHandle(p->msg);
 
-  GlobalData::Instance().AddLogEntry(msg, MessageDirection::Outgoing);
+  GlobalData::Instance().AddLogEntry(msg, identity, MessageDirection::Outgoing);
 
   ZeroMQServerSend(identity, msg);
 

@@ -11,6 +11,7 @@ constexpr char PACKAGE_NAME[] = "ZeroMQ";
 void ApplySocketDefaults(void *s, SocketTypes st)
 {
   int valZero = 0;
+  int valOne  = 1;
   int rc      = 0;
 
   rc = zmq_setsockopt(s, ZMQ_LINGER, &valZero, sizeof(valZero));
@@ -19,7 +20,7 @@ void ApplySocketDefaults(void *s, SocketTypes st)
   rc = zmq_setsockopt(s, ZMQ_SNDTIMEO, &valZero, sizeof(valZero));
   ZEROMQ_ASSERT(rc == 0);
 
-  rc = zmq_setsockopt(s, ZMQ_RCVTIMEO, &valZero, sizeof(valZero));
+  rc = zmq_setsockopt(s, ZMQ_RCVTIMEO, &valOne, sizeof(valOne));
   ZEROMQ_ASSERT(rc == 0);
 
   switch(st)
@@ -36,7 +37,9 @@ void ApplySocketDefaults(void *s, SocketTypes st)
     return;
   case SocketTypes::Server:
   {
-    int valOne = 1;
+    const char identity[] = "zeromq xop: router";
+    rc = zmq_setsockopt(s, ZMQ_IDENTITY, &identity, strlen(identity));
+    ZEROMQ_ASSERT(rc == 0);
 
     rc = zmq_setsockopt(s, ZMQ_ROUTER_MANDATORY, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
@@ -248,6 +251,31 @@ void GlobalData::AddLogEntry(const json &doc, MessageDirection dir)
   m_loggingSink->AddLogEntry(doc, dir);
 }
 
+void GlobalData::AddLogEntry(const json &doc, const std::string &identity,
+                             MessageDirection dir)
+{
+  if(!GetLoggingFlag())
+  {
+    return;
+  }
+
+  LockGuard lock(m_loggingLock);
+
+  m_loggingSink->AddLogEntry(doc, identity, dir);
+}
+
+void GlobalData::AddLogEntry(const std::string &str)
+{
+  if(!GetLoggingFlag())
+  {
+    return;
+  }
+
+  LockGuard lock(m_loggingLock);
+
+  m_loggingSink->AddLogEntry(str);
+}
+
 void GlobalData::AddLogEntry(const std::string &str, MessageDirection dir)
 {
   if(!GetLoggingFlag())
@@ -258,6 +286,19 @@ void GlobalData::AddLogEntry(const std::string &str, MessageDirection dir)
   LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(str, dir);
+}
+
+void GlobalData::AddLogEntry(const std::string &str,
+                             const std::string &identity, MessageDirection dir)
+{
+  if(!GetLoggingFlag())
+  {
+    return;
+  }
+
+  LockGuard lock(m_loggingLock);
+
+  m_loggingSink->AddLogEntry(str, identity, dir);
 }
 
 void GlobalData::SetLoggingTemplate(const std::string &loggingTemplate)
