@@ -36,11 +36,20 @@ struct fmt::formatter<RequestInterface> : fmt::formatter<std::string>
   template <typename FormatContext>
   auto format(const RequestInterface &req, FormatContext &ctx) const
   {
+    auto nicer_empty = [](const std::string &str) -> std::string
+    {
+      if(str.empty())
+      {
+        return "(not provided)";
+      }
+
+      return str;
+    };
+
     return format_to(
         ctx.out(),
         "version={}, callerIdentity={}, messageId={}, CallFunction: {}",
-        req.m_version, req.m_callerIdentity,
-        (req.m_messageId.empty() ? "(not provided)" : req.m_messageId),
+        req.m_version, req.m_callerIdentity, nicer_empty(req.m_messageId),
         *(req.m_op));
   }
 };
