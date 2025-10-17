@@ -49,7 +49,7 @@ struct fmt::formatter<RequestInterface> : fmt::formatter<std::string>
     return format_to(
         ctx.out(),
         "version={}, callerIdentity={}, messageId={}, CallFunction: {}",
-        req.m_version, req.m_callerIdentity, nicer_empty(req.m_messageId),
-        *(req.m_op));
+        req.m_version, nicer_empty(req.m_callerIdentity),
+        nicer_empty(req.m_messageId), *(req.m_op));
   }
 };
