@@ -40,6 +40,9 @@ public:
   void SetRecvBusyWaitingFlag(bool val);
   bool GetRecvBusyWaitingFlag() const;
 
+  void SetInterceptorFlag(bool val);
+  bool GetInterceptorFlag() const;
+
   void CloseConnections();
   void AddToListOfBindsOrConnections(const std::string &localPoint,
                                      SocketTypes st);
@@ -64,6 +67,9 @@ public:
 
   void RemoveSubscriberMessageFilter(const std::string &filter);
 
+  void SetInterceptorFunctionName(const std::string &funcName);
+  std::string GetInterceptorFunctionName();
+
 private:
   GlobalData();
   ~GlobalData()                             = default;
@@ -87,12 +93,16 @@ private:
   bool m_debugging;
   bool m_busyWaiting;
   bool m_logging;
+  bool m_interceptor;
 
   ConcurrentQueue<OutputMessagePtr> m_queue;
   std::unique_ptr<Logging> m_loggingSink;
   std::recursive_mutex m_loggingLock;
   void *zmq_context;
   std::vector<std::string> m_subMessageFilters;
+
+  std::recursive_mutex m_interceptorLock;
+  std::string m_interceptorFuncName;
 };
 
 template <>

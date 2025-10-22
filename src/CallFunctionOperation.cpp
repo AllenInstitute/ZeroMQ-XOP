@@ -191,6 +191,49 @@ void CallFunctionOperation::CanBeProcessed() const
   DEBUG_OUTPUT("Request Object can be processed: {}", *this);
 }
 
+void CallFunctionOperation::CallInterceptor(const std::string &identity) const
+{
+  if(!GlobalData::Instance().GetInterceptorFlag())
+  {
+    return;
+  }
+
+  auto funcName = GlobalData::Instance().GetInterceptorFunctionName();
+  ASSERT(!funcName.empty());
+
+  DEBUG_OUTPUT("InterceptorName={}", funcName);
+
+  FunctionInfo fip;
+  auto rc = GetFunctionInfo(funcName.c_str(), &fip);
+  if(rc != 0)
+  {
+    throw IgorException(NO_INTERCEPTOR_FUNC);
+  }
+
+  // we don't check the signature again, CallFunctionParameterHandler does that
+  // although with asserts only
+
+  std::vector<std::string> params{m_json.dump(), identity};
+
+  DEBUG_OUTPUT("params={}", params);
+
+  CallFunctionParameterHandler p(params, fip);
+
+  rc = CallFunction(&fip, p.GetParameterValueStorage(),
+                    p.GetReturnValueStorage());
+  ASSERT(rc == 0);
+
+  auto functionAborted = SpinProcess();
+
+  DEBUG_OUTPUT("Interceptor call finished with functionAborted={}",
+               functionAborted);
+
+  if(functionAborted)
+  {
+    throw RequestInterfaceException(REQ_INTERCEPT_FUNC_ABORTED);
+  }
+}
+
 json CallFunctionOperation::Call()
 {
   DEBUG_OUTPUT("Data={}", *this);

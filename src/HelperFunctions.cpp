@@ -189,6 +189,7 @@ void ApplyFlags(double flags)
     GlobalData::Instance().SetRecvBusyWaitingFlag(true);
     GlobalData::Instance().SetLoggingFlag(false);
     ToggleIPV6Support(false);
+    GlobalData::Instance().SetInterceptorFlag(false);
     numMatches++;
   }
 
@@ -214,6 +215,13 @@ void ApplyFlags(double flags)
   if((val & ZeroMQ_SET_FLAGS::LOGGING) == ZeroMQ_SET_FLAGS::LOGGING)
   {
     GlobalData::Instance().SetLoggingFlag(true);
+    numMatches++;
+  }
+
+  if((val & ZeroMQ_SET_FLAGS::INTERCEPTOR_FUNCTION) ==
+     ZeroMQ_SET_FLAGS::INTERCEPTOR_FUNCTION)
+  {
+    GlobalData::Instance().SetInterceptorFlag(true);
     numMatches++;
   }
 
@@ -286,6 +294,7 @@ json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
     try
     {
       req->CanBeProcessed();
+      req->CallInterceptor();
       auto reply = req->Call();
 
       DEBUG_OUTPUT("Function return value is {:.255s}",

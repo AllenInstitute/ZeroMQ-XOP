@@ -65,6 +65,12 @@ void RequestInterface::CanBeProcessed() const
   m_op->CanBeProcessed();
 }
 
+void RequestInterface::CallInterceptor() const
+{
+  ASSERT(m_op);
+  m_op->CallInterceptor(m_callerIdentity);
+}
+
 json RequestInterface::Call() const
 {
   ASSERT(m_op);
