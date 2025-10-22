@@ -11,7 +11,7 @@ public:
   explicit CallFunctionOperation(json j);
   void CanBeProcessed() const;
   json Call();
-  void CallInterceptor(const std::string &identity) const;
+  void CallInterceptor(const std::string &identity, InterceptorMode mode) const;
 
   friend struct fmt::formatter<CallFunctionOperation>;
 

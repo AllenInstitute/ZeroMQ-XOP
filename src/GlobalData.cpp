@@ -341,9 +341,9 @@ void GlobalData::SetInterceptorFunctionName(const std::string &funcName)
                         fmt::format("Function name={}", funcName));
   }
 
-  int reqParamTypes[] = {HSTRING_TYPE, HSTRING_TYPE};
+  int reqParamTypes[] = {HSTRING_TYPE, HSTRING_TYPE, NT_FP64};
   int badParamNumber{};
-  rc = CheckFunctionForm(&fip, 2, reqParamTypes, &badParamNumber, NT_FP64);
+  rc = CheckFunctionForm(&fip, 3, reqParamTypes, &badParamNumber, NT_FP64);
   if(rc != 0)
   {
     throw IgorException(

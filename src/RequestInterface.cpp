@@ -17,6 +17,34 @@ bool IsValidMessageId(const std::string &messageId)
   return messageId.length() != 0 && messageId.length() <= MAX_MESSAGEID_LENGTH;
 }
 
+class InterceptorCaller
+{
+public:
+  InterceptorCaller(std::shared_ptr<const RequestInterface> req) : m_req(req)
+  {
+    m_req->CallInterceptor(InterceptorMode::Begin);
+  }
+
+  ~InterceptorCaller()
+  {
+    try
+    {
+      m_req->CallInterceptor(InterceptorMode::End);
+    }
+    catch(const std::exception &e)
+    {
+      DEBUG_OUTPUT("Caught exception={}", e.what());
+    }
+    catch(...)
+    {
+      // do nothing
+    }
+  }
+
+private:
+  std::shared_ptr<const RequestInterface> m_req;
+};
+
 } // anonymous namespace
 
 RequestInterface::RequestInterface(Private, std::string callerIdentity,
@@ -65,15 +93,18 @@ void RequestInterface::CanBeProcessed() const
   m_op->CanBeProcessed();
 }
 
-void RequestInterface::CallInterceptor() const
+void RequestInterface::CallInterceptor(InterceptorMode mode) const
 {
   ASSERT(m_op);
-  m_op->CallInterceptor(m_callerIdentity);
+  m_op->CallInterceptor(m_callerIdentity, mode);
 }
 
 json RequestInterface::Call() const
 {
   ASSERT(m_op);
+
+  auto req = shared_from_this();
+  InterceptorCaller ic{req};
   auto reply = m_op->Call();
 
   if(HasValidMessageId())

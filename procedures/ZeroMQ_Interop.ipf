@@ -144,8 +144,22 @@ Function ZeroMQ_ShowHelp(topic)
 	DisplayHelpTopic topic
 End
 
-Function ZeroMQ_Interceptor_Proto(json, iden)
+/// @name Possible values for the mode parameter of ZeroMQ_Interceptor_Proto()
+/// @anchor ZeroMQInterceptorModes
+///@{
+Constant ZeroMQ_INTERCEPT_BEGIN = 1
+Constant ZeroMQ_INTERCEPT_END   = 2
+///@}
+
+/// @brief Prototype function to be used as interceptor function
+///
+/// @param json JSON payload with function name and parameters
+/// @param iden Routing id (formerly known as identity) of the remote zeromq side
+/// @param mode One of @ref ZeroMQInterceptorModes, communicates if we are before the function call or after.
+///        Due to an Igor Pro implementation detail the after interceptor call is skipped when the main function aborts
+Function ZeroMQ_Interceptor_Proto(json, iden, mode)
 	string json, iden
+	variable mode
 
 	Abort "Can't call prototype function"
 End

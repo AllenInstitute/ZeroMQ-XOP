@@ -38,15 +38,16 @@ static Function/WAVE ValidInterceptorFunctions()
 	return funcs
 End
 
-Function MyInterceptorPublic(string json, string identity)
+Function MyInterceptorPublic(string json, string identity, variable mode)
 
-	return MyInterceptor(json, identity)
+	return MyInterceptor(json, identity, mode)
 End
 
-static Function MyInterceptor(string json, string identity)
+static Function MyInterceptor(string json, string identity, variable mode)
 
 	printf "json=%s\r", json
 	printf "identity=%s\r", identity
+	printf "mode=%g\r", mode
 End
 
 // UTF_TD_GENERATOR zmq_set_interceptor_func#NonExistingInterceptorFunctions
@@ -88,7 +89,7 @@ Function InterceptorIsCalledWhenEnabled()
 
 	variable err, ret, errorValue, resultVariable
 	variable expected, histRef
-	string   replyMessage, history
+	string   replyMessage, history, historyFull, expectedStr
 
 	string msg = "{                    "              + \
 	             "\"version\" : 1,                  " + \
@@ -117,10 +118,14 @@ Function InterceptorIsCalledWhenEnabled()
 	// zeromq_recv will also create idle events while waiting
 	replyMessage = zeromq_client_recv()
 
-	history = CaptureHistory(histRef, 1)
-	history = GrepList(history, "^(json|identity)=", 0, "\r")
+	historyFull = CaptureHistory(histRef, 1)
+	history = GrepList(historyFull, "^(json|identity|mode)=", 0, "\r")
 
-	CHECK_EQUAL_STR(history, "json={\"name\":\"FunctionToCall\"}\ridentity=zeromq xop: dealer\r")
+	CHECK_EQUAL_STR(history, "json={\"name\":\"FunctionToCall\"}\ridentity=zeromq xop: dealer\rmode=1\rjson={\"name\":\"FunctionToCall\"}\ridentity=zeromq xop: dealer\rmode=2\r")
+
+	history = GrepList(historyFull, "^(mode)=", 0, "\r")
+	sprintf expectedStr, "mode=%d\rmode=%d\r", ZeroMQ_INTERCEPT_BEGIN, ZeroMQ_INTERCEPT_END
+	CHECK_EQUAL_STR(history, expectedStr)
 
 	errorValue = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
@@ -135,7 +140,61 @@ Function DoAbort_IGNORE()
 	Abort
 End
 
-Function AbortingInterceptor(string json, string identity)
+Function InterceptorIsCalledWithAbortingFunction()
+
+	variable err, ret, errorValue, resultVariable
+	variable expected, histRef
+	string   replyMessage, history, historyFull, expectedStr
+
+	string msg = "{                    "              + \
+	             "\"version\" : 1,                  " + \
+	             "\"CallFunction\" : {             "  + \
+	             "\"name\" : \"DoAbort_IGNORE\"     " + \
+	             "}                                 " + \
+	             "}"
+
+	zeromq_stop()
+	zeromq_server_bind("tcp://127.0.0.1:5555")
+	zeromq_client_connect("tcp://127.0.0.1:5555")
+
+	zeromq_set(ZeroMQ_SET_FLAGS_INTERCEPTOR)
+	zeromq_set_interceptor_func("MyInterceptorPublic")
+	CHECK_NO_RTE()
+
+	ret = zeromq_handler_start()
+	CHECK_EQUAL_VAR(ret, 0)
+
+	zeromq_client_send(msg)
+
+	histRef = CaptureHistoryStart()
+
+	// the json message is now in the internal message queue and
+	// will be processed at the next idle event
+	// zeromq_recv will also create idle events while waiting
+	try
+		replyMessage = zeromq_client_recv()
+		FAIL()
+	catch
+		PASS()
+	endtry
+
+	historyFull = CaptureHistory(histRef, 1)
+	history = GrepList(historyFull, "^(json|identity|mode)=", 0, "\r")
+
+	// due to an Igor Pro implementation detail
+	// we don't get a ZeroMQ_INTERCEPT_END call for the interceptor if the called function aborts
+
+	CHECK_EQUAL_STR(history, "json={\"name\":\"DoAbort_IGNORE\"}\ridentity=zeromq xop: dealer\rmode=1\r")
+
+	history = GrepList(historyFull, "^(mode)=", 0, "\r")
+	sprintf expectedStr, "mode=%d\r", ZeroMQ_INTERCEPT_BEGIN
+	CHECK_EQUAL_STR(history, expectedStr)
+
+	errorValue = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_FUNCTION_ABORTED)
+End
+
+Function AbortingInterceptor(string json, string identity, variable mode)
 
 	Abort
 End

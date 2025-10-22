@@ -294,7 +294,6 @@ json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)
     try
     {
       req->CanBeProcessed();
-      req->CallInterceptor();
       auto reply = req->Call();
 
       DEBUG_OUTPUT("Function return value is {:.255s}",

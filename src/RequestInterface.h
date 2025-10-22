@@ -19,7 +19,7 @@ public:
                                     const std::string &payload);
   static RequestInterfacePtr Create(const std::string &payload);
   void CanBeProcessed() const;
-  void CallInterceptor() const;
+  void CallInterceptor(InterceptorMode mode) const;
   json Call() const;
 
   std::string GetCallerIdentity() const;
