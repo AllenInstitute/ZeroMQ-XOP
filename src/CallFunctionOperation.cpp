@@ -7,19 +7,19 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-CallFunctionOperation::CallFunctionOperation(json j)
+CallFunctionOperation::CallFunctionOperation(json j) : m_json(j)
 {
-  DEBUG_OUTPUT("size={}", j.size());
+  DEBUG_OUTPUT("size={}", m_json.size());
 
-  if(j.size() != 1 && j.size() != 2)
+  if(m_json.size() != 1 && m_json.size() != 2)
   {
     throw RequestInterfaceException(REQ_INVALID_OPERATION_FORMAT);
   }
 
   // check first element "name"
-  auto it = j.find("name");
+  auto it = m_json.find("name");
 
-  if(it == j.end() || !it.value().is_string())
+  if(it == m_json.end() || !it.value().is_string())
   {
     throw RequestInterfaceException(REQ_INVALID_OPERATION_FORMAT);
   }
@@ -31,11 +31,11 @@ CallFunctionOperation::CallFunctionOperation(json j)
     throw RequestInterfaceException(REQ_NON_EXISTING_FUNCTION);
   }
 
-  it = j.find("params");
+  it = m_json.find("params");
 
-  if(it == j.end())
+  if(it == m_json.end())
   {
-    if(j.size() != 1) // unknown other objects
+    if(m_json.size() != 1) // unknown other objects
     {
       throw RequestInterfaceException(REQ_INVALID_OPERATION_FORMAT);
     }

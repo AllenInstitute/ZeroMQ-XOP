@@ -21,6 +21,7 @@ private:
   std::string m_name;
   std::vector<std::string> m_params;
   std::string m_historyDuringCall;
+  json m_json;
 };
 
 template <>
