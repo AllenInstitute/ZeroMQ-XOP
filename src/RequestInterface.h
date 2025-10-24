@@ -5,13 +5,21 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-class RequestInterface
+class RequestInterface : public std::enable_shared_from_this<RequestInterface>
 {
+private:
+  struct Private;
+
 public:
-  explicit RequestInterface(std::string callerIdentity,
+  explicit RequestInterface(Private, std::string callerIdentity,
                             const std::string &payload);
-  explicit RequestInterface(const std::string &payload);
+  explicit RequestInterface(Private, const std::string &payload);
+
+  static RequestInterfacePtr Create(std::string callerIdentity,
+                                    const std::string &payload);
+  static RequestInterfacePtr Create(const std::string &payload);
   void CanBeProcessed() const;
+  void CallInterceptor(InterceptorMode mode) const;
   json Call() const;
 
   std::string GetCallerIdentity() const;
@@ -22,6 +30,11 @@ public:
   friend struct fmt::formatter<RequestInterface>;
 
 private:
+  struct Private
+  {
+    explicit Private() = default;
+  };
+
   void FillFromJSON(json j);
 
   int m_version{};
@@ -36,11 +49,20 @@ struct fmt::formatter<RequestInterface> : fmt::formatter<std::string>
   template <typename FormatContext>
   auto format(const RequestInterface &req, FormatContext &ctx) const
   {
+    auto nicer_empty = [](const std::string &str) -> std::string
+    {
+      if(str.empty())
+      {
+        return "(not provided)";
+      }
+
+      return str;
+    };
+
     return format_to(
         ctx.out(),
         "version={}, callerIdentity={}, messageId={}, CallFunction: {}",
-        req.m_version, req.m_callerIdentity,
-        (req.m_messageId.empty() ? "(not provided)" : req.m_messageId),
-        *(req.m_op));
+        req.m_version, nicer_empty(req.m_callerIdentity),
+        nicer_empty(req.m_messageId), *(req.m_op));
   }
 };

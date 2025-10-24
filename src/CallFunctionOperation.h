@@ -11,6 +11,7 @@ public:
   explicit CallFunctionOperation(json j);
   void CanBeProcessed() const;
   json Call();
+  void CallInterceptor(const std::string &identity, InterceptorMode mode) const;
 
   friend struct fmt::formatter<CallFunctionOperation>;
 
@@ -21,6 +22,7 @@ private:
   std::string m_name;
   std::vector<std::string> m_params;
   std::string m_historyDuringCall;
+  json m_json;
 };
 
 template <>

@@ -51,30 +51,33 @@ XOPIORecResult RegisterFunction()
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set);
     break;
   case 12:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set_logging_template);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set_interceptor_func);
     break;
   case 13:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_stop);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set_logging_template);
     break;
   case 14:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_add_filter);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_stop);
     break;
   case 15:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_connect);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_add_filter);
     break;
   case 16:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_recv);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_connect);
     break;
   case 17:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_recv_multi);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_recv);
     break;
   case 18:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_remove_filter);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_recv_multi);
     break;
   case 19:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_callfunction);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_remove_filter);
     break;
   case 20:
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_callfunction);
+    break;
+  case 21:
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_serializeWave);
     break;
   }

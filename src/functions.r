@@ -103,6 +103,14 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   NT_FP64,      // parameter 1
   },
 
+  // variable zeromq_set_interceptor_func(string funcName)
+  "zeromq_set_interceptor_func",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  HSTRING_TYPE,      // parameter 1
+  },
+
   // variable zeromq_set_logging_template(string jsonString)
   "zeromq_set_logging_template",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
