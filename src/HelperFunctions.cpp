@@ -261,12 +261,12 @@ double ConvertStringToDouble(const std::string &str)
 
 json CallIgorFunctionFromMessage(const std::string &msg)
 {
-  std::shared_ptr<RequestInterface> req;
   try
   {
     try
     {
-      req = std::make_shared<RequestInterface>(msg);
+      auto req = RequestInterface::Create(msg);
+      return CallIgorFunctionFromReqInterface(req);
     }
     catch(const std::bad_alloc &)
     {
@@ -277,8 +277,6 @@ json CallIgorFunctionFromMessage(const std::string &msg)
   {
     return e;
   }
-
-  return CallIgorFunctionFromReqInterface(req);
 }
 
 json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)

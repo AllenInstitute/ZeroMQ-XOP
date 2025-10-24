@@ -5,12 +5,19 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-class RequestInterface
+class RequestInterface : public std::enable_shared_from_this<RequestInterface>
 {
+private:
+  struct Private;
+
 public:
-  explicit RequestInterface(std::string callerIdentity,
+  explicit RequestInterface(Private, std::string callerIdentity,
                             const std::string &payload);
-  explicit RequestInterface(const std::string &payload);
+  explicit RequestInterface(Private, const std::string &payload);
+
+  static RequestInterfacePtr Create(std::string callerIdentity,
+                                    const std::string &payload);
+  static RequestInterfacePtr Create(const std::string &payload);
   void CanBeProcessed() const;
   json Call() const;
 
@@ -22,6 +29,11 @@ public:
   friend struct fmt::formatter<RequestInterface>;
 
 private:
+  struct Private
+  {
+    explicit Private() = default;
+  };
+
   void FillFromJSON(json j);
 
   int m_version{};

@@ -19,7 +19,7 @@ bool IsValidMessageId(const std::string &messageId)
 
 } // anonymous namespace
 
-RequestInterface::RequestInterface(std::string callerIdentity,
+RequestInterface::RequestInterface(Private, std::string callerIdentity,
                                    const std::string &payload)
     : m_callerIdentity(std::move(callerIdentity))
 {
@@ -43,9 +43,20 @@ RequestInterface::RequestInterface(std::string callerIdentity,
   FillFromJSON(doc);
 }
 
-RequestInterface::RequestInterface(const std::string &payload)
-    : RequestInterface("", payload)
+RequestInterface::RequestInterface(Private, const std::string &payload)
+    : RequestInterface(Private(), "", payload)
 {
+}
+
+RequestInterfacePtr RequestInterface::Create(std::string callerIdentity,
+                                             const std::string &payload)
+{
+  return std::make_shared<RequestInterface>(Private(), callerIdentity, payload);
+}
+
+RequestInterfacePtr RequestInterface::Create(const std::string &payload)
+{
+  return std::make_shared<RequestInterface>(Private(), payload);
 }
 
 void RequestInterface::CanBeProcessed() const

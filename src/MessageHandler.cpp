@@ -68,7 +68,8 @@ void WorkerThread()
         try
         {
           const auto payload = CreateStringFromZMsg(&payloadMsg);
-          reqQueue.push(std::make_shared<RequestInterface>(identity, payload));
+          auto req           = RequestInterface::Create(identity, payload);
+          reqQueue.push(req);
         }
         catch(const std::bad_alloc &)
         {
