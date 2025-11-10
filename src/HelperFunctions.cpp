@@ -189,6 +189,7 @@ void ApplyFlags(double flags)
     GlobalData::Instance().SetRecvBusyWaitingFlag(true);
     GlobalData::Instance().SetLoggingFlag(false);
     ToggleIPV6Support(false);
+    GlobalData::Instance().SetInterceptorFlag(false);
     numMatches++;
   }
 
@@ -214,6 +215,13 @@ void ApplyFlags(double flags)
   if((val & ZeroMQ_SET_FLAGS::LOGGING) == ZeroMQ_SET_FLAGS::LOGGING)
   {
     GlobalData::Instance().SetLoggingFlag(true);
+    numMatches++;
+  }
+
+  if((val & ZeroMQ_SET_FLAGS::INTERCEPTOR_FUNCTION) ==
+     ZeroMQ_SET_FLAGS::INTERCEPTOR_FUNCTION)
+  {
+    GlobalData::Instance().SetInterceptorFlag(true);
     numMatches++;
   }
 
@@ -261,12 +269,12 @@ double ConvertStringToDouble(const std::string &str)
 
 json CallIgorFunctionFromMessage(const std::string &msg)
 {
-  std::shared_ptr<RequestInterface> req;
   try
   {
     try
     {
-      req = std::make_shared<RequestInterface>(msg);
+      auto req = RequestInterface::Create(msg);
+      return CallIgorFunctionFromReqInterface(req);
     }
     catch(const std::bad_alloc &)
     {
@@ -277,8 +285,6 @@ json CallIgorFunctionFromMessage(const std::string &msg)
   {
     return e;
   }
-
-  return CallIgorFunctionFromReqInterface(req);
 }
 
 json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req)

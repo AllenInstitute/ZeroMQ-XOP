@@ -131,6 +131,7 @@ SET(COVERAGE_SOURCES
   zeromq_set.cpp
   zeromq_set_logging_template.cpp
   zeromq_stop.cpp
+  zeromq_set_interceptor_func.cpp
   zeromq_sub_add_filter.cpp
   zeromq_sub_connect.cpp
   zeromq_sub_recv.cpp

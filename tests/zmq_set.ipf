@@ -24,7 +24,7 @@ Function ComplainsWithUnknownFlagsHigh()
 	variable err, ret
 
 	try
-		ret = zeromq_set(32); AbortOnRTE
+		ret = zeromq_set(64); AbortOnRTE
 		FAIL()
 	catch
 		err = GetRTError(1)

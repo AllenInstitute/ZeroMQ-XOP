@@ -156,6 +156,10 @@ variable zeromq_handler_stop();
 /// - Top-level entity must be a JSON object and does not have reserved keys
 THREADSAFE variable zeromq_set_logging_template(string jsonString);
 
+/// Set the name of the interceptor function, the prototype must match
+/// ZeroMQ_Interceptor_Proto()
+THREADSAFE variable zeromq_set_interceptor_func(string funcName);
+
 /// @cond DOXYGEN_IGNORES_THIS
 /// @name Functions used for testing and debugging
 /// @{

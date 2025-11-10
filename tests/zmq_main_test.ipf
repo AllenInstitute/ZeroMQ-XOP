@@ -12,6 +12,7 @@
 #include ":zmq_memory_leaks"
 #include ":zmq_pub_sub"
 #include ":zmq_pub_sub_multi"
+#include ":zmq_set_interceptor_func"
 #include ":zmq_set"
 #include ":zmq_start_handler"
 #include ":zmq_stop"
@@ -133,6 +134,7 @@ Function TEST_CASE_BEGIN_OVERRIDE(name)
 
 	zeromq_stop()
 	zeromq_set(ZMQ_SET_FLAGS_DEBUG | ZMQ_SET_FLAGS_DEFAULT | ZMQ_SET_FLAGS_LOGGING)
+	zeromq_set_interceptor_func("ZeroMQ_Interceptor_Proto")
 End
 
 Function TEST_CASE_END_OVERRIDE(name)
@@ -937,6 +939,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	list = AddListItem("zmq_memory_leaks.ipf", list, ";", Inf)
 	list = AddListItem("zmq_pub_sub.ipf", list, ";", Inf)
 	list = AddListItem("zmq_pub_sub_multi.ipf", list, ";", Inf)
+	list = AddListItem("zmq_set_interceptor_func.ipf", list, ";", Inf)
 	list = AddListItem("zmq_set_logging_template.ipf", list, ";", Inf)
 	list = AddListItem("zmq_set.ipf", list, ";", Inf)
 	list = AddListItem("zmq_start_handler.ipf", list, ";", Inf)

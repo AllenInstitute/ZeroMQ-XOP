@@ -90,6 +90,13 @@ BEGIN
   NT_FP64,      // parameter 1
   0,
 
+  // variable zeromq_set_interceptor_func(string funcName)
+  "zeromq_set_interceptor_func\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  HSTRING_TYPE,      // parameter 1
+  0,
+
   // variable zeromq_set_logging_template(string jsonString)
   "zeromq_set_logging_template\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category

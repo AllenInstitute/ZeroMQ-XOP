@@ -33,6 +33,8 @@ resource 'STR#' (1100) {					/* custom error messages */
   "Exists already as message filter .",                       // MESSAGE_FILTER_DUPLICATED
   "No such message filter."                                   // MESSAGE_FILTER_MISSING
   "Invalid type encountered.",                                // ERR_INVALID_TYPE
+  "Non-existing interceptor function.",                       // NO_INTERCEPTOR_FUNC
+  "Incompatible interceptor function signature."              // INVALID_INTERCEPTOR_FUNC
 	}
 };
 

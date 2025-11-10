@@ -7,19 +7,19 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-CallFunctionOperation::CallFunctionOperation(json j)
+CallFunctionOperation::CallFunctionOperation(json j) : m_json(j)
 {
-  DEBUG_OUTPUT("size={}", j.size());
+  DEBUG_OUTPUT("size={}", m_json.size());
 
-  if(j.size() != 1 && j.size() != 2)
+  if(m_json.size() != 1 && m_json.size() != 2)
   {
     throw RequestInterfaceException(REQ_INVALID_OPERATION_FORMAT);
   }
 
   // check first element "name"
-  auto it = j.find("name");
+  auto it = m_json.find("name");
 
-  if(it == j.end() || !it.value().is_string())
+  if(it == m_json.end() || !it.value().is_string())
   {
     throw RequestInterfaceException(REQ_INVALID_OPERATION_FORMAT);
   }
@@ -31,11 +31,11 @@ CallFunctionOperation::CallFunctionOperation(json j)
     throw RequestInterfaceException(REQ_NON_EXISTING_FUNCTION);
   }
 
-  it = j.find("params");
+  it = m_json.find("params");
 
-  if(it == j.end())
+  if(it == m_json.end())
   {
-    if(j.size() != 1) // unknown other objects
+    if(m_json.size() != 1) // unknown other objects
     {
       throw RequestInterfaceException(REQ_INVALID_OPERATION_FORMAT);
     }
@@ -189,6 +189,52 @@ void CallFunctionOperation::CanBeProcessed() const
   }
 
   DEBUG_OUTPUT("Request Object can be processed: {}", *this);
+}
+
+void CallFunctionOperation::CallInterceptor(const std::string &identity,
+                                            InterceptorMode mode) const
+{
+  if(!GlobalData::Instance().GetInterceptorFlag())
+  {
+    return;
+  }
+
+  auto funcName = GlobalData::Instance().GetInterceptorFunctionName();
+  ASSERT(!funcName.empty());
+
+  DEBUG_OUTPUT("InterceptorName={}", funcName);
+
+  FunctionInfo fip;
+  auto rc = GetFunctionInfo(funcName.c_str(), &fip);
+  if(rc != 0)
+  {
+    throw IgorException(NO_INTERCEPTOR_FUNC);
+  }
+
+  // we don't check the signature again, CallFunctionParameterHandler does that
+  // although with asserts only
+  auto mode_str = std::to_string(
+      static_cast<std::underlying_type_t<InterceptorMode>>(mode));
+
+  std::vector<std::string> params{m_json.dump(), identity, mode_str};
+
+  DEBUG_OUTPUT("params={}", params);
+
+  CallFunctionParameterHandler p(params, fip);
+
+  rc = CallFunction(&fip, p.GetParameterValueStorage(),
+                    p.GetReturnValueStorage());
+  ASSERT(rc == 0);
+
+  auto functionAborted = SpinProcess();
+
+  DEBUG_OUTPUT("Interceptor call finished with functionAborted={}",
+               functionAborted);
+
+  if(functionAborted)
+  {
+    throw RequestInterfaceException(REQ_INTERCEPT_FUNC_ABORTED);
+  }
 }
 
 json CallFunctionOperation::Call()

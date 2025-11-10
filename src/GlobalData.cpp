@@ -83,7 +83,8 @@ AllSocketTypesArray GetAllSocketTypes()
 }
 
 GlobalData::GlobalData()
-    : m_debugging(false), m_busyWaiting(true), m_logging(false)
+    : m_debugging(false), m_busyWaiting(true), m_logging(false),
+      m_interceptor(false)
 {
   zmq_context = zmq_ctx_new();
   ZEROMQ_ASSERT(zmq_context != nullptr);
@@ -152,6 +153,19 @@ void GlobalData::SetRecvBusyWaitingFlag(bool val)
 bool GlobalData::GetRecvBusyWaitingFlag() const
 {
   return m_busyWaiting;
+}
+
+void GlobalData::SetInterceptorFlag(bool val)
+{
+  LockGuard lock(m_settingsMutex);
+
+  DEBUG_OUTPUT("new value={}", val);
+  m_interceptor = val;
+}
+
+bool GlobalData::GetInterceptorFlag() const
+{
+  return m_interceptor;
 }
 
 void GlobalData::CloseConnections()
@@ -313,6 +327,39 @@ void GlobalData::InitLogging()
   LockGuard lock(m_loggingLock);
 
   m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME);
+}
+
+void GlobalData::SetInterceptorFunctionName(const std::string &funcName)
+{
+  LockGuard lock(m_interceptorLock);
+
+  FunctionInfo fip{};
+  auto rc = GetFunctionInfo(funcName.c_str(), &fip);
+  if(rc != 0)
+  {
+    throw IgorException(NO_INTERCEPTOR_FUNC,
+                        fmt::format("Function name={}", funcName));
+  }
+
+  int reqParamTypes[] = {HSTRING_TYPE, HSTRING_TYPE, NT_FP64};
+  int badParamNumber{};
+  rc = CheckFunctionForm(&fip, 3, reqParamTypes, &badParamNumber, NT_FP64);
+  if(rc != 0)
+  {
+    throw IgorException(
+        INVALID_INTERCEPTOR_FUNC,
+        fmt::format("Function name = {}, rc={}, badParamNumber={}", funcName,
+                    rc, badParamNumber));
+  }
+
+  m_interceptorFuncName = funcName;
+}
+
+std::string GlobalData::GetInterceptorFunctionName()
+{
+  LockGuard lock(m_interceptorLock);
+
+  return m_interceptorFuncName;
 }
 
 void GlobalData::AddSubscriberMessageFilter(std::string filter)

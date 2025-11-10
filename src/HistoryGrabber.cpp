@@ -16,8 +16,8 @@ std::string HistoryGrabber::GetHistoryUntilNow() const
 
   // -1 because HistoryLines() points
   // after the last paragraph with data
-  startLoc.paragraph = m_startLine - 1;
-  endLoc.paragraph   = endLine - 1;
+  startLoc.paragraph = std::max(m_startLine - 1, 0);
+  endLoc.paragraph   = std::max(endLine - 1, 0);
 
   Handle historyHandle = WMNewHandle(0);
   ASSERT(historyHandle != nullptr);

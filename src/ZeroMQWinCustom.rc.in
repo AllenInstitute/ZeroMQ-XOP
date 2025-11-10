@@ -23,6 +23,8 @@ BEGIN
   "Exists already as message filter .\0",                       // MESSAGE_FILTER_DUPLICATED
   "No such message filter.\0"                                   // MESSAGE_FILTER_MISSING
   "Invalid type encountered.\0",                                // ERR_INVALID_TYPE
+  "Non-existing interceptor function\0",                        // NO_INTERCEPTOR_FUNC
+  "Incompatible interceptor function signature\0",              // INVALID_INTERCEPTOR_FUNC
 	0,								// NOTE: 0 required to terminate the resource.
 END
 

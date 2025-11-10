@@ -18,6 +18,8 @@
 #define MESSAGE_FILTER_DUPLICATED  11 + FIRST_XOP_ERR
 #define MESSAGE_FILTER_MISSING     12 + FIRST_XOP_ERR
 #define ERR_INVALID_TYPE           13 + FIRST_XOP_ERR
+#define NO_INTERCEPTOR_FUNC        14 + FIRST_XOP_ERR
+#define INVALID_INTERCEPTOR_FUNC   15 + FIRST_XOP_ERR
 
 // non-XOP error codes
 
@@ -41,6 +43,7 @@
 #define REQ_UNSUPPORTED_FUNC_RET     105
 #define REQ_INVALID_PARAM_FORMAT     106
 #define REQ_FUNCTION_ABORTED         107
+#define REQ_INTERCEPT_FUNC_ABORTED   108
 /// @}
 /// @}
 // clang-format on

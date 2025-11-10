@@ -41,6 +41,9 @@ std::string GetErrorMessageFromCode(int errorCode)
   case REQ_FUNCTION_ABORTED:
     return "CallFunction: The function was partially executed but aborted at "
            "some point.";
+  case REQ_INTERCEPT_FUNC_ABORTED:
+    return "CallFunction: The interception function was partially executed but "
+           "aborted at some point.";
   default:
     ASSERT(0);
   }
