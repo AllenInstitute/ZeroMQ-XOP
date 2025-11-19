@@ -209,3 +209,20 @@ Function DoesNotAcceptLargeMessagesOnServerSocket()
 		CHECK_EQUAL_VAR(strlen(reply), 0)
 	endfor
 End
+
+Function AllowsEmptyIdentityAndPayload()
+
+	string reply, identity
+
+	zeromq_stop()
+	zeromq_server_bind("tcp://127.0.0.1:5555")
+
+	zeromq_client_connect("tcp://127.0.0.1:5555")
+
+	zeromq_client_send("")
+
+	reply = zeromq_server_recv(identity)
+
+	zeromq_server_send(identity, "")
+	CHECK_NO_RTE()
+End
