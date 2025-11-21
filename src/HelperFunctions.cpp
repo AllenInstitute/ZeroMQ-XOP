@@ -345,7 +345,7 @@ int ZeroMQClientSend(const std::string &payload)
 
   // payload
   rc = zmq_send(socket.get(), payload.c_str(), payloadLength, 0);
-  ZEROMQ_ASSERT(rc > 0);
+  ZEROMQ_ASSERT(rc >= 0);
 
   DEBUG_OUTPUT("rc={}", rc);
 
@@ -362,7 +362,7 @@ int ZeroMQServerSend(const std::string &identity, const std::string &payload)
   // identity
   int rc =
       zmq_send(socket.get(), identity.c_str(), identity.length(), ZMQ_SNDMORE);
-  ZEROMQ_ASSERT(rc > 0);
+  ZEROMQ_ASSERT(rc >= 0);
 
   // empty
   rc = zmq_send(socket.get(), nullptr, 0, ZMQ_SNDMORE);
@@ -370,7 +370,7 @@ int ZeroMQServerSend(const std::string &identity, const std::string &payload)
 
   // payload
   rc = zmq_send(socket.get(), payload.c_str(), payloadLength, 0);
-  ZEROMQ_ASSERT(rc > 0);
+  ZEROMQ_ASSERT(rc >= 0);
 
   DEBUG_OUTPUT("rc={}", rc);
 
