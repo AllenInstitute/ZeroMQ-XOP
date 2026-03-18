@@ -31,7 +31,7 @@ int IgorException::GetErrorCode() const
 
 int IgorException::HandleException() const
 {
-  NORMAL_OUTPUT("{}", what());
+  DEBUG_OUTPUT("{}", what());
 
   return m_errorCode;
 }
