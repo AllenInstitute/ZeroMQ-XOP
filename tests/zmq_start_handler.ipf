@@ -118,3 +118,18 @@ Function CallsFunctionsAtIdleEventOnly()
 	expected = FunctionToCall()
 	CHECK_EQUAL_VAR(resultVariable, expected)
 End
+
+// see also issue #76
+Function RepeatedStartStop()
+
+	variable i
+
+	zeromq_set(ZeroMQ_SET_FLAGS_DEFAULT | ZeroMQ_SET_FLAGS_NOBUSYWAITRECV)
+	for(i = 0; i < 10; i += 1)
+		zeromq_server_bind("tcp://127.0.0.1:5555")
+		zeromq_handler_start()
+		zeromq_stop()
+	endfor
+
+	PASS()
+End
