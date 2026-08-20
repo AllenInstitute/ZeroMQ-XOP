@@ -21,12 +21,6 @@ void WorkerThread()
 {
   DEBUG_OUTPUT("Begin");
 
-  {
-    // initialize to false
-    LockGuard lock(threadShouldFinishMutex);
-    threadShouldFinish = false;
-  }
-
   zmq_msg_t identityMsg;
   zmq_msg_t payloadMsg;
 
@@ -140,6 +134,13 @@ void MessageHandler::Start()
   if(!GlobalData::Instance().HasBindsOrConnections(SocketTypes::Server))
   {
     throw IgorException(HANDLER_NO_CONNECTION);
+  }
+
+  // Reset the stop flag *before* the worker thread is created, while still
+  // holding threadMutex. Fixes issue #76
+  {
+    LockGuard innerLock(threadShouldFinishMutex);
+    threadShouldFinish = false;
   }
 
   DEBUG_OUTPUT("Before WorkerThread() start.");
