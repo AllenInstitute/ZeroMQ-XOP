@@ -178,5 +178,15 @@ THREADSAFE string zeromq_test_serializeWave(WAVE wv);
 ///
 /// @param iterations number of Start()/Stop() cycles to perform, must be >= 1
 THREADSAFE variable zeromq_test_hb_startstop(variable iterations);
+
+/// Regression test for the IdleGuard fix in XOPEntry's IDLE case: directly
+/// exercises IdleGuard the same way XOPEntry does, throwing from within its
+/// scope, and checks that idleInProgress was reset by the guard's
+/// destructor despite the exception rather than staying stuck at `true`
+/// (which would permanently disable all further IDLE processing).
+///
+/// Not threadsafe: idleInProgress is plain (non-atomic) main-thread-only
+/// state, exactly like the real IDLE dispatch in XOPEntry.
+variable zeromq_test_idleguard();
 /// @}
 /// @endcond

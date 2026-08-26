@@ -109,6 +109,7 @@ SET(COVERAGE_SOURCES
   HeartbeatPublisher.cpp
   HelperFunctions.cpp
   HistoryGrabber.cpp
+  IdleGuard.cpp
   Logging.cpp
   MessageHandler.cpp
   RequestInterface.cpp
@@ -139,6 +140,7 @@ SET(COVERAGE_SOURCES
   zeromq_sub_remove_filter.cpp
   zeromq_test_callfunction.cpp
   zeromq_test_hb_startstop.cpp
+  zeromq_test_idleguard.cpp
   zeromq_test_serializeWave.cpp
 )
 
@@ -164,6 +166,7 @@ SET(HEADERS
   HeartbeatPublisher.h
   HelperFunctions.h
   HistoryGrabber.h
+  IdleGuard.h
   IgorTypeUnion.h
   Logging.h
   MessageHandler.h
