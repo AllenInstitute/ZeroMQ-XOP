@@ -153,6 +153,13 @@ BEGIN
   HSTRING_TYPE,      // parameter 1
   0,
 
+  // variable zeromq_test_hb_startstop(variable iterations)
+  "zeromq_test_hb_startstop\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  NT_FP64,      // parameter 1
+  0,
+
   // string zeromq_test_serializeWave(WAVE wv)
   "zeromq_test_serializeWave\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category

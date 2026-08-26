@@ -175,6 +175,14 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   HSTRING_TYPE,      // parameter 1
   },
 
+  // variable zeromq_test_hb_startstop(variable iterations)
+  "zeromq_test_hb_startstop",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  NT_FP64,      // parameter 1
+  },
+
   // string zeromq_test_serializeWave(WAVE wv)
   "zeromq_test_serializeWave",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category

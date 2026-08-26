@@ -138,6 +138,7 @@ SET(COVERAGE_SOURCES
   zeromq_sub_recv_multi.cpp
   zeromq_sub_remove_filter.cpp
   zeromq_test_callfunction.cpp
+  zeromq_test_hb_startstop.cpp
   zeromq_test_serializeWave.cpp
 )
 

@@ -20,12 +20,6 @@ void WorkerThread()
 {
   DEBUG_OUTPUT("Begin");
 
-  {
-    // initialize to false
-    LockGuard lock(threadShouldFinishMutex);
-    threadShouldFinish = false;
-  }
-
   for(;;)
   {
     try
@@ -90,6 +84,11 @@ void HeartbeatPublisher::Start()
   }
 
   DEBUG_OUTPUT("Trying to start.");
+
+  {
+    LockGuard innerLock(threadShouldFinishMutex);
+    threadShouldFinish = false;
+  }
 
   auto t = std::thread(WorkerThread);
   m_thread.swap(t);
