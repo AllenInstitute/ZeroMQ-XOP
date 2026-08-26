@@ -84,6 +84,9 @@ XOPIORecResult RegisterFunction()
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_idleguard);
     break;
   case 23:
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_queueswap);
+    break;
+  case 24:
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_serializeWave);
     break;
   }

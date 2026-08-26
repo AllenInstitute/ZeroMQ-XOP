@@ -191,6 +191,14 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
 
   },
 
+  // variable zeromq_test_queueswap()
+  "zeromq_test_queueswap",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+
+  },
+
   // string zeromq_test_serializeWave(WAVE wv)
   "zeromq_test_serializeWave",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
