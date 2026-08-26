@@ -1,5 +1,6 @@
 #include "ZeroMQ.h"
 #include "HelperFunctions.h"
+#include "MessageHandlerPauseGuard.h"
 #include "RequestInterface.h"
 
 namespace
@@ -247,6 +248,11 @@ std::string GetLastEndPoint(void *s)
 
 void ToggleIPV6Support(bool enable)
 {
+  // Covers the whole loop below (rather than conditionally pausing only for
+  // the Server iteration) since the pause/restart round-trip costs a few
+  // milliseconds at most -- see MessageHandlerPauseGuard.h.
+  MessageHandlerPauseGuard pauseGuard(true);
+
   for(auto st : GetAllSocketTypes())
   {
     GET_SOCKET(clientSocket, st);
@@ -837,6 +843,9 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   const auto point = GetStringFromHandle(h);
   WMDisposeHandle(h);
   h = nullptr;
+
+  // This is the only socket type the message handler's worker thread continuously polls.
+  MessageHandlerPauseGuard pauseGuard(st == SocketTypes::Server);
 
   GET_SOCKET(socket, st);
 

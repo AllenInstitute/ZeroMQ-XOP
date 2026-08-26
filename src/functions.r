@@ -191,6 +191,14 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
 
   },
 
+  // variable zeromq_test_msghandler_pause()
+  "zeromq_test_msghandler_pause",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+
+  },
+
   // variable zeromq_test_queueswap()
   "zeromq_test_queueswap",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category

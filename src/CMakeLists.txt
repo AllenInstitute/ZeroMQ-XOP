@@ -112,6 +112,7 @@ SET(COVERAGE_SOURCES
   IdleGuard.cpp
   Logging.cpp
   MessageHandler.cpp
+  MessageHandlerPauseGuard.cpp
   RequestInterface.cpp
   RequestInterfaceException.cpp
   SerializeWave.cpp
@@ -141,6 +142,7 @@ SET(COVERAGE_SOURCES
   zeromq_test_callfunction.cpp
   zeromq_test_hb_startstop.cpp
   zeromq_test_idleguard.cpp
+  zeromq_test_msghandler_pause.cpp
   zeromq_test_queueswap.cpp
   zeromq_test_serializeWave.cpp
   zeromq_test_socketclose_race.cpp
@@ -172,6 +174,7 @@ SET(HEADERS
   IgorTypeUnion.h
   Logging.h
   MessageHandler.h
+  MessageHandlerPauseGuard.h
   RequestInterface.h
   RequestInterfaceException.h
   resource.h

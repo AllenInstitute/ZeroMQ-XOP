@@ -214,5 +214,14 @@ THREADSAFE variable zeromq_test_queueswap();
 /// Throws ZMQ_SOCKET_CLOSE_RACE_DEADLOCK instead of hanging Igor Pro itself
 /// if that happens.
 THREADSAFE variable zeromq_test_socketclose_race();
+
+/// Regression test for MessageHandlerPauseGuard (see
+/// MessageHandlerPauseGuard.h): establishes a dummy Server bind, starts the
+/// message handler, and checks that constructing the guard stops it
+/// (IsRunning() becomes false), that destroying the guard restarts it
+/// (IsRunning() becomes true again), and that a disabled guard
+/// (enable = false) is a true no-op. Restores a stopped, unbound baseline
+/// on completion.
+THREADSAFE variable zeromq_test_msghandler_pause();
 /// @}
 /// @endcond
