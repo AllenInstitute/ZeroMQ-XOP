@@ -165,5 +165,18 @@ THREADSAFE variable zeromq_set_interceptor_func(string funcName);
 /// @{
 THREADSAFE string zeromq_test_callfunction(string msg);
 THREADSAFE string zeromq_test_serializeWave(WAVE wv);
+
+/// Regression test for a race between HeartbeatPublisher::Start() and
+/// Stop(): runs `iterations` back-to-back Start()/Stop() cycles, on a
+/// detached worker thread, with the heartbeat publisher's normal
+/// steady-state (started) status restored on completion.
+///
+/// If the race is present, a Stop() call can block forever, so this waits
+/// for the worker thread to finish only up to an internal timeout and
+/// throws ZMQ_HEARTBEAT_STARTSTOP_DEADLOCK instead of hanging Igor Pro
+/// itself when that happens.
+///
+/// @param iterations number of Start()/Stop() cycles to perform, must be >= 1
+THREADSAFE variable zeromq_test_hb_startstop(variable iterations);
 /// @}
 /// @endcond
