@@ -116,6 +116,7 @@ using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
 #include "CustomExceptions.h"
 #include "RequestInterfaceException.h"
 #include "HeartbeatPublisher.h"
+#include "IdleGuard.h"
 #include "HelperFunctions.h"
 #include "ConcurrentXOPNotice.h"
 #include "Logging.h"

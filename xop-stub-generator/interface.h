@@ -166,5 +166,6 @@ THREADSAFE variable zeromq_set_interceptor_func(string funcName);
 THREADSAFE string zeromq_test_callfunction(string msg);
 THREADSAFE string zeromq_test_serializeWave(WAVE wv);
 THREADSAFE variable zeromq_test_hb_startstop(variable iterations);
+variable zeromq_test_idleguard();
 /// @}
 /// @endcond

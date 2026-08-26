@@ -19,6 +19,7 @@
 #include ":zmq_stop_handler"
 #include ":zmq_test_callfunction"
 #include ":zmq_test_hb_startstop"
+#include ":zmq_test_idleguard"
 #include ":zmq_test_interop"
 #include ":zmq_test_serializeWave"
 
@@ -948,6 +949,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	list = AddListItem("zmq_stop_handler.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_callfunction.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_hb_startstop.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_idleguard.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_interop.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_serializeWave.ipf", list, ";", Inf)
 
