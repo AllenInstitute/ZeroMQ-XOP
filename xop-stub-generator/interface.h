@@ -196,5 +196,23 @@ variable zeromq_test_idleguard();
 /// a reintroduced deadlock surfaces as a thrown ZMQ_QUEUE_APPLY_DEADLOCK
 /// error instead of hanging Igor Pro itself.
 THREADSAFE variable zeromq_test_queueswap();
+
+/// Regression test for the GET_SOCKET/SocketWithMutex fetch-then-relock race
+/// (see GlobalData::GetOrCreateSocket, SocketWithMutex.h): one thread
+/// repeatedly closes and rebinds the Publisher socket via
+/// GlobalData::CloseConnections() (the same path zeromq_stop() uses) while
+/// another concurrently calls ZeroMQPublisherSend() -- the same function
+/// HeartbeatPublisher's always-running background thread uses -- in a tight
+/// loop, to get many race attempts quickly.
+///
+/// Before the fix, GET_SOCKET fetched the socket pointer and only
+/// afterward re-acquired the mutex, leaving a window where the closing
+/// thread could invalidate the socket a waiting thread was about to use;
+/// the sending thread could then hang inside libzmq while still holding
+/// the Publisher mutex, which the closing thread's next iteration would
+/// then block on forever -- the actual production freeze this reproduces.
+/// Throws ZMQ_SOCKET_CLOSE_RACE_DEADLOCK instead of hanging Igor Pro itself
+/// if that happens.
+THREADSAFE variable zeromq_test_socketclose_race();
 /// @}
 /// @endcond

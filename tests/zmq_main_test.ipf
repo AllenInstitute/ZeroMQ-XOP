@@ -23,6 +23,7 @@
 #include ":zmq_test_interop"
 #include ":zmq_test_queueswap"
 #include ":zmq_test_serializeWave"
+#include ":zmq_test_socketclose_race"
 
 Constant TCP_V4 = 4
 Constant TCP_V6 = 6
@@ -954,6 +955,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	list = AddListItem("zmq_test_interop.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_queueswap.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_serializeWave.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_socketclose_race.ipf", list, ";", Inf)
 
 	if(ParamIsDefault(testsuite))
 		testsuite = list

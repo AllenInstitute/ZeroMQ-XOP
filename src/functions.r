@@ -207,5 +207,13 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   WAVE_TYPE,      // parameter 1
   },
 
+  // variable zeromq_test_socketclose_race()
+  "zeromq_test_socketclose_race",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+
+  },
+
   }
 };
