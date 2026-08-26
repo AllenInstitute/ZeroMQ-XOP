@@ -167,6 +167,13 @@ BEGIN
 
   0,
 
+  // variable zeromq_test_msghandler_pause()
+  "zeromq_test_msghandler_pause\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+
+  0,
+
   // variable zeromq_test_queueswap()
   "zeromq_test_queueswap\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category

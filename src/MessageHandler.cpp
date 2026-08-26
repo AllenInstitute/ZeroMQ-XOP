@@ -168,6 +168,13 @@ void MessageHandler::Stop()
   m_thread.join();
 }
 
+bool MessageHandler::IsRunning() const
+{
+  LockGuard lock(threadMutex);
+
+  return m_thread.joinable();
+}
+
 void MessageHandler::HandleAllQueuedMessages()
 {
   if(!RunningInMainThread() || reqQueue.empty())

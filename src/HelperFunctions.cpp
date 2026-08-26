@@ -1,5 +1,6 @@
 #include "ZeroMQ.h"
 #include "HelperFunctions.h"
+#include "MessageHandlerPauseGuard.h"
 #include "RequestInterface.h"
 
 namespace
@@ -247,6 +248,8 @@ std::string GetLastEndPoint(void *s)
 
 void ToggleIPV6Support(bool enable)
 {
+  MessageHandlerPauseGuard pauseGuard(true);
+
   for(auto st : GetAllSocketTypes())
   {
     GET_SOCKET(clientSocket, st);
@@ -837,6 +840,8 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   const auto point = GetStringFromHandle(h);
   WMDisposeHandle(h);
   h = nullptr;
+
+  MessageHandlerPauseGuard pauseGuard(st == SocketTypes::Server);
 
   GET_SOCKET(socket, st);
 
