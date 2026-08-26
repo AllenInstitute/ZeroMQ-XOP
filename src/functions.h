@@ -239,6 +239,15 @@ typedef struct zeromq_test_idleguardParams zeromq_test_idleguardParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_test_queueswapParams
+{
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_test_queueswapParams zeromq_test_queueswapParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_test_serializeWaveParams
 {
   waveHndl wv;
@@ -318,6 +327,9 @@ extern "C" int zeromq_test_hb_startstop(zeromq_test_hb_startstopParams *p);
 
 // variable zeromq_test_idleguard()
 extern "C" int zeromq_test_idleguard(zeromq_test_idleguardParams *p);
+
+// variable zeromq_test_queueswap()
+extern "C" int zeromq_test_queueswap(zeromq_test_queueswapParams *p);
 
 // string zeromq_test_serializeWave(WAVE wv)
 extern "C" int zeromq_test_serializeWave(zeromq_test_serializeWaveParams *p);

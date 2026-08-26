@@ -21,6 +21,7 @@
 #include ":zmq_test_hb_startstop"
 #include ":zmq_test_idleguard"
 #include ":zmq_test_interop"
+#include ":zmq_test_queueswap"
 #include ":zmq_test_serializeWave"
 
 Constant TCP_V4 = 4
@@ -951,6 +952,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	list = AddListItem("zmq_test_hb_startstop.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_idleguard.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_interop.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_queueswap.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_serializeWave.ipf", list, ";", Inf)
 
 	if(ParamIsDefault(testsuite))

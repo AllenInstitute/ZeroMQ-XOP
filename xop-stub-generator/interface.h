@@ -188,5 +188,13 @@ THREADSAFE variable zeromq_test_hb_startstop(variable iterations);
 /// Not threadsafe: idleInProgress is plain (non-atomic) main-thread-only
 /// state, exactly like the real IDLE dispatch in XOPEntry.
 variable zeromq_test_idleguard();
+
+/// Regression test for ConcurrentQueue::apply_to_all's queue-swap fix: the
+/// functor passed to apply_to_all must be able to push() back into the same
+/// queue, on the same thread, without deadlocking. Runs entirely on a local
+/// ConcurrentQueue, on a detached worker thread with an internal timeout, so
+/// a reintroduced deadlock surfaces as a thrown ZMQ_QUEUE_APPLY_DEADLOCK
+/// error instead of hanging Igor Pro itself.
+THREADSAFE variable zeromq_test_queueswap();
 /// @}
 /// @endcond

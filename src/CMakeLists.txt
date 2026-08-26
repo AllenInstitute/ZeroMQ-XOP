@@ -141,6 +141,7 @@ SET(COVERAGE_SOURCES
   zeromq_test_callfunction.cpp
   zeromq_test_hb_startstop.cpp
   zeromq_test_idleguard.cpp
+  zeromq_test_queueswap.cpp
   zeromq_test_serializeWave.cpp
 )
 
