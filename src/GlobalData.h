@@ -31,6 +31,10 @@ public:
     return globData;
   }
 
+  /// @brief Returns the socket, creating it on first use
+  ///
+  /// The caller must hold GetMutex(st) while using the socket, see
+  /// SocketWithMutex.
   void *GetOrCreateSocket(SocketTypes st);
   bool HasBindsOrConnections(SocketTypes st);
 

@@ -257,6 +257,16 @@ struct zeromq_test_serializeWaveParams
 typedef struct zeromq_test_serializeWaveParams zeromq_test_serializeWaveParams;
 #pragma pack()
 
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_test_socketclose_raceParams
+{
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_test_socketclose_raceParams
+    zeromq_test_socketclose_raceParams;
+#pragma pack()
+
 // variable zeromq_client_connect(string remotePoint)
 extern "C" int zeromq_client_connect(zeromq_client_connectParams *p);
 
@@ -333,3 +343,7 @@ extern "C" int zeromq_test_queueswap(zeromq_test_queueswapParams *p);
 
 // string zeromq_test_serializeWave(WAVE wv)
 extern "C" int zeromq_test_serializeWave(zeromq_test_serializeWaveParams *p);
+
+// variable zeromq_test_socketclose_race()
+extern "C" int
+zeromq_test_socketclose_race(zeromq_test_socketclose_raceParams *p);

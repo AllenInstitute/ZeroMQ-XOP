@@ -143,6 +143,7 @@ SET(COVERAGE_SOURCES
   zeromq_test_idleguard.cpp
   zeromq_test_queueswap.cpp
   zeromq_test_serializeWave.cpp
+  zeromq_test_socketclose_race.cpp
 )
 
 SET(SOURCES

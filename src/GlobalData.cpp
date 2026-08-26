@@ -88,8 +88,6 @@ GlobalData::GlobalData()
 
 void *GlobalData::GetOrCreateSocket(SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
-
   auto &socketData = GetSocketTypeData(st);
   void *&socket    = socketData.m_zmq_socket;
 

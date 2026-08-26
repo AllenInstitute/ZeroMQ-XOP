@@ -181,5 +181,12 @@ BEGIN
   WAVE_TYPE,      // parameter 1
   0,
 
+  // variable zeromq_test_socketclose_race()
+  "zeromq_test_socketclose_race\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+
+  0,
+
 0,                // NOTE: 0 required to terminate the resource.
 END

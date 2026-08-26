@@ -168,5 +168,6 @@ THREADSAFE string zeromq_test_serializeWave(WAVE wv);
 THREADSAFE variable zeromq_test_hb_startstop(variable iterations);
 variable zeromq_test_idleguard();
 THREADSAFE variable zeromq_test_queueswap();
+THREADSAFE variable zeromq_test_socketclose_race();
 /// @}
 /// @endcond
