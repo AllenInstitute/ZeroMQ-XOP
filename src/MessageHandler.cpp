@@ -17,6 +17,43 @@ ConcurrentQueue<RequestInterfacePtr> incomingQueue;
 bool threadShouldFinish;
 std::recursive_mutex threadShouldFinishMutex;
 
+struct OutgoingReply
+{
+  std::string identity;
+  std::string message;
+};
+
+ConcurrentQueue<OutgoingReply> outgoingQueue;
+
+void DrainOutgoingReplies()
+{
+  if(RunningInMainThread() || outgoingQueue.empty())
+  {
+    return;
+  }
+
+  outgoingQueue.apply_to_all(
+      [](const OutgoingReply &reply)
+      {
+        try
+        {
+          auto rc = ZeroMQServerSend(reply.identity, reply.message);
+
+          DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
+        }
+        catch(const std::exception &e)
+        {
+          EMERGENCY_OUTPUT(
+              "Caught std::exception with what=\"{}\". This must NOT happen!",
+              e.what());
+        }
+        catch(...)
+        {
+          EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
+        }
+      });
+}
+
 void WorkerThread()
 {
   DEBUG_OUTPUT("Begin");
@@ -34,6 +71,8 @@ void WorkerThread()
   {
     try
     {
+      DrainOutgoingReplies();
+
       // check if stop is requested
       {
         LockGuard lock(threadShouldFinishMutex);
@@ -95,7 +134,7 @@ void WorkerThread()
   zmq_msg_close(&payloadMsg);
 }
 
-void CallAndReply(const RequestInterfacePtr &req) noexcept
+void CallAndQueueReply(const RequestInterfacePtr &req) noexcept
 {
   try
   {
@@ -103,7 +142,8 @@ void CallAndReply(const RequestInterfacePtr &req) noexcept
     {
       auto doc     = CallIgorFunctionFromReqInterface(req);
       auto message = doc.dump(DEFAULT_INDENT);
-      ZeroMQServerSend(req->GetCallerIdentity(), message);
+
+      outgoingQueue.push({req->GetCallerIdentity(), message});
     }
     catch(const std::exception &e)
     {
@@ -185,7 +225,7 @@ void MessageHandler::HandleAllQueuedMessages()
   auto msg = fmt::format("IDLE event messages: #{}", incomingQueue.size());
   GlobalData::Instance().AddLogEntry(msg);
 
-  incomingQueue.apply_to_all(CallAndReply);
+  incomingQueue.apply_to_all(CallAndQueueReply);
 }
 
 MessageHandler::~MessageHandler()
