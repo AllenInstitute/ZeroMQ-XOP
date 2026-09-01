@@ -113,6 +113,13 @@ void HeartbeatPublisher::Stop()
   m_thread.join();
 }
 
+bool HeartbeatPublisher::IsRunning() const
+{
+  LockGuard lock(threadMutex);
+
+  return m_thread.joinable();
+}
+
 HeartbeatPublisher::~HeartbeatPublisher()
 {
   Stop();
