@@ -872,6 +872,13 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   DEBUG_OUTPUT("type={}, point={}, rc={}", st, point, rc);
   GlobalData::Instance().AddToListOfBindsOrConnections(
       GetLastEndPoint(socket.get()), st);
+
+  // zeromq_stop() stops it
+  if(st == SocketTypes::Publisher &&
+     !HeartbeatPublisher::Instance().IsRunning())
+  {
+    HeartbeatPublisher::Instance().Start();
+  }
 }
 
 /// @brief Returns a Igor string Handle from a C++ string
