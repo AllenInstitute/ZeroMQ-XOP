@@ -160,6 +160,13 @@ BEGIN
   NT_FP64,      // parameter 1
   0,
 
+  // variable zeromq_test_hb_stopped_by_stop()
+  "zeromq_test_hb_stopped_by_stop\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+
+  0,
+
   // variable zeromq_test_idleguard()
   "zeromq_test_idleguard\0",
   F_UTIL | F_EXTERNAL,    // Function category
@@ -179,6 +186,13 @@ BEGIN
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
 
+  0,
+
+  // variable zeromq_test_reply_contention(variable numRequests)
+  "zeromq_test_reply_contention\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  NT_FP64,      // parameter 1
   0,
 
   // string zeromq_test_serializeWave(WAVE wv)
