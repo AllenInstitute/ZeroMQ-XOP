@@ -231,6 +231,16 @@ typedef struct zeromq_test_hb_startstopParams zeromq_test_hb_startstopParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_test_hb_stopped_by_stopParams
+{
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_test_hb_stopped_by_stopParams
+    zeromq_test_hb_stopped_by_stopParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_test_idleguardParams
 {
   double result;
@@ -255,6 +265,17 @@ struct zeromq_test_queueswapParams
   double result;
 };
 typedef struct zeromq_test_queueswapParams zeromq_test_queueswapParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_test_reply_contentionParams
+{
+  double numRequests;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_test_reply_contentionParams
+    zeromq_test_reply_contentionParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
@@ -345,6 +366,10 @@ extern "C" int zeromq_test_callfunction(zeromq_test_callfunctionParams *p);
 // variable zeromq_test_hb_startstop(variable iterations)
 extern "C" int zeromq_test_hb_startstop(zeromq_test_hb_startstopParams *p);
 
+// variable zeromq_test_hb_stopped_by_stop()
+extern "C" int
+zeromq_test_hb_stopped_by_stop(zeromq_test_hb_stopped_by_stopParams *p);
+
 // variable zeromq_test_idleguard()
 extern "C" int zeromq_test_idleguard(zeromq_test_idleguardParams *p);
 
@@ -354,6 +379,10 @@ zeromq_test_msghandler_pause(zeromq_test_msghandler_pauseParams *p);
 
 // variable zeromq_test_queueswap()
 extern "C" int zeromq_test_queueswap(zeromq_test_queueswapParams *p);
+
+// variable zeromq_test_reply_contention(variable numRequests)
+extern "C" int
+zeromq_test_reply_contention(zeromq_test_reply_contentionParams *p);
 
 // string zeromq_test_serializeWave(WAVE wv)
 extern "C" int zeromq_test_serializeWave(zeromq_test_serializeWaveParams *p);

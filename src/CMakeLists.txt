@@ -141,9 +141,11 @@ SET(COVERAGE_SOURCES
   zeromq_sub_remove_filter.cpp
   zeromq_test_callfunction.cpp
   zeromq_test_hb_startstop.cpp
+  zeromq_test_hb_stopped_by_stop.cpp
   zeromq_test_idleguard.cpp
   zeromq_test_msghandler_pause.cpp
   zeromq_test_queueswap.cpp
+  zeromq_test_reply_contention.cpp
   zeromq_test_serializeWave.cpp
   zeromq_test_socketclose_race.cpp
 )
