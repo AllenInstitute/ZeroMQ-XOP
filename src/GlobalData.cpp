@@ -185,7 +185,7 @@ void GlobalData::CloseConnections()
 
     try
     {
-      GET_SOCKET(socket, st);
+      auto *socket = GetOrCreateSocket(st);
 
       for(const auto &conn : list)
       {
@@ -194,13 +194,13 @@ void GlobalData::CloseConnections()
         {
         case SocketTypes::Server:
         case SocketTypes::Publisher:
-          rc = zmq_unbind(socket.get(), conn.c_str());
+          rc = zmq_unbind(socket, conn.c_str());
           DEBUG_OUTPUT("zmq_disconnect({}) returned={}", conn, rc);
 
           break;
         case SocketTypes::Client:
         case SocketTypes::Subscriber:
-          rc = zmq_disconnect(socket.get(), conn.c_str());
+          rc = zmq_disconnect(socket, conn.c_str());
           DEBUG_OUTPUT("zmq_unbind({}) returned={}", conn, rc);
           break;
         }
@@ -208,7 +208,7 @@ void GlobalData::CloseConnections()
       }
       list.clear();
 
-      auto rc = zmq_close(socket.get());
+      auto rc = zmq_close(socket);
       ZEROMQ_ASSERT(rc == 0);
       socketData.m_zmq_socket = nullptr;
     }
