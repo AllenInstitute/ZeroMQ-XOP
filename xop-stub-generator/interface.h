@@ -165,5 +165,91 @@ THREADSAFE variable zeromq_set_interceptor_func(string funcName);
 /// @{
 THREADSAFE string zeromq_test_callfunction(string msg);
 THREADSAFE string zeromq_test_serializeWave(WAVE wv);
+
+/// Regression test for a race between HeartbeatPublisher::Start() and
+/// Stop(): runs `iterations` back-to-back Start()/Stop() cycles, on a
+/// detached worker thread, with the heartbeat publisher's normal
+/// steady-state (started) status restored on completion.
+///
+/// If the race is present, a Stop() call can block forever, so this waits
+/// for the worker thread to finish only up to an internal timeout and
+/// throws ZMQ_HEARTBEAT_STARTSTOP_DEADLOCK instead of hanging Igor Pro
+/// itself when that happens.
+///
+/// @param iterations number of Start()/Stop() cycles to perform, must be >= 1
+THREADSAFE variable zeromq_test_hb_startstop(variable iterations);
+
+/// Regression test for the IdleGuard fix in XOPEntry's IDLE case: directly
+/// exercises IdleGuard the same way XOPEntry does, throwing from within its
+/// scope, and checks that idleInProgress was reset by the guard's
+/// destructor despite the exception rather than staying stuck at `true`
+/// (which would permanently disable all further IDLE processing).
+///
+/// Not threadsafe: idleInProgress is plain (non-atomic) main-thread-only
+/// state, exactly like the real IDLE dispatch in XOPEntry.
+variable zeromq_test_idleguard();
+
+/// Regression test for ConcurrentQueue::apply_to_all's queue-swap fix: the
+/// functor passed to apply_to_all must be able to push() back into the same
+/// queue, on the same thread, without deadlocking. Runs entirely on a local
+/// ConcurrentQueue, on a detached worker thread with an internal timeout, so
+/// a reintroduced deadlock surfaces as a thrown ZMQ_QUEUE_APPLY_DEADLOCK
+/// error instead of hanging Igor Pro itself.
+THREADSAFE variable zeromq_test_queueswap();
+
+/// Regression test for the GET_SOCKET/SocketWithMutex fetch-then-relock race
+/// (see GlobalData::GetOrCreateSocket, SocketWithMutex.h): one thread
+/// repeatedly closes and rebinds the Publisher socket via
+/// GlobalData::CloseConnections() (the same path zeromq_stop() uses) while
+/// another concurrently calls ZeroMQPublisherSend() -- the same function
+/// HeartbeatPublisher's always-running background thread uses -- in a tight
+/// loop, to get many race attempts quickly.
+///
+/// Before the fix, GET_SOCKET fetched the socket pointer and only
+/// afterward re-acquired the mutex, leaving a window where the closing
+/// thread could invalidate the socket a waiting thread was about to use;
+/// the sending thread could then hang inside libzmq while still holding
+/// the Publisher mutex, which the closing thread's next iteration would
+/// then block on forever -- the actual production freeze this reproduces.
+/// Throws ZMQ_SOCKET_CLOSE_RACE_DEADLOCK instead of hanging Igor Pro itself
+/// if that happens.
+THREADSAFE variable zeromq_test_socketclose_race();
+
+/// Regression test for MessageHandlerPauseGuard (see
+/// MessageHandlerPauseGuard.h): establishes a dummy Server bind, starts the
+/// message handler, and checks that constructing the guard stops it
+/// (IsRunning() becomes false), that destroying the guard restarts it
+/// (IsRunning() becomes true again), and that a disabled guard
+/// (enable = false) is a true no-op. Restores a stopped, unbound baseline
+/// on completion.
+THREADSAFE variable zeromq_test_msghandler_pause();
+
+/// Regression test for zeromq_stop() forgetting to stop HeartbeatPublisher
+/// before GlobalData::CloseConnections() tears down the Publisher socket
+/// HeartbeatPublisher's own background thread might still be sending on --
+/// see zeromq_stop.cpp's own comment. Binds a Publisher socket, starts
+/// HeartbeatPublisher for real, calls the actual zeromq_stop() operation
+/// directly (not a reimplementation of it), and checks that
+/// HeartbeatPublisher is no longer running afterward. Restores
+/// HeartbeatPublisher's normal steady-state (started) status set up by
+/// XOPMain() on completion.
+THREADSAFE variable zeromq_test_hb_stopped_by_stop();
+
+/// Regression test for the cross-thread Server-socket contention fix in
+/// MessageHandler.cpp (see its outgoingQueue comment): before the fix,
+/// CallAndReply() (run on the main thread via HandleAllQueuedMessages())
+/// sent replies directly via ZeroMQServerSend(), contending with
+/// WorkerThread's own receive-poll loop for GetMutex(SocketTypes::Server) --
+/// a race that could starve the main thread's send for seconds to minutes on
+/// Windows, since std::recursive_mutex there is not guaranteed fair. Drives
+/// numRequests real request/reply round trips -- the same
+/// receive -> queue -> main-thread Call() -> reply-queue -> WorkerThread-send
+/// pipeline the fix restructured -- calling HandleAllQueuedMessages() from
+/// this thread exactly like Igor's IDLE hook does, and asserts every reply
+/// arrives within a bounded time. Throws ZMQ_MSGHANDLER_REPLY_STALL instead
+/// of hanging Igor Pro itself if a reply does not arrive in time.
+///
+/// @param numRequests number of request/reply round trips to perform, must be >= 1
+THREADSAFE variable zeromq_test_reply_contention(variable numRequests);
 /// @}
 /// @endcond

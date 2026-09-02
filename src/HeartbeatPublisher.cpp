@@ -20,12 +20,6 @@ void WorkerThread()
 {
   DEBUG_OUTPUT("Begin");
 
-  {
-    // initialize to false
-    LockGuard lock(threadShouldFinishMutex);
-    threadShouldFinish = false;
-  }
-
   for(;;)
   {
     try
@@ -91,6 +85,11 @@ void HeartbeatPublisher::Start()
 
   DEBUG_OUTPUT("Trying to start.");
 
+  {
+    LockGuard innerLock(threadShouldFinishMutex);
+    threadShouldFinish = false;
+  }
+
   auto t = std::thread(WorkerThread);
   m_thread.swap(t);
 }
@@ -112,6 +111,13 @@ void HeartbeatPublisher::Stop()
   }
 
   m_thread.join();
+}
+
+bool HeartbeatPublisher::IsRunning() const
+{
+  LockGuard lock(threadMutex);
+
+  return m_thread.joinable();
 }
 
 HeartbeatPublisher::~HeartbeatPublisher()

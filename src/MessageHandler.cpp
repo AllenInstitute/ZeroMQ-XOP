@@ -17,6 +17,46 @@ ConcurrentQueue<RequestInterfacePtr> reqQueue;
 bool threadShouldFinish;
 std::recursive_mutex threadShouldFinishMutex;
 
+/// A reply queued by CallAndReply() (main thread) for WorkerThread to actually
+/// send.
+struct OutgoingReply
+{
+  std::string identity;
+  std::string message;
+};
+
+// Replies are queued here instead of being sent directly from CallAndReply()
+// (main thread) so that WorkerThread is the only thread that ever calls
+// ZeroMQServerSend/ZeroMQServerReceive, i.e. the only thread that ever locks
+// GetMutex(SocketTypes::Server).
+ConcurrentQueue<OutgoingReply> outgoingQueue;
+
+/// Sends every reply queued by CallAndReply() so far. Must only be called
+/// from WorkerThread
+void DrainOutgoingReplies()
+{
+  outgoingQueue.apply_to_all(
+      [](const OutgoingReply &reply)
+      {
+        try
+        {
+          auto rc = ZeroMQServerSend(reply.identity, reply.message);
+
+          DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
+        }
+        catch(const std::exception &e)
+        {
+          EMERGENCY_OUTPUT(
+              "Caught std::exception with what=\"{}\". This must NOT happen!",
+              e.what());
+        }
+        catch(...)
+        {
+          EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
+        }
+      });
+}
+
 void WorkerThread()
 {
   DEBUG_OUTPUT("Begin");
@@ -43,6 +83,8 @@ void WorkerThread()
           break;
         }
       }
+
+      DrainOutgoingReplies();
 
       auto numBytes = ZeroMQServerReceive(&identityMsg, &payloadMsg);
 
@@ -103,7 +145,9 @@ void CallAndReply(const RequestInterfacePtr &req) noexcept
     {
       auto doc     = CallIgorFunctionFromReqInterface(req);
       auto message = doc.dump(DEFAULT_INDENT);
-      ZeroMQServerSend(req->GetCallerIdentity(), message);
+
+      // Queued rather than sent directly -- see outgoingQueue's comment.
+      outgoingQueue.push({req->GetCallerIdentity(), message});
     }
     catch(const std::exception &e)
     {
@@ -166,6 +210,18 @@ void MessageHandler::Stop()
   }
 
   m_thread.join();
+
+  // WorkerThread might have exited between its last DrainOutgoingReplies()
+  // call and a reply queued right afterwards by CallAndReply()
+  // to flush any such leftover reply here
+  DrainOutgoingReplies();
+}
+
+bool MessageHandler::IsRunning() const
+{
+  LockGuard lock(threadMutex);
+
+  return m_thread.joinable();
 }
 
 void MessageHandler::HandleAllQueuedMessages()

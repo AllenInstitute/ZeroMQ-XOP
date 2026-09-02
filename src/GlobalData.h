@@ -31,7 +31,17 @@ public:
     return globData;
   }
 
-  void *ZMQSocket(SocketTypes st);
+  /// @brief Returns the ZMQ socket for st, creating it on first use
+  ///
+  /// The caller must hold GetMutex(st) for the entire time it uses the
+  /// returned pointer -- this function does not lock it itself. Prefer
+  /// SocketWithMutex (SocketWithMutex.h) over calling this directly: it
+  /// acquires GetMutex(st) and fetches the socket as a single critical
+  /// section. Locking separately around a call to this function (acquire
+  /// GetMutex(st), call GetOrCreateSocket(st), THEN construct a lock guard
+  /// around the returned pointer) leaves a window where another thread can
+  /// close the socket in between, handing the caller a stale pointer.
+  void *GetOrCreateSocket(SocketTypes st);
   bool HasBindsOrConnections(SocketTypes st);
 
   void SetDebugFlag(bool val);

@@ -5,14 +5,14 @@
 XOPIORecResult RegisterFunction()
 {
   /*  NOTE:
-    Some XOPs should return a result of NIL in response to the FUNCADDRS
-    message. See XOP manual "Restrictions on Direct XFUNCs" section.
+    Some XOPs should return a result of NIL in response to the FUNCADDRS message.
+    See XOP manual "Restrictions on Direct XFUNCs" section.
   */
 
-  XOPIORecParam funcIndex    = GetXOPItem(0); /* which function invoked ? */
+  XOPIORecParam funcIndex = GetXOPItem(0);    /* which function invoked ? */
   XOPIORecResult returnValue = NIL;
 
-  switch(funcIndex)
+  switch (funcIndex)
   {
   case 0:
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_client_connect);
@@ -78,8 +78,30 @@ XOPIORecResult RegisterFunction()
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_callfunction);
     break;
   case 21:
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_hb_startstop);
+    break;
+  case 22:
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_hb_stopped_by_stop);
+    break;
+  case 23:
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_idleguard);
+    break;
+  case 24:
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_msghandler_pause);
+    break;
+  case 25:
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_queueswap);
+    break;
+  case 26:
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_reply_contention);
+    break;
+  case 27:
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_serializeWave);
     break;
+  case 28:
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_socketclose_race);
+    break;
+
   }
   return returnValue;
 }

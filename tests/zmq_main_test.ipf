@@ -18,8 +18,15 @@
 #include ":zmq_stop"
 #include ":zmq_stop_handler"
 #include ":zmq_test_callfunction"
+#include ":zmq_test_hb_startstop"
+#include ":zmq_test_hb_stopped_by_stop"
+#include ":zmq_test_idleguard"
 #include ":zmq_test_interop"
+#include ":zmq_test_msghandler_pause"
+#include ":zmq_test_queueswap"
+#include ":zmq_test_reply_contention"
 #include ":zmq_test_serializeWave"
+#include ":zmq_test_socketclose_race"
 
 Constant TCP_V4 = 4
 Constant TCP_V6 = 6
@@ -946,8 +953,15 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	list = AddListItem("zmq_stop.ipf", list, ";", Inf)
 	list = AddListItem("zmq_stop_handler.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_callfunction.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_hb_startstop.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_hb_stopped_by_stop.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_idleguard.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_interop.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_msghandler_pause.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_queueswap.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_reply_contention.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_serializeWave.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_socketclose_race.ipf", list, ";", Inf)
 
 	if(ParamIsDefault(testsuite))
 		testsuite = list

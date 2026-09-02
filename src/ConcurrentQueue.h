@@ -58,15 +58,23 @@ public:
   ///
   /// @tparam Functor must accept an object of type ConcurrentQueue::T
   ///           and *never* throw
+  ///
+  /// The queue is drained into a local container before F is invoked, so
+  /// m_mutex is never held while F runs. This matters because F can run
+  /// foreign code that might, on the same thread, push into this ConcurrentQueue.
   template <typename Functor>
   void apply_to_all(Functor F)
   {
-    Lock lock(m_mutex);
+    std::queue<T> drained;
 
-    for(; !m_queue.empty();)
     {
-      F(m_queue.front());
-      m_queue.pop();
+      Lock lock(m_mutex);
+      std::swap(drained, m_queue);
+    }
+
+    for(; !drained.empty(); drained.pop())
+    {
+      F(drained.front());
     }
   }
 

@@ -18,6 +18,7 @@ public:
   void Start();
   void Stop();
   void HandleAllQueuedMessages();
+  bool IsRunning() const;
 
 private:
   MessageHandler() = default;

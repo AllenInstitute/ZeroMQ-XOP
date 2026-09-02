@@ -1,5 +1,7 @@
 #include "ZeroMQ.h"
 #include "HelperFunctions.h"
+#include "HeartbeatPublisher.h"
+#include "MessageHandlerPauseGuard.h"
 #include "RequestInterface.h"
 
 namespace
@@ -247,6 +249,11 @@ std::string GetLastEndPoint(void *s)
 
 void ToggleIPV6Support(bool enable)
 {
+  // Covers the whole loop below (rather than conditionally pausing only for
+  // the Server iteration) since the pause/restart round-trip costs a few
+  // milliseconds at most -- see MessageHandlerPauseGuard.h.
+  MessageHandlerPauseGuard pauseGuard(true);
+
   for(auto st : GetAllSocketTypes())
   {
     GET_SOCKET(clientSocket, st);
@@ -838,6 +845,10 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   WMDisposeHandle(h);
   h = nullptr;
 
+  // This is the only socket type the message handler's worker thread
+  // continuously polls.
+  MessageHandlerPauseGuard pauseGuard(st == SocketTypes::Server);
+
   GET_SOCKET(socket, st);
 
   int rc = 0;
@@ -859,6 +870,15 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   DEBUG_OUTPUT("type={}, point={}, rc={}", st, point, rc);
   GlobalData::Instance().AddToListOfBindsOrConnections(
       GetLastEndPoint(socket.get()), st);
+
+  // zeromq_stop() stops HeartbeatPublisher before tearing down the Publisher
+  // socket (see its comment for why); restart it here as soon as a Publisher
+  // socket is bound again, i.e. as soon as it has something to publish on.
+  if(st == SocketTypes::Publisher &&
+     !HeartbeatPublisher::Instance().IsRunning())
+  {
+    HeartbeatPublisher::Instance().Start();
+  }
 }
 
 /// @brief Returns a Igor string Handle from a C++ string

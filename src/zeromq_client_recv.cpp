@@ -20,18 +20,33 @@ extern "C" int zeromq_client_recv(zeromq_client_recvParams *p)
 
     if(numBytes == -1 && zmq_errno() == EAGAIN) // timeout
     {
-      if(!wait || SpinProcess()) // user requested abort or we should not wait
+      if(!wait)
       {
         InitHandle(&(p->result), 0);
         break;
       }
 
-      if(RunningInMainThread())
+      if(SpinProcess()) // user requested abort, or a stale leftover flag
       {
-        XOPSilentCommand("DoXOPIdle");
-      }
+        // Give the reply one more explicit chance to have arrived before
+        // honoring the abort.
+        numBytes = ZeroMQClientReceive(&payloadMsg);
 
-      continue;
+        if(numBytes == -1 && zmq_errno() == EAGAIN)
+        {
+          InitHandle(&(p->result), 0);
+          break;
+        }
+      }
+      else
+      {
+        if(RunningInMainThread())
+        {
+          XOPSilentCommand("DoXOPIdle");
+        }
+
+        continue;
+      }
     }
 
     ZEROMQ_ASSERT(numBytes >= 0);
