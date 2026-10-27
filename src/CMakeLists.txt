@@ -429,20 +429,32 @@ ADD_SUBDIRECTORY(fmt EXCLUDE_FROM_ALL)
 
 TARGET_LINK_LIBRARIES(${libname} PRIVATE fmt-header-only)
 
-FIND_PROGRAM(RUN_CLANG_TIDY PATHS ${LLVM_BREW} NAMES run-clang-tidy.py)
-FIND_PROGRAM(CLANG_TIDY PATHS ${LLVM_BREW} NAMES clang-tidy)
-FIND_PROGRAM(CLANG_APPLY_REPLACEMENTS PATHS ${LLVM_BREW} NAMES clang-apply-replacements)
+# LLVM 14 and later install the script without the .py extension
+FIND_PROGRAM(RUN_CLANG_TIDY PATHS ${LLVM_BREW} NAMES run-clang-tidy run-clang-tidy.py)
 
-IF(RUN_CLANG_TIDY AND CLANG_TIDY AND CLANG_APPLY_REPLACEMENTS)
+IF(RUN_CLANG_TIDY)
+  # Homebrew's LLVM is not in PATH, where run-clang-tidy looks for its tools
+  FIND_PROGRAM(CLANG_TIDY PATHS ${LLVM_BREW} NAMES clang-tidy)
+  FIND_PROGRAM(CLANG_APPLY_REPLACEMENTS PATHS ${LLVM_BREW} NAMES clang-apply-replacements)
+
+  SET(RUN_CLANG_TIDY_TOOLS)
+  IF(CLANG_TIDY)
+    LIST(APPEND RUN_CLANG_TIDY_TOOLS -clang-tidy-binary=${CLANG_TIDY})
+  ENDIF()
+  IF(CLANG_APPLY_REPLACEMENTS)
+    LIST(APPEND RUN_CLANG_TIDY_TOOLS -clang-apply-replacements-binary=${CLANG_APPLY_REPLACEMENTS})
+  ENDIF()
+
   ADD_CUSTOM_TARGET(clang-tidy
                     COMMAND ${RUN_CLANG_TIDY}
-                    -clang-tidy-binary=${CLANG_TIDY}
-                    -clang-apply-replacements-binary=${CLANG_APPLY_REPLACEMENTS}
+                    ${RUN_CLANG_TIDY_TOOLS}
                     -fix
                     -p=${CMAKE_BINARY_DIR}
                     ${SOURCES}
                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                     COMMENT "Running clang-tidy" VERBATIM)
+ELSE()
+  MESSAGE(STATUS "Target clang-tidy is not available, run-clang-tidy is missing")
 ENDIF()
 
 FIND_PACKAGE(Git QUIET REQUIRED)
