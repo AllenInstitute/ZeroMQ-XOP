@@ -149,7 +149,7 @@ public:
                                 now.time_since_epoch());
     j[TEMPLATE_KEY_TS] = ts;
 
-    WriteIntoLogfile(j.dump());
+    WriteIntoLogfile(j.dump(-1, ' ', false, json::error_handler_t::replace));
   }
 
 #ifdef _MSC_VER

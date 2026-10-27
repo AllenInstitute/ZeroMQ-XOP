@@ -171,6 +171,22 @@ static Function CheckLoggedIdentity(string identity, string expected)
 	CHECK_GE_VAR(strsearch(entry, expected, 0), 0)
 End
 
+Function LogsInvalidUTF8Payload()
+
+	variable errorValue
+	string replyMessage, logfile
+
+	zeromq_set_logging_template("{}")
+
+	replyMessage = zeromq_test_callfunction(num2char(0xFF, 1))
+	errorValue   = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_INVALID_JSON_OBJECT)
+
+	logfile = ReadFile(GetLogFilePath_IGNORE())
+	CHECK_EQUAL_VAR(ItemsInList(logfile, "\n"), 2)
+	CHECK_GE_VAR(strsearch(StringFromList(1, logfile, "\n"), "\"str\":\"" + num2char(0xFFFD) + "\"", 0), 0)
+End
+
 Function LogsTextIdentity()
 
 	CheckLoggedIdentity("my client", "my client")
