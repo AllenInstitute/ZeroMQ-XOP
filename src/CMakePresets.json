@@ -1,0 +1,44 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ci-clang-tidy",
+      "binaryDir": "${sourceDir}/../build",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "WARNINGS_AS_ERRORS": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ci-clang-tidy",
+      "configurePreset": "ci-clang-tidy",
+      "targets": [
+        "clang-tidy"
+      ]
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ci-clang-tidy",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ci-clang-tidy"
+        },
+        {
+          "type": "build",
+          "name": "ci-clang-tidy"
+        }
+      ]
+    }
+  ]
+}

@@ -179,8 +179,9 @@ clang-tidy:
       GIT_COMMITTER_NAME:  "ci"
       GIT_COMMITTER_EMAIL: "bots@byte-physics.de"
   script:
-    - cmake -B build -S src -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-    - cmake --build build --config Debug --target clang-tidy && exit 0 || exit_value=$?
+    - cd src
+    - cmake --workflow --preset=ci-clang-tidy && exit 0 || exit_value=$?
+    - cd ..
     - git commit -m "clang-tidy fixes" .
     - git format-patch -n1
     - exit ${exit_value}
