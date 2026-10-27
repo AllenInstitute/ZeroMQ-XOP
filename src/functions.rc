@@ -146,6 +146,14 @@ BEGIN
   HSTRING_TYPE,      // parameter 1
   0,
 
+  // string zeromq_test_callfunc_identity(string msg, string identity)
+  "zeromq_test_callfunc_identity\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  HSTRING_TYPE,          // Return value type
+  HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 2
+  0,
+
   // string zeromq_test_callfunction(string msg)
   "zeromq_test_callfunction\0",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category

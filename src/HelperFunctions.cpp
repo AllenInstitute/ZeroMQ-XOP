@@ -278,13 +278,14 @@ double ConvertStringToDouble(const std::string &str)
   return val;
 }
 
-json CallIgorFunctionFromMessage(const std::string &msg)
+json CallIgorFunctionFromMessage(const std::string &msg,
+                                 const std::string &identity)
 {
   try
   {
     try
     {
-      auto req = RequestInterface::Create(msg);
+      auto req = RequestInterface::Create(identity, msg);
       return CallIgorFunctionFromReqInterface(req);
     }
     catch(const std::bad_alloc &)

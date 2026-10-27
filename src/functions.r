@@ -167,6 +167,15 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   HSTRING_TYPE,      // parameter 1
   },
 
+  // string zeromq_test_callfunc_identity(string msg, string identity)
+  "zeromq_test_callfunc_identity",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  HSTRING_TYPE,          // Return value type
+  {
+  HSTRING_TYPE,      // parameter 1
+  HSTRING_TYPE,      // parameter 2
+  },
+
   // string zeromq_test_callfunction(string msg)
   "zeromq_test_callfunction",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category

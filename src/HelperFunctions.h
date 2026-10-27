@@ -181,7 +181,8 @@ std::string To_stringHighRes(const T val)
 }
 
 double ConvertStringToDouble(const std::string &str);
-json CallIgorFunctionFromMessage(const std::string &msg);
+json CallIgorFunctionFromMessage(const std::string &msg,
+                                 const std::string &identity = "");
 json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req);
 
 int ZeroMQClientSend(const std::string &payload);
