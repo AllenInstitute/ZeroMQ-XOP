@@ -13,7 +13,7 @@ namespace
 
 using namespace std::chrono_literals;
 std::recursive_mutex threadMutex;
-ConcurrentQueue<RequestInterfacePtr> reqQueue;
+ConcurrentQueue<RequestInterfacePtr> incomingQueue;
 bool threadShouldFinish;
 std::recursive_mutex threadShouldFinishMutex;
 
@@ -63,7 +63,7 @@ void WorkerThread()
         {
           const auto payload = CreateStringFromZMsg(&payloadMsg);
           auto req           = RequestInterface::Create(identity, payload);
-          reqQueue.push(req);
+          incomingQueue.push(req);
         }
         catch(const std::bad_alloc &)
         {
@@ -177,15 +177,15 @@ bool MessageHandler::IsRunning() const
 
 void MessageHandler::HandleAllQueuedMessages()
 {
-  if(!RunningInMainThread() || reqQueue.empty())
+  if(!RunningInMainThread() || incomingQueue.empty())
   {
     return;
   }
 
-  auto msg = fmt::format("IDLE event messages: #{}", reqQueue.size());
+  auto msg = fmt::format("IDLE event messages: #{}", incomingQueue.size());
   GlobalData::Instance().AddLogEntry(msg);
 
-  reqQueue.apply_to_all(CallAndReply);
+  incomingQueue.apply_to_all(CallAndReply);
 }
 
 MessageHandler::~MessageHandler()
