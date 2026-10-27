@@ -29,9 +29,7 @@ extern "C" void XOPEntry()
       }
       break;
     case CLEANUP:
-      MessageHandler::Instance().Stop();
-      HeartbeatPublisher::Instance().Stop();
-      GlobalData::Instance().CloseConnections();
+      StopThreadsAndCloseConnections();
       break;
     }
   }

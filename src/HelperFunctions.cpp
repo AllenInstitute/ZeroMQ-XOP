@@ -1,5 +1,6 @@
 #include "ZeroMQ.h"
 #include "HelperFunctions.h"
+#include "MessageHandler.h"
 #include "MessageHandlerPauseGuard.h"
 #include "RequestInterface.h"
 
@@ -244,6 +245,13 @@ std::string GetLastEndPoint(void *s)
   buf[bufSize - 1] = '\0';
   DEBUG_OUTPUT("lastEndPoint={}", buf);
   return std::string(buf);
+}
+
+void StopThreadsAndCloseConnections()
+{
+  MessageHandler::Instance().Stop();
+  HeartbeatPublisher::Instance().Stop();
+  GlobalData::Instance().CloseConnections();
 }
 
 void ToggleIPV6Support(bool enable)
