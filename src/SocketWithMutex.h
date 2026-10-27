@@ -4,7 +4,7 @@
 // BSD-3-Clause.
 
 #define GET_SOCKET(A, ST)                                                      \
-  SocketWithMutex A(GlobalData::Instance().ZMQSocket(ST),                      \
+  SocketWithMutex A(GlobalData::Instance().GetOrCreateSocket(ST),              \
                     GlobalData::Instance().GetMutex(ST));
 
 class SocketWithMutex

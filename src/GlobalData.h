@@ -31,7 +31,7 @@ public:
     return globData;
   }
 
-  void *ZMQSocket(SocketTypes st);
+  void *GetOrCreateSocket(SocketTypes st);
   bool HasBindsOrConnections(SocketTypes st);
 
   void SetDebugFlag(bool val);

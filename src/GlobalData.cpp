@@ -86,7 +86,7 @@ GlobalData::GlobalData()
   ZEROMQ_ASSERT(zmq_context != nullptr);
 }
 
-void *GlobalData::ZMQSocket(SocketTypes st)
+void *GlobalData::GetOrCreateSocket(SocketTypes st)
 {
   LockGuard lock(GetMutex(st));
 
