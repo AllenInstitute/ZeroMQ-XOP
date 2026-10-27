@@ -174,22 +174,23 @@ clang-tidy:
   tags:
     - macosx, xcode, sonoma, arm64
   variables:
-      GIT_AUTHOR_NAME:  "ci"
-      GIT_AUTHOR_EMAIL: "bots@byte-physics.de"
+      GIT_AUTHOR_NAME:     "ci"
+      GIT_AUTHOR_EMAIL:    "bots@byte-physics.de"
+      GIT_COMMITTER_NAME:  "ci"
+      GIT_COMMITTER_EMAIL: "bots@byte-physics.de"
   script:
     - cmake -B build -S src -G "Unix Makefiles" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-    - cmake --build build --config Debug --target clang-tidy && exit_value=$? || exit_value=$?
+    - cmake --build build --config Debug --target clang-tidy && exit 0 || exit_value=$?
     - git commit -m "clang-tidy fixes" .
     - git format-patch -n1
     - exit ${exit_value}
   needs:
     - download-xoptoolkit
   artifacts:
-    when: always
+    when: on_failure
     expire_in: 1 week
     paths:
-      - build/clang-tidy-fixes.yaml
-      - build/*.patch
+      - ./*.patch
 
 # codesign-and-notarize-xop-macosx:
 #   tags:
