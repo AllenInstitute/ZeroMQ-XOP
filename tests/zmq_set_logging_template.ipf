@@ -4,6 +4,8 @@
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
+static StrConstant LOG_ENTRY_TIMESTAMP_REGEXP = "^(.*),\"ts\":\"[^\"]*\"}$"
+
 static Function/WAVE InvalidJSONTemplatesGen()
 
 	Make/FREE/T/N=(5) templates
@@ -60,6 +62,17 @@ static Function/S ReadFile(string path)
 	Close refnum
 
 	return contents
+End
+
+/// Remove the timestamp, the last key of a log entry
+static Function/S RemoveTimestamp(string entry)
+
+	string withoutTimestamp
+
+	SplitString/E=LOG_ENTRY_TIMESTAMP_REGEXP entry, withoutTimestamp
+	CHECK_EQUAL_VAR(V_flag, 1)
+
+	return withoutTimestamp + "}"
 End
 
 static Function TEST_CASE_BEGIN_OVERRIDE(name)
@@ -133,14 +146,17 @@ Function WorksInBothDirections()
 	logfile = ReadFile(path)
 	CHECK_EQUAL_VAR(ItemsInList(logfile, "\n"), 3)
 
-	actual   = "{}"
-	expected = StringFromList(0, logfile, "\n")
+	expected = "{}"
+	actual   = StringFromList(0, logfile, "\n")
+	CHECK_EQUAL_STR(actual, expected)
 
-	actual   = "{\"blahh\":\"blubb\",\"direction\":\"Incoming\",\"json\":{\"CallFunction\":{\"name\":\"TestFunctionNoArgs\"},\"version\":1}}"
-	expected = StringFromList(1, logfile, "\n")
+	expected = "{\"blahh\":\"blubb\",\"direction\":\"Incoming\",\"json\":{\"CallFunction\":{\"name\":\"TestFunctionNoArgs\"},\"version\":1}}"
+	actual   = RemoveTimestamp(StringFromList(1, logfile, "\n"))
+	CHECK_EQUAL_STR(actual, expected)
 
-	actual   = "{\"blahh\":\"blubb\",\"direction\":\"Outgoing\",\"json\":{\"errorCode\":{\"value\":0},\"result\":{\"type\":\"variable\",\"value\":\"nan\"}}}"
-	expected = StringFromList(2, logfile, "\n")
+	expected = "{\"blahh\":\"blubb\",\"direction\":\"Outgoing\",\"json\":{\"errorCode\":{\"value\":0},\"result\":{\"type\":\"variable\",\"value\":\"nan\"}}}"
+	actual   = RemoveTimestamp(StringFromList(2, logfile, "\n"))
+	CHECK_EQUAL_STR(actual, expected)
 End
 
 static Function CheckLoggedIdentity(string identity, string expected)
