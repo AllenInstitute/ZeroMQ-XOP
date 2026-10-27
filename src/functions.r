@@ -175,12 +175,68 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   HSTRING_TYPE,      // parameter 1
   },
 
+  // variable zeromq_test_hb_startstop(variable iterations)
+  "zeromq_test_hb_startstop",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  NT_FP64,      // parameter 1
+  },
+
+  // variable zeromq_test_hb_stopped_by_stop()
+  "zeromq_test_hb_stopped_by_stop",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+
+  },
+
+  // variable zeromq_test_idleguard()
+  "zeromq_test_idleguard",
+  F_UTIL | F_EXTERNAL,    // Function category
+  NT_FP64,          // Return value type
+  {
+
+  },
+
+  // variable zeromq_test_msghandler_pause()
+  "zeromq_test_msghandler_pause",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+
+  },
+
+  // variable zeromq_test_queueswap()
+  "zeromq_test_queueswap",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+
+  },
+
+  // variable zeromq_test_reply_contention(variable numRequests)
+  "zeromq_test_reply_contention",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  NT_FP64,      // parameter 1
+  },
+
   // string zeromq_test_serializeWave(WAVE wv)
   "zeromq_test_serializeWave",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   HSTRING_TYPE,          // Return value type
   {
   WAVE_TYPE,      // parameter 1
+  },
+
+  // variable zeromq_test_socketclose_race()
+  "zeromq_test_socketclose_race",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+
   },
 
   }

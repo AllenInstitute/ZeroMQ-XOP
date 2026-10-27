@@ -3,15 +3,15 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-#define GET_SOCKET(A, ST)                                                      \
-  SocketWithMutex A(GlobalData::Instance().ZMQSocket(ST),                      \
-                    GlobalData::Instance().GetMutex(ST));
+#define GET_SOCKET(A, ST) SocketWithMutex A(ST);
 
+/// @brief Holds the socket and its locked mutex
 class SocketWithMutex
 {
 public:
-  SocketWithMutex(void *s, std::recursive_mutex &mutex)
-      : m_lock(mutex), m_plainSocket(s)
+  explicit SocketWithMutex(SocketTypes st)
+      : m_lock(GlobalData::Instance().GetMutex(st)),
+        m_plainSocket(GlobalData::Instance().GetOrCreateSocket(st))
   {
     // DEBUG_OUTPUT("Locking {}",  m_plainSocket);
   }
@@ -30,6 +30,7 @@ public:
   }
 
 private:
+  // m_lock must be initialized before m_plainSocket
   LockGuard m_lock;
   void *m_plainSocket;
 };

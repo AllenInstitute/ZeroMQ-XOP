@@ -13,9 +13,46 @@ namespace
 
 using namespace std::chrono_literals;
 std::recursive_mutex threadMutex;
-ConcurrentQueue<RequestInterfacePtr> reqQueue;
+ConcurrentQueue<RequestInterfacePtr> incomingQueue;
 bool threadShouldFinish;
 std::recursive_mutex threadShouldFinishMutex;
+
+struct OutgoingReply
+{
+  std::string identity;
+  std::string message;
+};
+
+ConcurrentQueue<OutgoingReply> outgoingQueue;
+
+void DrainOutgoingReplies()
+{
+  if(RunningInMainThread() || outgoingQueue.empty())
+  {
+    return;
+  }
+
+  outgoingQueue.apply_to_all(
+      [](const OutgoingReply &reply)
+      {
+        try
+        {
+          auto rc = ZeroMQServerSend(reply.identity, reply.message);
+
+          DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
+        }
+        catch(const std::exception &e)
+        {
+          EMERGENCY_OUTPUT(
+              "Caught std::exception with what=\"{}\". This must NOT happen!",
+              e.what());
+        }
+        catch(...)
+        {
+          EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
+        }
+      });
+}
 
 void WorkerThread()
 {
@@ -34,6 +71,8 @@ void WorkerThread()
   {
     try
     {
+      DrainOutgoingReplies();
+
       // check if stop is requested
       {
         LockGuard lock(threadShouldFinishMutex);
@@ -63,7 +102,7 @@ void WorkerThread()
         {
           const auto payload = CreateStringFromZMsg(&payloadMsg);
           auto req           = RequestInterface::Create(identity, payload);
-          reqQueue.push(req);
+          incomingQueue.push(req);
         }
         catch(const std::bad_alloc &)
         {
@@ -95,7 +134,7 @@ void WorkerThread()
   zmq_msg_close(&payloadMsg);
 }
 
-void CallAndReply(const RequestInterfacePtr &req) noexcept
+void CallAndQueueReply(const RequestInterfacePtr &req) noexcept
 {
   try
   {
@@ -103,7 +142,8 @@ void CallAndReply(const RequestInterfacePtr &req) noexcept
     {
       auto doc     = CallIgorFunctionFromReqInterface(req);
       auto message = doc.dump(DEFAULT_INDENT);
-      ZeroMQServerSend(req->GetCallerIdentity(), message);
+
+      outgoingQueue.push({req->GetCallerIdentity(), message});
     }
     catch(const std::exception &e)
     {
@@ -168,17 +208,24 @@ void MessageHandler::Stop()
   m_thread.join();
 }
 
+bool MessageHandler::IsRunning() const
+{
+  LockGuard lock(threadMutex);
+
+  return m_thread.joinable();
+}
+
 void MessageHandler::HandleAllQueuedMessages()
 {
-  if(!RunningInMainThread() || reqQueue.empty())
+  if(!RunningInMainThread() || incomingQueue.empty())
   {
     return;
   }
 
-  auto msg = fmt::format("IDLE event messages: #{}", reqQueue.size());
+  auto msg = fmt::format("IDLE event messages: #{}", incomingQueue.size());
   GlobalData::Instance().AddLogEntry(msg);
 
-  reqQueue.apply_to_all(CallAndReply);
+  incomingQueue.apply_to_all(CallAndQueueReply);
 }
 
 MessageHandler::~MessageHandler()

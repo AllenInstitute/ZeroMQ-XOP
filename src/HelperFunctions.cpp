@@ -1,5 +1,7 @@
 #include "ZeroMQ.h"
 #include "HelperFunctions.h"
+#include "MessageHandler.h"
+#include "MessageHandlerPauseGuard.h"
 #include "RequestInterface.h"
 
 namespace
@@ -245,8 +247,17 @@ std::string GetLastEndPoint(void *s)
   return std::string(buf);
 }
 
+void StopThreadsAndCloseConnections()
+{
+  MessageHandler::Instance().Stop();
+  HeartbeatPublisher::Instance().Stop();
+  GlobalData::Instance().CloseConnections();
+}
+
 void ToggleIPV6Support(bool enable)
 {
+  MessageHandlerPauseGuard pauseGuard(true);
+
   for(auto st : GetAllSocketTypes())
   {
     GET_SOCKET(clientSocket, st);
@@ -838,6 +849,8 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   WMDisposeHandle(h);
   h = nullptr;
 
+  MessageHandlerPauseGuard pauseGuard(st == SocketTypes::Server);
+
   GET_SOCKET(socket, st);
 
   int rc = 0;
@@ -859,6 +872,13 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   DEBUG_OUTPUT("type={}, point={}, rc={}", st, point, rc);
   GlobalData::Instance().AddToListOfBindsOrConnections(
       GetLastEndPoint(socket.get()), st);
+
+  // zeromq_stop() stops it
+  if(st == SocketTypes::Publisher &&
+     !HeartbeatPublisher::Instance().IsRunning())
+  {
+    HeartbeatPublisher::Instance().Start();
+  }
 }
 
 /// @brief Returns a Igor string Handle from a C++ string

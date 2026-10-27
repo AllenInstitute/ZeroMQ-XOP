@@ -4,13 +4,6 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-namespace
-{
-
-bool idleInProgress = false;
-
-} // anonymous namespace
-
 /*	XOPEntry()
   This is the entry point from the host application to the XOP for all messages
   after the INIT message.
@@ -28,18 +21,15 @@ extern "C" void XOPEntry()
     }
     break;
     case IDLE:
-      if(!idleInProgress)
+      if(!IsIdleInProgress())
       {
-        idleInProgress = true;
+        IdleGuard guard;
         MessageHandler::Instance().HandleAllQueuedMessages();
         OutputQueuedNotices();
-        idleInProgress = false;
       }
       break;
     case CLEANUP:
-      MessageHandler::Instance().Stop();
-      HeartbeatPublisher::Instance().Stop();
-      GlobalData::Instance().CloseConnections();
+      StopThreadsAndCloseConnections();
       break;
     }
   }

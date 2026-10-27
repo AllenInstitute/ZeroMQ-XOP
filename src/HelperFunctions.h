@@ -137,6 +137,10 @@ enum ZeroMQ_SET_FLAGS
 std::string GetLastEndPoint(void *s);
 void ToggleIPV6Support(bool enable);
 
+/// @brief Stops the message handler and the heartbeat publisher and closes
+///        all sockets
+void StopThreadsAndCloseConnections();
+
 template <typename T, int withComma>
 struct GetFormatString
 {
