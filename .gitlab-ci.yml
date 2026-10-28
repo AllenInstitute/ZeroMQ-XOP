@@ -54,6 +54,8 @@ compile-libzmq-windows:
     - windows, shell, amd64
   variables:
       GIT_SUBMODULE_STRATEGY: "none"
+      # own mspdbsrv.exe per job
+      _MSPDBSRV_ENDPOINT_: "$CI_JOB_ID"
   parallel:
     matrix:
       - CONFIG_TYPE:
@@ -118,6 +120,9 @@ compile-xop-windows:
   stage: second
   tags:
     - windows, shell, amd64
+  variables:
+      # own mspdbsrv.exe per job
+      _MSPDBSRV_ENDPOINT_: "$CI_JOB_ID"
   parallel:
     matrix:
       - CONFIG_TYPE:
