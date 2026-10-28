@@ -4,6 +4,8 @@
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
+static StrConstant LOG_ENTRY_TIMESTAMP_REGEXP = "^(.*),\"ts\":\"[^\"]*\"}$"
+
 static Function/WAVE InvalidJSONTemplatesGen()
 
 	Make/FREE/T/N=(5) templates
@@ -60,6 +62,17 @@ static Function/S ReadFile(string path)
 	Close refnum
 
 	return contents
+End
+
+/// Remove the timestamp, the last key of a log entry
+static Function/S RemoveTimestamp(string entry)
+
+	string withoutTimestamp
+
+	SplitString/E=LOG_ENTRY_TIMESTAMP_REGEXP entry, withoutTimestamp
+	CHECK_EQUAL_VAR(V_flag, 1)
+
+	return withoutTimestamp + "}"
 End
 
 static Function TEST_CASE_BEGIN_OVERRIDE(name)
@@ -133,12 +146,78 @@ Function WorksInBothDirections()
 	logfile = ReadFile(path)
 	CHECK_EQUAL_VAR(ItemsInList(logfile, "\n"), 3)
 
-	actual   = "{}"
-	expected = StringFromList(0, logfile, "\n")
+	expected = "{}"
+	actual   = StringFromList(0, logfile, "\n")
+	CHECK_EQUAL_STR(actual, expected)
 
-	actual   = "{\"blahh\":\"blubb\",\"direction\":\"Incoming\",\"json\":{\"CallFunction\":{\"name\":\"TestFunctionNoArgs\"},\"version\":1}}"
-	expected = StringFromList(1, logfile, "\n")
+	expected = "{\"blahh\":\"blubb\",\"direction\":\"Incoming\",\"json\":{\"CallFunction\":{\"name\":\"TestFunctionNoArgs\"},\"version\":1}}"
+	actual   = RemoveTimestamp(StringFromList(1, logfile, "\n"))
+	CHECK_EQUAL_STR(actual, expected)
 
-	actual   = "{\"blahh\":\"blubb\",\"direction\":\"Outgoing\",\"json\":{\"errorCode\":{\"value\":0},\"result\":{\"type\":\"variable\",\"value\":\"nan\"}}}"
-	expected = StringFromList(2, logfile, "\n")
+	expected = "{\"blahh\":\"blubb\",\"direction\":\"Outgoing\",\"json\":{\"errorCode\":{\"value\":0},\"result\":{\"type\":\"variable\",\"value\":\"nan\"}}}"
+	actual   = RemoveTimestamp(StringFromList(2, logfile, "\n"))
+	CHECK_EQUAL_STR(actual, expected)
+End
+
+static Function CheckLoggedIdentity(string identity, string expected)
+
+	variable errorValue
+	string msg, replyMessage, logfile, entry
+
+	zeromq_set_logging_template("{}")
+
+	msg = "{\"version\"     : 1, "                    + \
+	      "\"CallFunction\" : {"                      + \
+	      "\"name\"         : \"TestFunctionNoArgs\"" + \
+	      "}}"
+
+	replyMessage = zeromq_test_callfunc_identity(msg, identity)
+	errorValue   = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	logfile = ReadFile(GetLogFilePath_IGNORE())
+	CHECK_EQUAL_VAR(ItemsInList(logfile, "\n"), 3)
+
+	expected = "\"remote identity\":\"" + expected + "\""
+
+	entry = StringFromList(1, logfile, "\n")
+	CHECK_GE_VAR(strsearch(entry, expected, 0), 0)
+
+	entry = StringFromList(2, logfile, "\n")
+	CHECK_GE_VAR(strsearch(entry, expected, 0), 0)
+End
+
+Function LogsInvalidUTF8Payload()
+
+	variable errorValue
+	string replyMessage, logfile
+
+	zeromq_set_logging_template("{}")
+
+	replyMessage = zeromq_test_callfunction(num2char(0xFF, 1))
+	errorValue   = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_INVALID_JSON_OBJECT)
+
+	logfile = ReadFile(GetLogFilePath_IGNORE())
+	CHECK_EQUAL_VAR(ItemsInList(logfile, "\n"), 2)
+	CHECK_GE_VAR(strsearch(StringFromList(1, logfile, "\n"), "\"str\":\"" + num2char(0xFFFD) + "\"", 0), 0)
+End
+
+Function LogsTextIdentity()
+
+	CheckLoggedIdentity("my client", "my client")
+End
+
+Function LogsGeneratedIdentityAsHex()
+
+	string identity = PadString("", 1, 0x0) + num2char(0x01) + num2char(0x02) + num2char(0x03) + num2char(0x04)
+
+	CheckLoggedIdentity(identity, "0x0001020304")
+End
+
+Function LogsInvalidUTF8IdentityAsHex()
+
+	string identity = num2char(0xFF, 1) + "ab"
+
+	CheckLoggedIdentity(identity, "0xff6162")
 End

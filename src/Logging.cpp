@@ -25,6 +25,30 @@ constexpr const char DIR_SEPARATOR[] = "/";
 #endif // MACIGOR
 #endif // WINIGOR
 
+/// ZeroMQ generates binary identities, starting with a zero byte, for clients
+/// which don't set one, see ZMQ_ROUTING_ID. A JSON string can only hold UTF-8.
+std::string ToLoggableIdentity(const std::string &identity)
+{
+  ASSERT(!identity.empty());
+
+  if(identity.front() != '\0')
+  {
+    try
+    {
+      json(identity).dump();
+      return identity;
+    }
+    catch(const json::type_error &)
+    {
+    }
+  }
+
+  const auto *bytes = reinterpret_cast<const unsigned char *>(identity.data());
+
+  return fmt::format(FMT_STRING("0x{:02x}"),
+                     fmt::join(bytes, bytes + identity.size(), ""));
+}
+
 json ParseLoggingTemplate(const std::string &str)
 {
   json doc;
@@ -116,7 +140,7 @@ public:
 
     if(identity.has_value() && !identity->empty())
     {
-      j[IDENTITY_KEY] = identity.value();
+      j[IDENTITY_KEY] = ToLoggableIdentity(identity.value());
     }
 
     const auto now = std::chrono::system_clock::now();
@@ -125,7 +149,7 @@ public:
                                 now.time_since_epoch());
     j[TEMPLATE_KEY_TS] = ts;
 
-    WriteIntoLogfile(j.dump());
+    WriteIntoLogfile(j.dump(-1, ' ', false, json::error_handler_t::replace));
   }
 
 #ifdef _MSC_VER

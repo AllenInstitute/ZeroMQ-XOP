@@ -172,5 +172,6 @@ THREADSAFE variable zeromq_test_socketclose_race();
 THREADSAFE variable zeromq_test_msghandler_pause();
 THREADSAFE variable zeromq_test_hb_stopped_by_stop();
 THREADSAFE variable zeromq_test_reply_contention(variable numRequests);
+THREADSAFE string zeromq_test_callfunc_identity(string msg, string identity);
 /// @}
 /// @endcond

@@ -211,6 +211,18 @@ typedef struct zeromq_sub_remove_filterParams zeromq_sub_remove_filterParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_test_callfunc_identityParams
+{
+  Handle identity;
+  Handle msg;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  Handle result;
+};
+typedef struct zeromq_test_callfunc_identityParams
+    zeromq_test_callfunc_identityParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_test_callfunctionParams
 {
   Handle msg;
@@ -359,6 +371,10 @@ extern "C" int zeromq_sub_recv_multi(zeromq_sub_recv_multiParams *p);
 
 // variable zeromq_sub_remove_filter(string filter)
 extern "C" int zeromq_sub_remove_filter(zeromq_sub_remove_filterParams *p);
+
+// string zeromq_test_callfunc_identity(string msg, string identity)
+extern "C" int
+zeromq_test_callfunc_identity(zeromq_test_callfunc_identityParams *p);
 
 // string zeromq_test_callfunction(string msg)
 extern "C" int zeromq_test_callfunction(zeromq_test_callfunctionParams *p);
