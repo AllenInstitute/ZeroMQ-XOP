@@ -437,6 +437,21 @@ int ZeroMQServerReceive(zmq_msg_t *identityMsg, zmq_msg_t *payloadMsg)
     return numBytes;
   }
 
+  // Read the remaining frames of an invalid message, so that the next call
+  // starts with the next message, identityMsg keeps the identity
+  auto throwInvalidFormat = [&socket](zmq_msg_t *msg)
+  {
+    while(zmq_msg_more(msg))
+    {
+      if(zmq_msg_recv(msg, socket.get(), 0) < 0)
+      {
+        break;
+      }
+    }
+
+    throw IgorException(INVALID_MESSAGE_FORMAT);
+  };
+
   // zeromq guarantees that either all parts in multi-part messages
   // arrive or none.
   if(!zmq_msg_more(identityMsg))
@@ -447,13 +462,13 @@ int ZeroMQServerReceive(zmq_msg_t *identityMsg, zmq_msg_t *payloadMsg)
   numBytes = zmq_msg_recv(payloadMsg, socket.get(), 0);
   if(numBytes != 0 || !zmq_msg_more(payloadMsg))
   {
-    throw IgorException(INVALID_MESSAGE_FORMAT);
+    throwInvalidFormat(payloadMsg);
   }
 
   numBytes = zmq_msg_recv(payloadMsg, socket.get(), 0);
   if(numBytes < 0 || zmq_msg_more(payloadMsg))
   {
-    throw IgorException(INVALID_MESSAGE_FORMAT);
+    throwInvalidFormat(payloadMsg);
   }
 
   return numBytes;

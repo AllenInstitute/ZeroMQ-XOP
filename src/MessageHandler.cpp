@@ -38,6 +38,16 @@ struct OutgoingReply
 
 ConcurrentQueue<OutgoingReply> outgoingQueue;
 
+void SendErrorReply(const std::string &identity, const IgorException &e)
+{
+  const json reply = e;
+
+  // the client might have disconnected in the meantime
+  auto rc = ZeroMQServerSend(identity, reply.dump(DEFAULT_INDENT), false);
+
+  DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
+}
+
 void DrainOutgoingReplies()
 {
   if(RunningInMainThread() || outgoingQueue.empty())
@@ -109,7 +119,18 @@ void WorkerThread()
         }
       }
 
-      auto numBytes = ZeroMQServerReceive(&identityMsg, &payloadMsg);
+      int numBytes{};
+
+      try
+      {
+        numBytes = ZeroMQServerReceive(&identityMsg, &payloadMsg);
+      }
+      catch(const IgorException &e)
+      {
+        // the message has the wrong frames, but we know the sender
+        SendErrorReply(CreateStringFromZMsg(&identityMsg), e);
+        continue;
+      }
 
       if(numBytes == -1 && zmq_errno() == EAGAIN) // timeout
       {
@@ -137,10 +158,7 @@ void WorkerThread()
       }
       catch(const IgorException &e)
       {
-        const json reply = e;
-        rc = ZeroMQServerSend(identity, reply.dump(DEFAULT_INDENT));
-
-        DEBUG_OUTPUT("ZeroMQSendAsServer returned {}", rc);
+        SendErrorReply(identity, e);
       }
     }
     catch(const std::exception &e)
