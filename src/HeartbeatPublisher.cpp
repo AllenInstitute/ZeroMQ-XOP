@@ -3,6 +3,7 @@
 #include "RequestInterface.h"
 
 #include <chrono>
+#include <condition_variable>
 #include <thread>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
@@ -14,7 +15,19 @@ namespace
 using namespace std::chrono_literals;
 std::recursive_mutex threadMutex;
 bool threadShouldFinish;
-std::recursive_mutex threadShouldFinishMutex;
+std::mutex threadShouldFinishMutex;
+std::condition_variable threadShouldFinishCondition;
+
+/// Wait until the next heartbeat is due
+///
+/// @return true if the thread should finish
+bool WaitForNextHeartbeat()
+{
+  std::unique_lock<std::mutex> lock(threadShouldFinishMutex);
+
+  return threadShouldFinishCondition.wait_for(lock, 5s, []
+                                              { return threadShouldFinish; });
+}
 
 void WorkerThread()
 {
@@ -26,7 +39,7 @@ void WorkerThread()
     {
       // check if stop is requested
       {
-        LockGuard lock(threadShouldFinishMutex);
+        std::lock_guard<std::mutex> lock(threadShouldFinishMutex);
         if(threadShouldFinish)
         {
           DEBUG_OUTPUT("Exiting");
@@ -50,7 +63,11 @@ void WorkerThread()
         }
       }
 
-      std::this_thread::sleep_for(5s);
+      if(WaitForNextHeartbeat())
+      {
+        DEBUG_OUTPUT("Exiting");
+        break;
+      }
     }
     catch(const IgorException &e)
     {
@@ -86,7 +103,7 @@ void HeartbeatPublisher::Start()
   DEBUG_OUTPUT("Trying to start.");
 
   {
-    LockGuard innerLock(threadShouldFinishMutex);
+    std::lock_guard<std::mutex> innerLock(threadShouldFinishMutex);
     threadShouldFinish = false;
   }
 
@@ -106,9 +123,11 @@ void HeartbeatPublisher::Stop()
   DEBUG_OUTPUT("Shutting down.");
 
   {
-    LockGuard innerLock(threadShouldFinishMutex);
+    std::lock_guard<std::mutex> innerLock(threadShouldFinishMutex);
     threadShouldFinish = true;
   }
+
+  threadShouldFinishCondition.notify_all();
 
   m_thread.join();
 }
