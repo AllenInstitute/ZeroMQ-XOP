@@ -223,3 +223,41 @@ Function ClientRecvReturnsAfterTimeout()
 	CHECK_GE_VAR(elapsed, 0.5)
 	CHECK_LT_VAR(elapsed, 5)
 End
+
+Function/S EchoString_IGNORE(string str)
+
+	return str
+End
+
+// The reply to a request the caller gave up on must not be returned for
+// the next request
+Function ClientRecvDiscardsRepliesToAbandonedRequests()
+
+	string reply
+
+	string first  = "{\"version\" : 1, \"CallFunction\" : {\"name\" : \"EchoString_IGNORE\", \"params\" : [\"first\"]}}"
+	string second = "{\"version\" : 1, \"CallFunction\" : {\"name\" : \"EchoString_IGNORE\", \"params\" : [\"second\"]}}"
+
+	zeromq_stop()
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
+	zeromq_client_set_recv_timeout(0.5)
+
+	zeromq_server_bind("tcp://127.0.0.1:5555")
+	zeromq_client_connect("tcp://127.0.0.1:5555")
+
+	// the message handler is not running yet, so there is no reply
+	zeromq_client_send(first)
+	reply = zeromq_client_recv()
+	CHECK_EMPTY_STR(reply)
+
+	zeromq_handler_start()
+	zeromq_client_set_recv_timeout(5)
+
+	zeromq_client_send(second)
+	reply = zeromq_client_recv()
+
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
+
+	CHECK_GE_VAR(strsearch(reply, "\"second\"", 0), 0)
+	CHECK_EQUAL_VAR(strsearch(reply, "\"first\"", 0), -1)
+End

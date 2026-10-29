@@ -193,6 +193,39 @@ double GlobalData::GetClientRecvTimeout() const
   return m_clientRecvTimeout;
 }
 
+void GlobalData::ClientRequestSent()
+{
+  LockGuard lock(GetMutex(SocketTypes::Client));
+
+  m_clientPendingReplies++;
+}
+
+void GlobalData::AbandonClientReplies()
+{
+  LockGuard lock(GetMutex(SocketTypes::Client));
+
+  DEBUG_OUTPUT("pending replies={}", m_clientPendingReplies);
+  m_clientAbandonedReplies = m_clientPendingReplies;
+}
+
+bool GlobalData::ClientReplyReceived()
+{
+  LockGuard lock(GetMutex(SocketTypes::Client));
+
+  if(m_clientPendingReplies > 0)
+  {
+    m_clientPendingReplies--;
+  }
+
+  if(m_clientAbandonedReplies > 0)
+  {
+    m_clientAbandonedReplies--;
+    return true;
+  }
+
+  return false;
+}
+
 void GlobalData::CloseConnections()
 {
   if(HasSocket(SocketTypes::Subscriber))
@@ -213,6 +246,12 @@ void GlobalData::CloseConnections()
     auto &list       = socketData.m_list;
 
     DEBUG_OUTPUT("SocketType {}, Connections={}", st, list.size());
+
+    if(st == SocketTypes::Client)
+    {
+      m_clientPendingReplies   = 0;
+      m_clientAbandonedReplies = 0;
+    }
 
     try
     {

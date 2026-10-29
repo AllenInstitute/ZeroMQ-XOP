@@ -53,6 +53,18 @@ public:
   void SetClientRecvTimeout(double val);
   double GetClientRecvTimeout() const;
 
+  /// @name Replies to client requests which the caller gave up on
+  ///
+  /// zeromq_client_recv() returns an empty string after an abort or the
+  /// timeout, but the reply can still arrive later. It must not be returned
+  /// as the reply to the next request.
+  /// @{
+  void ClientRequestSent();
+  void AbandonClientReplies();
+  /// @return true if the reply belongs to a request the caller gave up on
+  bool ClientReplyReceived();
+  /// @}
+
   void CloseConnections();
   void AddToListOfBindsOrConnections(const std::string &localPoint,
                                      SocketTypes st);
@@ -105,6 +117,8 @@ private:
   bool m_logging;
   bool m_interceptor;
   std::atomic<double> m_clientRecvTimeout{0};
+  size_t m_clientPendingReplies{0};   ///< guarded by the client mutex
+  size_t m_clientAbandonedReplies{0}; ///< guarded by the client mutex
 
   ConcurrentQueue<OutputMessagePtr> m_queue;
   std::unique_ptr<Logging> m_loggingSink;
