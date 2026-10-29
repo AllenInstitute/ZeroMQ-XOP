@@ -655,12 +655,21 @@ The default socket options are:
 - ``ZMQ_RCVTIMEO``         = ``1`` (milliseconds)
 - ``ZMQ_ROUTER_MANDATORY`` = ``1`` (``Router`` only)
 - ``ZMQ_ROUTER_HANDOVER``  = ``1`` (``Router`` only)
-- ``ZMQ_MAXMSGSIZE``       = ``1024`` (in bytes, ``Router`` only)
+- ``ZMQ_MAXMSGSIZE``       = ``65536`` (in bytes, ``Router`` only)
 - ``ZMQ_IDENTITY``         = ``zeromq xop: dealer $pid-$counter`` (``Dealer`` only, unique for every socket)
 
 The ``Router``/Server expects three frames (identity, empty, payload) and the
 ``Dealer``/Client expects two frames (empty, payload) when sending/receiving
 messages. This format is used to be compatible with REP/REQ sockets.
+
+The ``Router``/Server accepts messages of up to 65536 bytes (64 KiB), e.g. the
+JSON text of a ``CallFunction`` request. libzmq closes the connection of a
+client which sends a larger message: the message is neither received nor
+answered, and no error is reported. A client waiting for the reply with busy
+waiting therefore waits forever, use ``ZeroMQ_SET_FLAGS_NOBUSYWAITRECV`` to poll
+with an own timeout instead. The client reconnects automatically, so its later
+messages are received again. The limit protects against huge messages when
+binding to a network interface.
 
 The ``Publisher``/``Subscriber`` send/expect two frames (filter, payload). This is done so that there is no ambiguity
 between filter and payload. The payload can be empty.

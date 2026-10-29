@@ -10,6 +10,10 @@ namespace
 
 constexpr char PACKAGE_NAME[] = "ZeroMQ";
 
+/// Maximum size of a message received by the server socket in bytes, libzmq
+/// closes the connection of a client which sends a larger one
+constexpr int64_t MAX_SERVER_MESSAGE_SIZE = 65536;
+
 /// A ROUTER socket routes to one connection per identity, so every client
 /// socket of every Igor Pro instance needs its own identity
 std::string CreateClientIdentity()
@@ -55,10 +59,10 @@ void ApplySocketDefaults(void *s, SocketTypes st)
     rc = zmq_setsockopt(s, ZMQ_ROUTER_HANDOVER, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
 
-    int64_t bytes = 1024;
-
-    rc = zmq_setsockopt(s, ZMQ_MAXMSGSIZE, &bytes, sizeof(bytes));
+    rc = zmq_setsockopt(s, ZMQ_MAXMSGSIZE, &MAX_SERVER_MESSAGE_SIZE,
+                        sizeof(MAX_SERVER_MESSAGE_SIZE));
     ZEROMQ_ASSERT(rc == 0);
+
     return;
   }
   case SocketTypes::Subscriber:

@@ -17,7 +17,7 @@
 ///   - DEALER/ROUTER: ZMQ_LINGER = 0
 ///   - ROUTER: ZMQ_ROUTER_MANDATORY = 1
 ///   - ROUTER: ZMQ_ROUTER_HANDOVER = 1
-///   - ROUTER: ZMQ_MAXMSGSIZE = 1024 byte
+///   - ROUTER: ZMQ_MAXMSGSIZE = 65536 bytes, see zeromq_server_bind()
 ///   - DEALER: ZMQ_IDENTITY "zeromq xop: dealer $pid-$counter", unique for
 ///     every socket
 /// - For compatibility reasons with the REQ socket, DEALER sockets have to
@@ -43,6 +43,11 @@ THREADSAFE variable zeromq_set(variable flags);
 ///                   `tcp://127.0.0.1:5670` should be used, the TCP/IP port
 ///                   must be > 1024 and unused, 5670 is a good default choice
 ///                   [standard port for FileMQ]
+///
+/// The server accepts messages of up to 65536 bytes (64 KiB). libzmq closes
+/// the connection of a client which sends a larger message: the message is
+/// neither received nor answered, and no error is reported. The client
+/// reconnects automatically, so its later messages are received again.
 THREADSAFE variable zeromq_server_bind(string localPoint);
 
 /// Send a messsage as the `ROUTER` socket
@@ -64,6 +69,11 @@ THREADSAFE string zeromq_server_recv(string *identity);
 /// Send a messsage as the `DEALER` socket
 ///
 /// @param msg      Message to send
+///
+/// A server of this XOP drops messages larger than 65536 bytes without a
+/// reply, see zeromq_server_bind(). With busy waiting zeromq_client_recv()
+/// then waits forever, use `ZeroMQ_SET_FLAGS_NOBUSYWAITRECV` to poll with an
+/// own timeout instead.
 THREADSAFE variable zeromq_client_send(string msg);
 
 /// @brief Connect to a ZMQ server, e.g. a different Igor instance running as a
