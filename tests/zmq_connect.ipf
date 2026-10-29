@@ -4,6 +4,8 @@
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
+static StrConstant CLIENT_IDENTITY_REGEX = "^zeromq xop: dealer [0-9]+-[0-9]+$"
+
 static Function GetSourceCheck_IGNORE(string type)
 	strswitch(type)
 		case "CallClientConnect":
@@ -143,4 +145,34 @@ Function AllowsMultipleConnections([string str])
 
 	ret = f("tcp://127.0.0.1:6666")
 	CHECK_EQUAL_VAR(ret, 0)
+End
+
+static Function/S GetClientIdentity_IGNORE()
+
+	string identity, reply
+
+	zeromq_stop()
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
+	zeromq_server_bind("tcp://127.0.0.1:5555")
+	zeromq_client_connect("tcp://127.0.0.1:5555")
+
+	zeromq_client_send("abcd")
+	reply = zeromq_server_recv(identity)
+	CHECK_EQUAL_STR(reply, "abcd")
+
+	return identity
+End
+
+// The server can only route replies to one connection per identity
+Function ClientsHaveUniqueIdentities()
+
+	string first, second
+
+	first = GetClientIdentity_IGNORE()
+	CHECK_EQUAL_VAR(GrepString(first, CLIENT_IDENTITY_REGEX), 1)
+
+	second = GetClientIdentity_IGNORE()
+	CHECK_EQUAL_VAR(GrepString(second, CLIENT_IDENTITY_REGEX), 1)
+
+	CHECK_NEQ_STR(first, second)
 End

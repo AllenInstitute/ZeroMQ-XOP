@@ -1,5 +1,11 @@
 #include "ZeroMQ.h"
 
+#include <atomic>
+
+#ifdef MACIGOR
+#include <unistd.h>
+#endif // MACIGOR
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
@@ -7,6 +13,21 @@ namespace
 {
 
 constexpr char PACKAGE_NAME[] = "ZeroMQ";
+
+/// A ROUTER socket routes to one connection per identity, so every client
+/// socket of every Igor Pro instance needs its own identity
+std::string CreateClientIdentity()
+{
+  static std::atomic<uint64_t> counter{0};
+
+#ifdef WINIGOR
+  const auto pid = GetCurrentProcessId();
+#else
+  const auto pid = getpid();
+#endif // WINIGOR
+
+  return fmt::format(FMT_STRING("zeromq xop: dealer {}-{}"), pid, counter++);
+}
 
 void ApplySocketDefaults(void *s, SocketTypes st)
 {
@@ -27,8 +48,8 @@ void ApplySocketDefaults(void *s, SocketTypes st)
   {
   case SocketTypes::Client:
   {
-    const char identity[] = "zeromq xop: dealer";
-    rc = zmq_setsockopt(s, ZMQ_IDENTITY, &identity, strlen(identity));
+    const auto identity = CreateClientIdentity();
+    rc = zmq_setsockopt(s, ZMQ_IDENTITY, identity.c_str(), identity.length());
     ZEROMQ_ASSERT(rc == 0);
     return;
   }
