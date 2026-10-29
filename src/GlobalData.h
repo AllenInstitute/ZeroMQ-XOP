@@ -112,10 +112,10 @@ private:
   SocketTypeData m_client, m_server, m_pub, m_sub;
   std::recursive_mutex m_settingsMutex;
 
-  bool m_debugging;
-  bool m_busyWaiting;
-  bool m_logging;
-  bool m_interceptor;
+  std::atomic<bool> m_debugging;
+  std::atomic<bool> m_busyWaiting;
+  std::atomic<bool> m_logging;
+  std::atomic<bool> m_interceptor;
   std::atomic<double> m_clientRecvTimeout{0};
   size_t m_clientPendingReplies{0};   ///< guarded by the client mutex
   size_t m_clientAbandonedReplies{0}; ///< guarded by the client mutex
