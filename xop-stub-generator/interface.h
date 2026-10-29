@@ -16,6 +16,7 @@
 ///   - DEALER/ROUTER: ZMQ_RCVTIMEO = 1
 ///   - DEALER/ROUTER: ZMQ_LINGER = 0
 ///   - ROUTER: ZMQ_ROUTER_MANDATORY = 1
+///   - ROUTER: ZMQ_ROUTER_HANDOVER = 1
 ///   - ROUTER: ZMQ_MAXMSGSIZE = 1024 byte
 ///   - DEALER: ZMQ_IDENTITY non-empty string
 /// - For compatibility reasons with the REQ socket, DEALER sockets have to

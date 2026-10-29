@@ -654,6 +654,7 @@ The default socket options are:
 - ``ZMQ_SNDTIMEO``         = ``0``
 - ``ZMQ_RCVTIMEO``         = ``1`` (milliseconds)
 - ``ZMQ_ROUTER_MANDATORY`` = ``1`` (``Router`` only)
+- ``ZMQ_ROUTER_HANDOVER``  = ``1`` (``Router`` only)
 - ``ZMQ_MAXMSGSIZE``       = ``1024`` (in bytes, ``Router`` only)
 - ``ZMQ_IDENTITY``         = ``zeromq xop: dealer`` (``Dealer`` only)
 

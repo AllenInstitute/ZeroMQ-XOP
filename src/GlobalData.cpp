@@ -40,6 +40,9 @@ void ApplySocketDefaults(void *s, SocketTypes st)
     rc = zmq_setsockopt(s, ZMQ_ROUTER_MANDATORY, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
 
+    rc = zmq_setsockopt(s, ZMQ_ROUTER_HANDOVER, &valOne, sizeof(valOne));
+    ZEROMQ_ASSERT(rc == 0);
+
     int64_t bytes = 1024;
 
     rc = zmq_setsockopt(s, ZMQ_MAXMSGSIZE, &bytes, sizeof(bytes));
