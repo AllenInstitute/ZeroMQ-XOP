@@ -134,6 +134,9 @@ enum ZeroMQ_SET_FLAGS
 };
 }
 
+/// Return the ID of the Igor Pro process
+uint64_t GetProcessID();
+
 std::string GetLastEndPoint(void *s);
 void ToggleIPV6Support(bool enable);
 
