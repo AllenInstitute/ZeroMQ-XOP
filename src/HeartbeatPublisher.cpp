@@ -59,14 +59,7 @@ void WorkerThread()
         {
           EMERGENCY_OUTPUT(
               "Error sending heartbeat publisher message with rc = {}", rc);
-          continue;
         }
-      }
-
-      if(WaitForNextHeartbeat())
-      {
-        DEBUG_OUTPUT("Exiting");
-        break;
       }
     }
     catch(const IgorException &e)
@@ -84,6 +77,12 @@ void WorkerThread()
     catch(...)
     {
       EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
+    }
+
+    if(WaitForNextHeartbeat())
+    {
+      DEBUG_OUTPUT("Exiting");
+      break;
     }
   }
 }
