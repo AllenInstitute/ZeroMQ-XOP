@@ -32,6 +32,13 @@ public:
     return m_queue.empty();
   }
 
+  void clear()
+  {
+    Lock lock(m_mutex);
+
+    m_queue = {};
+  }
+
   size_t size() const
   {
     Lock lock(m_mutex);

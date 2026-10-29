@@ -18,6 +18,10 @@ public:
   void Start();
   void Stop();
   void HandleAllQueuedMessages();
+
+  /// Discard the requests and replies of the current connections, called
+  /// when the connections are closed
+  void DiscardQueuedMessages();
   bool IsRunning() const;
 
 private:

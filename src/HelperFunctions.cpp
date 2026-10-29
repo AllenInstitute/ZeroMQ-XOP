@@ -265,6 +265,7 @@ void StopThreadsAndCloseConnections()
   MessageHandler::Instance().Stop();
   HeartbeatPublisher::Instance().Stop();
   GlobalData::Instance().CloseConnections();
+  MessageHandler::Instance().DiscardQueuedMessages();
 }
 
 void ToggleIPV6Support(bool enable)
