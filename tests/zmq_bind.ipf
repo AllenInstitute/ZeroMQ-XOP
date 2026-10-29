@@ -185,15 +185,17 @@ Function AllowsBindingMultiplePorts([string str])
 	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666, TCP_V4), 1)
 End
 
-Function DoesNotAcceptLargeMessagesOnServerSocket()
+// The server would drop the connection of a client sending a too large
+// message, without a reply, and the client would wait forever
+Function AcceptsLargeMessagesOnServerSocket()
 
-	variable err, ret, rc, i
+	variable ret
 	string identity, reply
 	string msg = ""
 
-	zeromq_set(ZMQ_SET_FLAGS_DEFAULT | ZMQ_SET_FLAGS_NOBUSYWAITRECV)
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
 
-	rc = zeromq_server_bind("tcp://127.0.0.1:5555")
+	ret = zeromq_server_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
 	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 
@@ -203,11 +205,9 @@ Function DoesNotAcceptLargeMessagesOnServerSocket()
 
 	zeromq_client_send(msg)
 
-	for(i = 0; i < 100; i += 1)
-		reply = zeromq_server_recv(identity)
-		CHECK_EQUAL_VAR(strlen(identity), 0)
-		CHECK_EQUAL_VAR(strlen(reply), 0)
-	endfor
+	reply = zeromq_server_recv(identity)
+	CHECK_EQUAL_STR(reply, msg)
+	CHECK_GT_VAR(strlen(identity), 0)
 End
 
 Function AllowsEmptyIdentityAndPayload()
