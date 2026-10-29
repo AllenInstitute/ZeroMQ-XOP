@@ -365,7 +365,8 @@ int ZeroMQClientSend(const std::string &payload)
   return rc;
 }
 
-int ZeroMQServerSend(const std::string &identity, const std::string &payload)
+int ZeroMQServerSend(const std::string &identity, const std::string &payload,
+                     bool unreachableIsError)
 {
   GET_SOCKET(socket, SocketTypes::Server);
   const auto payloadLength = payload.length();
@@ -375,6 +376,13 @@ int ZeroMQServerSend(const std::string &identity, const std::string &payload)
   // identity
   int rc =
       zmq_send(socket.get(), identity.c_str(), identity.length(), ZMQ_SNDMORE);
+
+  // ZMQ_ROUTER_MANDATORY reports an unknown identity on the first frame
+  if(rc < 0 && zmq_errno() == EHOSTUNREACH && !unreachableIsError)
+  {
+    return -1;
+  }
+
   ZEROMQ_ASSERT(rc >= 0);
 
   // empty

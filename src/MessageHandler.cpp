@@ -56,7 +56,14 @@ void DrainOutgoingReplies()
             return;
           }
 
-          auto rc = ZeroMQServerSend(reply.identity, reply.message);
+          // the client might have disconnected in the meantime
+          auto rc = ZeroMQServerSend(reply.identity, reply.message, false);
+
+          if(rc < 0)
+          {
+            DEBUG_OUTPUT("Discarding the reply to a disconnected client");
+            return;
+          }
 
           DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
         }
