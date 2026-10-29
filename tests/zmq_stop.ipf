@@ -52,3 +52,21 @@ Function StopsConnections()
 	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 0)
 	/// @todo how to check that the connections are closed?
 End
+
+Function StopsHeartbeatPublisherImmediately()
+
+	variable ret, start, elapsed
+
+	ret = zeromq_pub_bind("tcp://127.0.0.1:5556")
+	CHECK_EQUAL_VAR(ret, 0)
+
+	// let the heartbeat publisher send its first heartbeat
+	Sleep/S 0.5
+
+	start   = stopmstimer(-2)
+	ret     = zeromq_stop()
+	elapsed = (stopmstimer(-2) - start) / 1e6
+
+	CHECK_EQUAL_VAR(ret, 0)
+	CHECK_LT_VAR(elapsed, 1)
+End

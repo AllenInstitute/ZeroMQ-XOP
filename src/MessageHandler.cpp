@@ -75,7 +75,7 @@ void WorkerThread()
 
       // check if stop is requested
       {
-        LockGuard lock(threadShouldFinishMutex);
+        LockGuardRec lock(threadShouldFinishMutex);
         if(threadShouldFinish)
         {
           DEBUG_OUTPUT("Exiting");
@@ -162,7 +162,7 @@ void CallAndQueueReply(const RequestInterfacePtr &req) noexcept
 
 void MessageHandler::Start()
 {
-  LockGuard lock(threadMutex);
+  LockGuardRec lock(threadMutex);
 
   if(m_thread.joinable())
   {
@@ -179,7 +179,7 @@ void MessageHandler::Start()
   // Reset the stop flag *before* the worker thread is created, while still
   // holding threadMutex. Fixes issue #76
   {
-    LockGuard innerLock(threadShouldFinishMutex);
+    LockGuardRec innerLock(threadShouldFinishMutex);
     threadShouldFinish = false;
   }
 
@@ -191,7 +191,7 @@ void MessageHandler::Start()
 
 void MessageHandler::Stop()
 {
-  LockGuard lock(threadMutex);
+  LockGuardRec lock(threadMutex);
 
   if(!m_thread.joinable())
   {
@@ -201,7 +201,7 @@ void MessageHandler::Stop()
   DEBUG_OUTPUT("Shutting down the handler.");
 
   {
-    LockGuard innerLock(threadShouldFinishMutex);
+    LockGuardRec innerLock(threadShouldFinishMutex);
     threadShouldFinish = true;
   }
 
@@ -210,7 +210,7 @@ void MessageHandler::Stop()
 
 bool MessageHandler::IsRunning() const
 {
-  LockGuard lock(threadMutex);
+  LockGuardRec lock(threadMutex);
 
   return m_thread.joinable();
 }

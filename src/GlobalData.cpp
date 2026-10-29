@@ -127,7 +127,7 @@ void *GlobalData::GetOrCreateSocket(SocketTypes st)
 
 bool GlobalData::HasBindsOrConnections(SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  LockGuardRec lock(GetMutex(st));
 
   auto &socketData = GetSocketTypeData(st);
 
@@ -136,7 +136,7 @@ bool GlobalData::HasBindsOrConnections(SocketTypes st)
 
 bool GlobalData::HasSocket(SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  LockGuardRec lock(GetMutex(st));
 
   auto &socketData = GetSocketTypeData(st);
   return socketData.m_zmq_socket != nullptr;
@@ -144,7 +144,7 @@ bool GlobalData::HasSocket(SocketTypes st)
 
 void GlobalData::SetDebugFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  LockGuardRec lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
   m_debugging = val;
@@ -157,7 +157,7 @@ bool GlobalData::GetDebugFlag() const
 
 void GlobalData::SetRecvBusyWaitingFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  LockGuardRec lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
   m_busyWaiting = val;
@@ -170,7 +170,7 @@ bool GlobalData::GetRecvBusyWaitingFlag() const
 
 void GlobalData::SetInterceptorFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  LockGuardRec lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
   m_interceptor = val;
@@ -190,7 +190,7 @@ void GlobalData::CloseConnections()
 
   for(auto st : GetAllSocketTypes())
   {
-    LockGuard lock(GetMutex(st));
+    LockGuardRec lock(GetMutex(st));
 
     if(!HasSocket(st))
     {
@@ -241,7 +241,7 @@ void GlobalData::CloseConnections()
 void GlobalData::AddToListOfBindsOrConnections(const std::string &point,
                                                SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  LockGuardRec lock(GetMutex(st));
 
   auto &socketData = GetSocketTypeData(st);
   socketData.m_list.push_back(point);
@@ -254,7 +254,7 @@ ConcurrentQueue<OutputMessagePtr> &GlobalData::GetXOPNoticeQueue()
 
 void GlobalData::SetLoggingFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  LockGuardRec lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
 
@@ -273,7 +273,7 @@ void GlobalData::AddLogEntry(const json &doc, MessageDirection dir)
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  LockGuardRec lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(doc, dir);
 }
@@ -286,7 +286,7 @@ void GlobalData::AddLogEntry(const json &doc, const std::string &identity,
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  LockGuardRec lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(doc, identity, dir);
 }
@@ -298,7 +298,7 @@ void GlobalData::AddLogEntry(const std::string &str)
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  LockGuardRec lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(str);
 }
@@ -310,7 +310,7 @@ void GlobalData::AddLogEntry(const std::string &str, MessageDirection dir)
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  LockGuardRec lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(str, dir);
 }
@@ -323,28 +323,28 @@ void GlobalData::AddLogEntry(const std::string &str,
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  LockGuardRec lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(str, identity, dir);
 }
 
 void GlobalData::SetLoggingTemplate(const std::string &loggingTemplate)
 {
-  LockGuard lock(m_loggingLock);
+  LockGuardRec lock(m_loggingLock);
 
   m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME, loggingTemplate);
 }
 
 void GlobalData::InitLogging()
 {
-  LockGuard lock(m_loggingLock);
+  LockGuardRec lock(m_loggingLock);
 
   m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME);
 }
 
 void GlobalData::SetInterceptorFunctionName(const std::string &funcName)
 {
-  LockGuard lock(m_interceptorLock);
+  LockGuardRec lock(m_interceptorLock);
 
   FunctionInfo fip{};
   auto rc = GetFunctionInfo(funcName.c_str(), &fip);
@@ -370,7 +370,7 @@ void GlobalData::SetInterceptorFunctionName(const std::string &funcName)
 
 std::string GlobalData::GetInterceptorFunctionName()
 {
-  LockGuard lock(m_interceptorLock);
+  LockGuardRec lock(m_interceptorLock);
 
   return m_interceptorFuncName;
 }
