@@ -2,6 +2,7 @@
 #include "MessageHandler.h"
 #include "RequestInterface.h"
 
+#include <atomic>
 #include <chrono>
 #include <thread>
 
@@ -13,14 +14,26 @@ namespace
 
 using namespace std::chrono_literals;
 std::recursive_mutex threadMutex;
-ConcurrentQueue<RequestInterfacePtr> incomingQueue;
 bool threadShouldFinish;
 std::recursive_mutex threadShouldFinishMutex;
+
+/// Incremented when the connections are closed, requests and replies of
+/// an older generation belong to clients of closed connections
+std::atomic<uint64_t> connectionGeneration{0};
+
+struct IncomingRequest
+{
+  RequestInterfacePtr request;
+  uint64_t generation;
+};
+
+ConcurrentQueue<IncomingRequest> incomingQueue;
 
 struct OutgoingReply
 {
   std::string identity;
   std::string message;
+  uint64_t generation;
 };
 
 ConcurrentQueue<OutgoingReply> outgoingQueue;
@@ -37,6 +50,12 @@ void DrainOutgoingReplies()
       {
         try
         {
+          if(reply.generation != connectionGeneration)
+          {
+            DEBUG_OUTPUT("Discarding the reply to a closed connection");
+            return;
+          }
+
           auto rc = ZeroMQServerSend(reply.identity, reply.message);
 
           DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
@@ -102,7 +121,7 @@ void WorkerThread()
         {
           const auto payload = CreateStringFromZMsg(&payloadMsg);
           auto req           = RequestInterface::Create(identity, payload);
-          incomingQueue.push(req);
+          incomingQueue.push({req, connectionGeneration});
         }
         catch(const std::bad_alloc &)
         {
@@ -134,16 +153,31 @@ void WorkerThread()
   zmq_msg_close(&payloadMsg);
 }
 
-void CallAndQueueReply(const RequestInterfacePtr &req) noexcept
+void CallAndQueueReply(const IncomingRequest &incoming) noexcept
 {
   try
   {
     try
     {
-      auto doc     = CallIgorFunctionFromReqInterface(req);
-      auto message = doc.dump(DEFAULT_INDENT);
+      if(incoming.generation != connectionGeneration)
+      {
+        DEBUG_OUTPUT("Discarding the request of a closed connection");
+        return;
+      }
 
-      outgoingQueue.push({req->GetCallerIdentity(), message});
+      const auto &req = incoming.request;
+      auto doc        = CallIgorFunctionFromReqInterface(req);
+      auto message    = doc.dump(DEFAULT_INDENT);
+
+      // the called function might have closed the connections
+      if(incoming.generation != connectionGeneration)
+      {
+        DEBUG_OUTPUT("Discarding the reply to a closed connection");
+        return;
+      }
+
+      outgoingQueue.push(
+          {req->GetCallerIdentity(), message, incoming.generation});
     }
     catch(const std::exception &e)
     {
@@ -206,6 +240,14 @@ void MessageHandler::Stop()
   }
 
   m_thread.join();
+}
+
+void MessageHandler::DiscardQueuedMessages()
+{
+  connectionGeneration++;
+
+  incomingQueue.apply_to_all([](const IncomingRequest &) {});
+  outgoingQueue.apply_to_all([](const OutgoingReply &) {});
 }
 
 bool MessageHandler::IsRunning() const
