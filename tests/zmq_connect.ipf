@@ -176,3 +176,50 @@ Function ClientsHaveUniqueIdentities()
 
 	CHECK_NEQ_STR(first, second)
 End
+
+Function ClientRecvTimeoutComplainsWithInvalidValues()
+
+	variable err
+
+	try
+		zeromq_client_set_recv_timeout(-1); AbortOnRTE
+		FAIL()
+	catch
+		err = GetRTError(1)
+		CheckErrorMessage(err, ZMQ_INVALID_ARG)
+	endtry
+
+	try
+		zeromq_client_set_recv_timeout(NaN); AbortOnRTE
+		FAIL()
+	catch
+		err = GetRTError(1)
+		CheckErrorMessage(err, ZMQ_INVALID_ARG)
+	endtry
+End
+
+// Without a reply zeromq_client_recv() would wait forever
+Function ClientRecvReturnsAfterTimeout()
+
+	variable start, elapsed
+	string reply
+
+	zeromq_stop()
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
+	zeromq_client_set_recv_timeout(0.5)
+
+	// the server never replies, as the message handler is not running
+	zeromq_server_bind("tcp://127.0.0.1:5555")
+	zeromq_client_connect("tcp://127.0.0.1:5555")
+	zeromq_client_send("abcd")
+
+	start   = stopmstimer(-2)
+	reply   = zeromq_client_recv()
+	elapsed = (stopmstimer(-2) - start) / 1e6
+
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
+
+	CHECK_EMPTY_STR(reply)
+	CHECK_GE_VAR(elapsed, 0.5)
+	CHECK_LT_VAR(elapsed, 5)
+End

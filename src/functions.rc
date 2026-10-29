@@ -25,6 +25,13 @@ BEGIN
   HSTRING_TYPE,      // parameter 1
   0,
 
+  // variable zeromq_client_set_recv_timeout(variable timeout)
+  "zeromq_client_set_recv_timeout\0",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  NT_FP64,      // parameter 1
+  0,
+
   // variable zeromq_handler_start()
   "zeromq_handler_start\0",
   F_UTIL | F_EXTERNAL,    // Function category

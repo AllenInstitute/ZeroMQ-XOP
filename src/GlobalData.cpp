@@ -182,6 +182,17 @@ bool GlobalData::GetInterceptorFlag() const
   return m_interceptor;
 }
 
+void GlobalData::SetClientRecvTimeout(double val)
+{
+  DEBUG_OUTPUT("new value={}", val);
+  m_clientRecvTimeout = val;
+}
+
+double GlobalData::GetClientRecvTimeout() const
+{
+  return m_clientRecvTimeout;
+}
+
 void GlobalData::CloseConnections()
 {
   if(HasSocket(SocketTypes::Subscriber))

@@ -9,7 +9,7 @@
 /// @name Flags for zeromq_set()
 /// @anchor ZeroMQSetFlags
 ///@{
-/// Sets the default flags (no debug, no ipv6, busy wait on receive)
+/// Sets the default flags (no debug, no ipv6, busy wait on receive, no client receive timeout)
 Constant ZeroMQ_SET_FLAGS_DEFAULT = 0x1
 /// Enable debug output
 Constant ZeroMQ_SET_FLAGS_DEBUG = 0x2
@@ -47,7 +47,7 @@ Constant ZeroMQ_MESSAGE_INVALID_TYPE      = 10013
 /// @name Flags for zeromq_set()
 /// @anchor ZeroMQSetFlags
 ///@{
-/// Sets the default flags (no debug, no ipv6, busy wait on receive, no interceptor function)
+/// Sets the default flags (no debug, no ipv6, busy wait on receive, no interceptor function, no client receive timeout)
 Constant ZMQ_SET_FLAGS_DEFAULT = 0x1
 /// Enable debug output
 Constant ZMQ_SET_FLAGS_DEBUG = 0x2

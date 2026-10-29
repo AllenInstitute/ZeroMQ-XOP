@@ -1,5 +1,7 @@
 #include "ZeroMQ.h"
 
+#include <chrono>
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
@@ -12,7 +14,9 @@ extern "C" int zeromq_client_recv(zeromq_client_recvParams *p)
   int rc = zmq_msg_init(&payloadMsg);
   ZEROMQ_ASSERT(rc == 0);
 
-  auto wait = GlobalData::Instance().GetRecvBusyWaitingFlag();
+  auto wait          = GlobalData::Instance().GetRecvBusyWaitingFlag();
+  const auto timeout = GlobalData::Instance().GetClientRecvTimeout();
+  const auto start   = std::chrono::steady_clock::now();
 
   for(;;)
   {
@@ -22,6 +26,16 @@ extern "C" int zeromq_client_recv(zeromq_client_recvParams *p)
     {
       if(!wait)
       {
+        InitHandle(&(p->result), 0);
+        break;
+      }
+
+      const std::chrono::duration<double> elapsed =
+          std::chrono::steady_clock::now() - start;
+
+      if(timeout > 0 && elapsed.count() > timeout)
+      {
+        DEBUG_OUTPUT("No reply within the timeout of {} s", timeout);
         InitHandle(&(p->result), 0);
         break;
       }

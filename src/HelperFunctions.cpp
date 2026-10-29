@@ -192,6 +192,7 @@ void ApplyFlags(double flags)
     GlobalData::Instance().SetLoggingFlag(false);
     ToggleIPV6Support(false);
     GlobalData::Instance().SetInterceptorFlag(false);
+    GlobalData::Instance().SetClientRecvTimeout(0);
     numMatches++;
   }
 

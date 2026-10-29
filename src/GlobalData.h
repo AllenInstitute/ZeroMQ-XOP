@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <mutex>
 #include <memory>
 #include "Logging.h"
@@ -46,6 +47,11 @@ public:
 
   void SetInterceptorFlag(bool val);
   bool GetInterceptorFlag() const;
+
+  /// @brief Time zeromq_client_recv() waits for a message in seconds, 0 waits
+  /// forever
+  void SetClientRecvTimeout(double val);
+  double GetClientRecvTimeout() const;
 
   void CloseConnections();
   void AddToListOfBindsOrConnections(const std::string &localPoint,
@@ -98,6 +104,7 @@ private:
   bool m_busyWaiting;
   bool m_logging;
   bool m_interceptor;
+  std::atomic<double> m_clientRecvTimeout{0};
 
   ConcurrentQueue<OutputMessagePtr> m_queue;
   std::unique_ptr<Logging> m_loggingSink;

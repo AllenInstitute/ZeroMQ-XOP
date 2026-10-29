@@ -42,6 +42,17 @@ typedef struct zeromq_client_sendParams zeromq_client_sendParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_client_set_recv_timeoutParams
+{
+  double timeout;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_client_set_recv_timeoutParams
+    zeromq_client_set_recv_timeoutParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_handler_startParams
 {
   double result;
@@ -318,6 +329,10 @@ extern "C" int zeromq_client_recv(zeromq_client_recvParams *p);
 
 // variable zeromq_client_send(string msg)
 extern "C" int zeromq_client_send(zeromq_client_sendParams *p);
+
+// variable zeromq_client_set_recv_timeout(variable timeout)
+extern "C" int
+zeromq_client_set_recv_timeout(zeromq_client_set_recv_timeoutParams *p);
 
 // variable zeromq_handler_start()
 extern "C" int zeromq_handler_start(zeromq_handler_startParams *p);
