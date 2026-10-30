@@ -8,7 +8,7 @@
 namespace
 {
 
-constexpr char PACKAGE_NAME[] = "ZeroMQ";
+constexpr const char *PACKAGE_NAME = "ZeroMQ";
 
 /// Maximum size of a message received by the server socket in bytes, libzmq
 /// closes the connection of a client which sends a larger one
@@ -362,9 +362,10 @@ void GlobalData::SetInterceptorFunctionName(const std::string &funcName)
                         fmt::format("Function name={}", funcName));
   }
 
-  int reqParamTypes[] = {HSTRING_TYPE, HSTRING_TYPE, NT_FP64};
+  std::array<int, 3> reqParamTypes = {HSTRING_TYPE, HSTRING_TYPE, NT_FP64};
   int badParamNumber{};
-  rc = CheckFunctionForm(&fip, 3, reqParamTypes, &badParamNumber, NT_FP64);
+  rc = CheckFunctionForm(&fip, To<int>(reqParamTypes.size()),
+                         reqParamTypes.data(), &badParamNumber, NT_FP64);
   if(rc != 0)
   {
     throw IgorException(
