@@ -132,7 +132,7 @@ enum ZeroMQ_SET_FLAGS
   LOGGING              = 16,
   INTERCEPTOR_FUNCTION = 32
 };
-}
+} // namespace ZeroMQ_SET_FLAGS
 
 /// Socket types for zeromq_get_bound_endpoints()
 namespace ZeroMQ_SOCKET_TYPE
@@ -145,7 +145,7 @@ enum ZeroMQ_SOCKET_TYPE
   PUBLISHER  = 3,
   SUBSCRIBER = 4
 };
-}
+} // namespace ZeroMQ_SOCKET_TYPE
 
 std::string GetLastEndPoint(void *s);
 void ToggleIPV6Support(bool enable);
