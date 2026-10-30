@@ -552,7 +552,7 @@ json SerializeWave(waveHndl waveHandle)
   const auto type     = GetWaveTypeString(waveType);
   const auto rawData  = WaveToString(waveType, waveHandle);
 
-  int numDims;
+  int numDims   = 0;
   auto dimSizes = GetWaveDimension(waveHandle, numDims);
   dimSizes.resize(numDims);
   const auto dimSizesString = DimensionSizesToString(dimSizes);
