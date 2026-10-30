@@ -68,7 +68,7 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
       std::vector<IndexInt> dims(MAX_DIMENSIONS, 0);
       const std::string elem = GetWaveElement<std::string>(wv, dims);
 
-      sendStorage.emplace_back(SendStorage(elem));
+      sendStorage.emplace_back(elem);
 
       if(i == 0)
       {
@@ -83,7 +83,7 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
     {
       auto *ptr           = GetWaveDataPtr<void>(wv);
       const auto numBytes = WavePoints(wv) * GetWaveElementSize(waveType);
-      sendStorage.emplace_back(SendStorage(ptr, numBytes));
+      sendStorage.emplace_back(ptr, numBytes);
     }
   }
 

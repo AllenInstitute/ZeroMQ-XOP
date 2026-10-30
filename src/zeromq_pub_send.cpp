@@ -19,8 +19,8 @@ extern "C" int zeromq_pub_send(zeromq_pub_sendParams *p)
                                      MessageDirection::Outgoing);
 
   SendStorageVec sendStorage;
-  sendStorage.emplace_back(SendStorage{filter});
-  sendStorage.emplace_back(SendStorage{msg});
+  sendStorage.emplace_back(filter);
+  sendStorage.emplace_back(msg);
 
   ZeroMQPublisherSend(sendStorage);
 

@@ -50,8 +50,8 @@ void WorkerThread()
       if(GlobalData::Instance().HasBindsOrConnections(SocketTypes::Publisher))
       {
         SendStorageVec sendStorage;
-        sendStorage.emplace_back(SendStorage{"heartbeat"});
-        sendStorage.emplace_back(SendStorage{""});
+        sendStorage.emplace_back("heartbeat");
+        sendStorage.emplace_back("");
 
         auto rc = ZeroMQPublisherSend(sendStorage);
 
