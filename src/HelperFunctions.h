@@ -223,7 +223,7 @@ int GetNumberOfInputParameters(const FunctionInfo &fip, int numReturnValues);
 int GetFirstInputParameterIndex(const FunctionInfo &fip, int numReturnValues);
 std::string CleanupString(std::string str);
 
-enum class InterceptorMode
+enum class InterceptorMode : std::uint8_t
 {
   Begin = 1,
   End   = 2
@@ -232,7 +232,7 @@ enum class InterceptorMode
 // Straight from the fmt documentation
 // https://fmt.dev/latest/api.html#argument-lists
 
-enum class OutputMode
+enum class OutputMode : std::uint8_t
 {
   Debug,
   Emergency,

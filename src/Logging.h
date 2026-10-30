@@ -1,10 +1,11 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
-enum class MessageDirection
+enum class MessageDirection : std::uint8_t
 {
   Incoming = 0,
   Outgoing

@@ -11,7 +11,7 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-enum class SocketTypes
+enum class SocketTypes : std::uint8_t
 {
   Client,
   Server,
