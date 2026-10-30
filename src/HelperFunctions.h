@@ -245,7 +245,7 @@ void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
 
 template <typename... T>
 void xop_logging(OutputMode mode, const char *func, int line,
-                 fmt::format_string<T...> format, T &&...args) noexcept
+                 fmt::format_string<T...> format, const T &...args) noexcept
 {
   vlog(mode, func, line, format, fmt::make_format_args(args...));
 }
