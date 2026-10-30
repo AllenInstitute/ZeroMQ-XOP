@@ -28,7 +28,7 @@ public:
 
 private:
   json ReadPassByRefParameters(int first, int last);
-  unsigned char m_values[MAX_NUM_PARAMS * sizeof(double)] = {};
+  std::array<unsigned char, MAX_NUM_PARAMS * sizeof(double)> m_values{};
   std::vector<int> m_paramTypes;
   std::vector<CountInt> m_paramSizesInBytes;
   bool m_multipleReturnValueSyntax;

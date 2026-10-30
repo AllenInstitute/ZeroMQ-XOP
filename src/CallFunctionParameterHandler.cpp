@@ -271,5 +271,5 @@ json CallFunctionParameterHandler::ReadPassByRefParameters(int first, int last)
 
 unsigned char *CallFunctionParameterHandler::GetParameterValueStorage()
 {
-  return &m_values[0];
+  return m_values.data();
 }

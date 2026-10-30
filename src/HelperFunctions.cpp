@@ -7,6 +7,8 @@
 namespace
 {
 
+constexpr size_t MAX_ENDPOINT_LENGTH = 256;
+
 ExperimentModification MapOutputModeToExperimentModification(OutputMode mode)
 {
   switch(mode)
@@ -241,14 +243,15 @@ void ApplyFlags(double flags)
 
 std::string GetLastEndPoint(void *socket)
 {
-  char buf[256];
-  size_t bufSize = sizeof(buf);
-  const int rc   = zmq_getsockopt(socket, ZMQ_LAST_ENDPOINT, buf, &bufSize);
+  std::array<char, MAX_ENDPOINT_LENGTH> buf{};
+  size_t bufSize = buf.size();
+  const int rc =
+      zmq_getsockopt(socket, ZMQ_LAST_ENDPOINT, buf.data(), &bufSize);
   ZEROMQ_ASSERT(rc == 0);
 
-  buf[bufSize - 1] = '\0';
-  DEBUG_OUTPUT("lastEndPoint={}", buf);
-  return std::string(buf);
+  buf.at(bufSize - 1) = '\0';
+  DEBUG_OUTPUT("lastEndPoint={}", buf.data());
+  return {buf.data()};
 }
 
 void StopThreadsAndCloseConnections()
@@ -584,11 +587,12 @@ std::string SerializeDataFolder(DataFolderHandle dataFolderHandle)
     return "free";
   }
 
-  char dataFolderPathOrName[MAXCMDLEN + 1];
-  rc = GetDataFolderNameOrPath(dataFolderHandle, 0x1, dataFolderPathOrName);
+  std::array<char, MAXCMDLEN + 1> dataFolderPathOrName{};
+  rc = GetDataFolderNameOrPath(dataFolderHandle, 0x1,
+                               dataFolderPathOrName.data());
   ASSERT(rc == 0);
 
-  std::string folder(dataFolderPathOrName);
+  std::string folder(dataFolderPathOrName.data());
 
   // datafolder handle refers to non existing datafolder
   if(folder.find(":_killed folder_:") != std::string::npos)

@@ -382,14 +382,14 @@ void AddDataFullScaleIfSet(json &doc, waveHndl waveHandle)
 
 void AddDataUnitIfSet(json &doc, waveHndl waveHandle)
 {
-  char unit[MAX_UNIT_CHARS + 1];
+  std::array<char, MAX_UNIT_CHARS + 1> unit{};
 
-  auto rc = MDGetWaveUnits(waveHandle, -1, unit);
+  auto rc = MDGetWaveUnits(waveHandle, -1, unit.data());
   ASSERT(rc == 0);
 
-  if(strlen(unit) > 0)
+  if(strlen(unit.data()) > 0)
   {
-    doc["data"]["unit"] = unit;
+    doc["data"]["unit"] = unit.data();
   }
 }
 
@@ -435,13 +435,13 @@ void AddDimensionUnitsIfSet(json &doc, waveHndl waveHandle,
 
   for(size_t i = 0; i < numDimensions; i++)
   {
-    char unit[MAX_UNIT_CHARS + 1];
-    auto rc = MDGetWaveUnits(waveHandle, static_cast<int>(i), unit);
+    std::array<char, MAX_UNIT_CHARS + 1> unit{};
+    auto rc = MDGetWaveUnits(waveHandle, static_cast<int>(i), unit.data());
     ASSERT(rc == 0);
 
-    if(strlen(unit) > 0)
+    if(strlen(unit.data()) > 0)
     {
-      units.at(i)          = unit;
+      units.at(i)          = unit.data();
       differentFromDefault = true;
     }
   }
@@ -466,13 +466,14 @@ void AddDimensionLabelsFullIfSet(json &doc, waveHndl waveHandle,
 
   for(size_t i = 0; i < numDimensions; i++)
   {
-    char label[MAX_DIM_LABEL_BYTES + 1];
-    auto rc = MDGetDimensionLabel(waveHandle, static_cast<int>(i), -1, label);
+    std::array<char, MAX_DIM_LABEL_BYTES + 1> label{};
+    auto rc =
+        MDGetDimensionLabel(waveHandle, static_cast<int>(i), -1, label.data());
     ASSERT(rc == 0);
 
-    if(strlen(label) > 0)
+    if(strlen(label.data()) > 0)
     {
-      labels.at(i)         = label;
+      labels.at(i)         = label.data();
       differentFromDefault = true;
     }
   }
@@ -502,14 +503,15 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
   {
     for(CountInt j = 0; j < dimSizes.at(i); j++)
     {
-      char label[MAX_DIM_LABEL_BYTES + 1];
-      auto rc = MDGetDimensionLabel(waveHandle, static_cast<int>(i), j, label);
+      std::array<char, MAX_DIM_LABEL_BYTES + 1> label{};
+      auto rc =
+          MDGetDimensionLabel(waveHandle, static_cast<int>(i), j, label.data());
       ASSERT(rc == 0);
 
-      if(strlen(label) > 0)
+      if(strlen(label.data()) > 0)
       {
         differentFromDefault  = true;
-        labels.at(labelIndex) = label;
+        labels.at(labelIndex) = label.data();
       }
 
       labelIndex++;

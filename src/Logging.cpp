@@ -4,24 +4,24 @@
 
 namespace
 {
-constexpr char DEFAULT_TEMPLATE[]     = "{}";
-constexpr char SESSION_START_MARKER[] = "{}";
-constexpr char IDENTITY_KEY[]         = "remote identity";
+constexpr const char *DEFAULT_TEMPLATE     = "{}";
+constexpr const char *SESSION_START_MARKER = "{}";
+constexpr const char *IDENTITY_KEY         = "remote identity";
 
-constexpr char TEMPLATE_KEY_JSON[]      = "json";
-constexpr char TEMPLATE_KEY_STR[]       = "str";
-constexpr char TEMPLATE_KEY_DIRECTION[] = "direction";
-constexpr char TEMPLATE_KEY_TS[]        = "ts";
+constexpr const char *TEMPLATE_KEY_JSON      = "json";
+constexpr const char *TEMPLATE_KEY_STR       = "str";
+constexpr const char *TEMPLATE_KEY_DIRECTION = "direction";
+constexpr const char *TEMPLATE_KEY_TS        = "ts";
 
 constexpr std::array<const char *, 4> RESERVED_KEYS = {
     TEMPLATE_KEY_DIRECTION, TEMPLATE_KEY_JSON, TEMPLATE_KEY_STR,
     TEMPLATE_KEY_TS};
 
 #ifdef WINIGOR
-constexpr const char DIR_SEPARATOR[] = "\\";
+constexpr const char *DIR_SEPARATOR = "\\";
 #else
 #ifdef MACIGOR
-constexpr const char DIR_SEPARATOR[] = "/";
+constexpr const char *DIR_SEPARATOR = "/";
 #endif // MACIGOR
 #endif // WINIGOR
 
@@ -191,13 +191,13 @@ public:
 
   void CreatePackageDirectory(const std::string &package)
   {
-    char pathOut[MAX_PATH_LEN + 1];
+    std::array<char, MAX_PATH_LEN + 1> pathOut{};
 
-    auto rc = SpecialDirPath("Igor Preferences", 0, 0x1, 1, pathOut);
+    auto rc = SpecialDirPath("Igor Preferences", 0, 0x1, 1, pathOut.data());
     ASSERT(rc == 0);
 
-    const auto path = fmt::format("{}Packages{}{}{}", pathOut, DIR_SEPARATOR,
-                                  package, DIR_SEPARATOR);
+    const auto path = fmt::format("{}Packages{}{}{}", pathOut.data(),
+                                  DIR_SEPARATOR, package, DIR_SEPARATOR);
 
     EnsureDirectoryExists(path);
 
