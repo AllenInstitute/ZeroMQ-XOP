@@ -26,10 +26,12 @@ TickCountInt ConvertToUnixEpochUTC(TickCountInt secs)
   }
 
   // calculate the offset including local time zone to the unix epoch
-  short year       = 1970;
-  short month      = 1;
-  short dayOfMonth = 1;
-  double offset    = std::numeric_limits<double>::quiet_NaN();
+  constexpr std::int16_t UNIX_EPOCH_YEAR = 1970;
+
+  std::int16_t year       = UNIX_EPOCH_YEAR;
+  std::int16_t month      = 1;
+  std::int16_t dayOfMonth = 1;
+  double offset           = std::numeric_limits<double>::quiet_NaN();
 
   auto rc = DateToIgorDateInSeconds(1, &year, &month, &dayOfMonth, &offset);
   ASSERT(rc == 0);
@@ -46,11 +48,11 @@ std::string GetWaveTypeString(int waveType)
 {
   std::string result;
 
-  const auto isComplex = waveType & NT_CMPLX;
-  waveType &= ~NT_CMPLX;
+  const auto isComplex = IsBitSet(waveType, NT_CMPLX);
+  waveType             = ClearBit(waveType, NT_CMPLX);
 
-  const auto isUnsigned = waveType & NT_UNSIGNED;
-  waveType &= ~NT_UNSIGNED;
+  const auto isUnsigned = IsBitSet(waveType, NT_UNSIGNED);
+  waveType              = ClearBit(waveType, NT_UNSIGNED);
 
   switch(waveType)
   {
@@ -152,7 +154,7 @@ struct WriteIntoStream<float, withComma>
 template <int withComma>
 struct WriteIntoStream<char *, withComma>
 {
-  void operator()(fmt::memory_buffer &buf, char *val)
+  void operator()(fmt::memory_buffer &buf, const char *val)
   {
     auto formatSpec = GetFormatString<char *, withComma>()();
 
@@ -203,13 +205,13 @@ void OutputArray(fmt::memory_buffer &buf, T *data, CountInt dataLength)
 
   fmt::format_to(std::back_inserter(buf), "[");
 
-  CountInt i = 0;
-  for(i = 0; i < dataLength - 1; i++)
+  CountInt index = 0;
+  for(index = 0; index < dataLength - 1; index++)
   {
-    streamWriterWithComma(buf, *(data + i));
+    streamWriterWithComma(buf, *std::next(data, index));
   }
 
-  streamWriter(buf, *(data + i));
+  streamWriter(buf, *std::next(data, index));
 
   fmt::format_to(std::back_inserter(buf), "]");
 }
@@ -225,8 +227,7 @@ void ToString(fmt::memory_buffer &buf, waveHndl waveHandle, CountInt offset)
     return;
   }
 
-  T *data = GetWaveDataPtr<T>(waveHandle);
-  data += offset;
+  T *data = std::next(GetWaveDataPtr<T>(waveHandle), offset);
 
   OutputArray(buf, data, dataLength);
 }
@@ -255,11 +256,11 @@ void ToString<char *>(fmt::memory_buffer &buf, waveHndl waveHandle,
 
   fmt::format_to(std::back_inserter(buf), "[");
 
-  CountInt i = 0;
-  for(i = 0; i < dataLength - 1; i++)
+  CountInt index = 0;
+  for(index = 0; index < dataLength - 1; index++)
   {
     streamWriterWithComma(buf, data);
-    data += strlen(data) + 1;
+    data = std::next(data, To<std::ptrdiff_t>(strlen(data) + 1));
   }
 
   streamWriter(buf, data);
@@ -323,8 +324,8 @@ std::string WaveToStringImpl(int waveType, waveHndl waveHandle, CountInt offset)
 
 std::string WaveToString(int waveType, waveHndl waveHandle)
 {
-  const auto isComplex = waveType & NT_CMPLX;
-  waveType &= ~NT_CMPLX;
+  const auto isComplex = IsBitSet(waveType, NT_CMPLX);
+  waveType             = ClearBit(waveType, NT_CMPLX);
 
   if(!isComplex)
   {
@@ -352,7 +353,7 @@ std::string DimensionSizesToString(std::vector<CountInt> dimensionSizes)
   }
 
   fmt::memory_buffer buf;
-  OutputArray(buf, &dimensionSizes[0], dimensionSizes.size());
+  OutputArray(buf, dimensionSizes.data(), To<CountInt>(dimensionSizes.size()));
 
   return to_string(buf);
 }
@@ -363,33 +364,33 @@ void AddDataFullScaleIfSet(json &doc, waveHndl waveHandle)
                                  std::numeric_limits<double>::quiet_NaN()};
 
   // see the documentation to MDGetWaveScaling, the order 1, 0 is correct
-  auto rc = MDGetWaveScaling(waveHandle, -1, &entries[1], &entries[0]);
+  auto rc = MDGetWaveScaling(waveHandle, -1, &entries.at(1), entries.data());
   ASSERT(rc == 0);
 
   // heuristic;
   // in Igor you would use the first "isValid" entry of the WaveInfo string
-  if((entries[0] == 0.0 && entries[1] == 0.0) ||
-     (std::isnan(entries[0]) && std::isnan(entries[1])))
+  if((entries.at(0) == 0.0 && entries.at(1) == 0.0) ||
+     (std::isnan(entries.at(0)) && std::isnan(entries.at(1))))
   {
     return;
   }
 
   fmt::memory_buffer buf;
-  OutputArray(buf, &entries[0], entries.size());
+  OutputArray(buf, entries.data(), To<CountInt>(entries.size()));
 
   doc["data"]["fullScale"] = json::parse(to_string(buf));
 }
 
 void AddDataUnitIfSet(json &doc, waveHndl waveHandle)
 {
-  char unit[MAX_UNIT_CHARS + 1];
+  std::array<char, MAX_UNIT_CHARS + 1> unit{};
 
-  auto rc = MDGetWaveUnits(waveHandle, -1, unit);
+  auto rc = MDGetWaveUnits(waveHandle, -1, unit.data());
   ASSERT(rc == 0);
 
-  if(strlen(unit) > 0)
+  if(strlen(unit.data()) > 0)
   {
-    doc["data"]["unit"] = unit;
+    doc["data"]["unit"] = unit.data();
   }
 }
 
@@ -404,23 +405,23 @@ void AddDimensionScalingIfSet(json &doc, waveHndl waveHandle,
 
   for(size_t i = 0; i < numDimensions; i++)
   {
-    auto rc = MDGetWaveScaling(waveHandle, static_cast<int>(i), &delta[i],
-                               &offset[i]);
+    auto rc = MDGetWaveScaling(waveHandle, static_cast<int>(i), &delta.at(i),
+                               &offset.at(i));
     ASSERT(rc == 0);
 
-    differentFromDefault |= (offset[i] != 0.0 || delta[i] != 1.0);
+    differentFromDefault |= (offset.at(i) != 0.0 || delta.at(i) != 1.0);
   }
 
   if(differentFromDefault)
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, &offset[0], offset.size());
+    OutputArray(buf, offset.data(), To<CountInt>(offset.size()));
     doc["dimension"]["offset"] = json::parse(to_string(buf));
 
     buf.clear();
 
-    OutputArray(buf, &delta[0], delta.size());
+    OutputArray(buf, delta.data(), To<CountInt>(delta.size()));
     doc["dimension"]["delta"] = json::parse(to_string(buf));
   }
 }
@@ -435,13 +436,13 @@ void AddDimensionUnitsIfSet(json &doc, waveHndl waveHandle,
 
   for(size_t i = 0; i < numDimensions; i++)
   {
-    char unit[MAX_UNIT_CHARS + 1];
-    auto rc = MDGetWaveUnits(waveHandle, static_cast<int>(i), unit);
+    std::array<char, MAX_UNIT_CHARS + 1> unit{};
+    auto rc = MDGetWaveUnits(waveHandle, static_cast<int>(i), unit.data());
     ASSERT(rc == 0);
 
-    if(strlen(unit) > 0)
+    if(strlen(unit.data()) > 0)
     {
-      units[i]             = unit;
+      units.at(i)          = unit.data();
       differentFromDefault = true;
     }
   }
@@ -450,7 +451,7 @@ void AddDimensionUnitsIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, &units[0], units.size());
+    OutputArray(buf, units.data(), To<CountInt>(units.size()));
     doc["dimension"]["unit"] = json::parse(to_string(buf));
   }
 }
@@ -466,13 +467,14 @@ void AddDimensionLabelsFullIfSet(json &doc, waveHndl waveHandle,
 
   for(size_t i = 0; i < numDimensions; i++)
   {
-    char label[MAX_DIM_LABEL_BYTES + 1];
-    auto rc = MDGetDimensionLabel(waveHandle, static_cast<int>(i), -1, label);
+    std::array<char, MAX_DIM_LABEL_BYTES + 1> label{};
+    auto rc =
+        MDGetDimensionLabel(waveHandle, static_cast<int>(i), -1, label.data());
     ASSERT(rc == 0);
 
-    if(strlen(label) > 0)
+    if(strlen(label.data()) > 0)
     {
-      labels[i]            = label;
+      labels.at(i)         = label.data();
       differentFromDefault = true;
     }
   }
@@ -481,7 +483,7 @@ void AddDimensionLabelsFullIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, &labels[0], labels.size());
+    OutputArray(buf, labels.data(), To<CountInt>(labels.size()));
     doc["dimension"]["label"]["full"] = json::parse(to_string(buf));
   }
 }
@@ -491,7 +493,7 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
 {
   const auto numDimensions  = dimSizes.size();
   auto differentFromDefault = false;
-  CountInt k                = 0;
+  CountInt labelIndex       = 0;
 
   // label for the each dimension index
   // serialized here with column-major order
@@ -500,19 +502,20 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
 
   for(size_t i = 0; i < numDimensions; i++)
   {
-    for(CountInt j = 0; j < dimSizes[i]; j++)
+    for(CountInt j = 0; j < dimSizes.at(i); j++)
     {
-      char label[MAX_DIM_LABEL_BYTES + 1];
-      auto rc = MDGetDimensionLabel(waveHandle, static_cast<int>(i), j, label);
+      std::array<char, MAX_DIM_LABEL_BYTES + 1> label{};
+      auto rc =
+          MDGetDimensionLabel(waveHandle, static_cast<int>(i), j, label.data());
       ASSERT(rc == 0);
 
-      if(strlen(label) > 0)
+      if(strlen(label.data()) > 0)
       {
-        differentFromDefault = true;
-        labels[k]            = label;
+        differentFromDefault  = true;
+        labels.at(labelIndex) = label.data();
       }
 
-      k++;
+      labelIndex++;
     }
   }
 
@@ -520,7 +523,7 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, &labels[0], labels.size());
+    OutputArray(buf, labels.data(), To<CountInt>(labels.size()));
     doc["dimension"]["label"]["each"] = json::parse(to_string(buf));
   }
 }
@@ -552,7 +555,7 @@ json SerializeWave(waveHndl waveHandle)
   const auto type     = GetWaveTypeString(waveType);
   const auto rawData  = WaveToString(waveType, waveHandle);
 
-  int numDims;
+  int numDims   = 0;
   auto dimSizes = GetWaveDimension(waveHandle, numDims);
   dimSizes.resize(numDims);
   const auto dimSizesString = DimensionSizesToString(dimSizes);

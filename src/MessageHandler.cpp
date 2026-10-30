@@ -33,7 +33,11 @@ struct IncomingRequest
   uint64_t generation;
 };
 
-ConcurrentQueue<IncomingRequest> incomingQueue;
+ConcurrentQueue<IncomingRequest> &GetIncomingQueue()
+{
+  static ConcurrentQueue<IncomingRequest> queue;
+  return queue;
+}
 
 struct OutgoingReply
 {
@@ -42,56 +46,62 @@ struct OutgoingReply
   uint64_t generation;
 };
 
-ConcurrentQueue<OutgoingReply> outgoingQueue;
-
-void QueueErrorReply(const std::string &identity, const IgorException &e)
+ConcurrentQueue<OutgoingReply> &GetOutgoingQueue()
 {
-  const json reply = e;
+  static ConcurrentQueue<OutgoingReply> queue;
+  return queue;
+}
 
-  incomingQueue.push(
+void QueueErrorReply(const std::string &identity,
+                     const IgorException &exception)
+{
+  const json reply = exception;
+
+  GetIncomingQueue().push(
       {nullptr, identity, reply.dump(DEFAULT_INDENT), connectionGeneration});
+}
+
+void SendReply(const OutgoingReply &reply)
+{
+  try
+  {
+    if(reply.generation != connectionGeneration)
+    {
+      DEBUG_OUTPUT("Discarding the reply to a closed connection");
+      return;
+    }
+
+    // the client might have disconnected in the meantime
+    auto rc = ZeroMQServerSend(reply.identity, reply.message, false);
+
+    if(rc < 0)
+    {
+      DEBUG_OUTPUT("Discarding the reply to a disconnected client");
+      return;
+    }
+
+    DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
+  }
+  catch(const std::exception &e)
+  {
+    EMERGENCY_OUTPUT(
+        "Caught std::exception with what=\"{}\". This must NOT happen!",
+        e.what());
+  }
+  catch(...)
+  {
+    EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
+  }
 }
 
 void DrainOutgoingReplies()
 {
-  if(RunningInMainThread() || outgoingQueue.empty())
+  if(RunningInMainThread() || GetOutgoingQueue().empty())
   {
     return;
   }
 
-  outgoingQueue.apply_to_all(
-      [](const OutgoingReply &reply)
-      {
-        try
-        {
-          if(reply.generation != connectionGeneration)
-          {
-            DEBUG_OUTPUT("Discarding the reply to a closed connection");
-            return;
-          }
-
-          // the client might have disconnected in the meantime
-          auto rc = ZeroMQServerSend(reply.identity, reply.message, false);
-
-          if(rc < 0)
-          {
-            DEBUG_OUTPUT("Discarding the reply to a disconnected client");
-            return;
-          }
-
-          DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
-        }
-        catch(const std::exception &e)
-        {
-          EMERGENCY_OUTPUT(
-              "Caught std::exception with what=\"{}\". This must NOT happen!",
-              e.what());
-        }
-        catch(...)
-        {
-          EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
-        }
-      });
+  GetOutgoingQueue().apply_to_all(SendReply);
 }
 
 void WorkerThread()
@@ -115,7 +125,7 @@ void WorkerThread()
 
       // check if stop is requested
       {
-        LockGuard lock(threadShouldFinishMutex);
+        const LockGuard lock(threadShouldFinishMutex);
         if(threadShouldFinish)
         {
           DEBUG_OUTPUT("Exiting");
@@ -153,7 +163,7 @@ void WorkerThread()
         {
           const auto payload = CreateStringFromZMsg(&payloadMsg);
           auto req           = RequestInterface::Create(identity, payload);
-          incomingQueue.push({req, identity, "", connectionGeneration});
+          GetIncomingQueue().push({req, identity, "", connectionGeneration});
         }
         catch(const std::bad_alloc &)
         {
@@ -182,6 +192,9 @@ void WorkerThread()
   zmq_msg_close(&payloadMsg);
 }
 
+// FMT_STRING checks the format string at compile time, the format_error
+// thrown when checking it at runtime can not happen
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void CallAndQueueReply(const IncomingRequest &incoming) noexcept
 {
   try
@@ -196,7 +209,7 @@ void CallAndQueueReply(const IncomingRequest &incoming) noexcept
 
       if(!incoming.request)
       {
-        outgoingQueue.push(
+        GetOutgoingQueue().push(
             {incoming.identity, incoming.errorReply, incoming.generation});
         return;
       }
@@ -212,7 +225,7 @@ void CallAndQueueReply(const IncomingRequest &incoming) noexcept
         return;
       }
 
-      outgoingQueue.push(
+      GetOutgoingQueue().push(
           {req->GetCallerIdentity(), message, incoming.generation});
     }
     catch(const std::exception &e)
@@ -232,7 +245,7 @@ void CallAndQueueReply(const IncomingRequest &incoming) noexcept
 
 void MessageHandler::Start()
 {
-  LockGuard lock(threadMutex);
+  const LockGuard lock(threadMutex);
 
   if(m_thread.joinable())
   {
@@ -249,19 +262,19 @@ void MessageHandler::Start()
   // Reset the stop flag *before* the worker thread is created, while still
   // holding threadMutex. Fixes issue #76
   {
-    LockGuard innerLock(threadShouldFinishMutex);
+    const LockGuard innerLock(threadShouldFinishMutex);
     threadShouldFinish = false;
   }
 
   DEBUG_OUTPUT("Before WorkerThread() start.");
 
-  auto t = std::thread(WorkerThread);
-  m_thread.swap(t);
+  auto worker = std::thread(WorkerThread);
+  m_thread.swap(worker);
 }
 
 void MessageHandler::Stop()
 {
-  LockGuard lock(threadMutex);
+  const LockGuard lock(threadMutex);
 
   if(!m_thread.joinable())
   {
@@ -271,7 +284,7 @@ void MessageHandler::Stop()
   DEBUG_OUTPUT("Shutting down the handler.");
 
   {
-    LockGuard innerLock(threadShouldFinishMutex);
+    const LockGuard innerLock(threadShouldFinishMutex);
     threadShouldFinish = true;
   }
 
@@ -282,31 +295,41 @@ void MessageHandler::DiscardQueuedMessages()
 {
   connectionGeneration++;
 
-  incomingQueue.apply_to_all([](const IncomingRequest &) {});
-  outgoingQueue.apply_to_all([](const OutgoingReply &) {});
+  GetIncomingQueue().apply_to_all([](const IncomingRequest &) {});
+  GetOutgoingQueue().apply_to_all([](const OutgoingReply &) {});
 }
 
 bool MessageHandler::IsRunning() const
 {
-  LockGuard lock(threadMutex);
+  const LockGuard lock(threadMutex);
 
   return m_thread.joinable();
 }
 
 void MessageHandler::HandleAllQueuedMessages()
 {
-  if(!RunningInMainThread() || incomingQueue.empty())
+  if(!RunningInMainThread() || GetIncomingQueue().empty())
   {
     return;
   }
 
-  auto msg = fmt::format("IDLE event messages: #{}", incomingQueue.size());
+  auto msg = fmt::format("IDLE event messages: #{}", GetIncomingQueue().size());
   GlobalData::Instance().AddLogEntry(msg);
 
-  incomingQueue.apply_to_all(CallAndQueueReply);
+  GetIncomingQueue().apply_to_all(CallAndQueueReply);
 }
 
+// FMT_STRING checks the format string at compile time, the format_error
+// thrown when checking it at runtime can not happen
+// NOLINTNEXTLINE(bugprone-exception-escape)
 MessageHandler::~MessageHandler()
 {
-  Stop();
+  try
+  {
+    Stop();
+  }
+  catch(const std::exception &e)
+  {
+    EMERGENCY_OUTPUT("Could not stop the thread: {}", e.what());
+  }
 }

@@ -23,13 +23,15 @@ extern "C" void XOPEntry()
     case IDLE:
       if(!IsIdleInProgress())
       {
-        IdleGuard guard;
+        const IdleGuard guard;
         MessageHandler::Instance().HandleAllQueuedMessages();
         OutputQueuedNotices();
       }
       break;
     case CLEANUP:
       StopThreadsAndCloseConnections();
+      break;
+    default:
       break;
     }
   }

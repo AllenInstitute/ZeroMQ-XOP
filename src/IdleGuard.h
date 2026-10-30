@@ -1,4 +1,5 @@
-#pragma once
+#ifndef IDLE_GUARD_H
+#define IDLE_GUARD_H
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -17,3 +18,5 @@ public:
 };
 
 bool IsIdleInProgress();
+
+#endif // IDLE_GUARD_H

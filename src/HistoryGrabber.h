@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HISTORY_GRABBER_H
+#define HISTORY_GRABBER_H
 
 #include "ZeroMQ.h"
 
@@ -10,8 +11,10 @@ class HistoryGrabber
 {
 public:
   HistoryGrabber();
-  std::string GetHistoryUntilNow() const;
+  [[nodiscard]] std::string GetHistoryUntilNow() const;
 
 private:
   int m_startLine{0};
 };
+
+#endif // HISTORY_GRABBER_H

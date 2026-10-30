@@ -35,12 +35,12 @@ void OutputToHistory_TS(std::string str, ExperimentModification mode)
   if(RunningInMainThread())
   {
     OutputQueuedNotices();
-    OutputToHistory(str, mode);
+    OutputToHistory(std::move(str), mode);
     return;
   }
 
   GlobalData::Instance().GetXOPNoticeQueue().push(
-      std::make_shared<OutputMessage>(str, mode));
+      std::make_shared<OutputMessage>(std::move(str), mode));
 }
 
 void OutputQueuedNotices()
@@ -51,5 +51,6 @@ void OutputQueuedNotices()
   }
 
   GlobalData::Instance().GetXOPNoticeQueue().apply_to_all(
-      [](const OutputMessagePtr &om) { OutputToHistory(om->msg, om->mode); });
+      [](const OutputMessagePtr &outputMessage)
+      { OutputToHistory(outputMessage->msg, outputMessage->mode); });
 }

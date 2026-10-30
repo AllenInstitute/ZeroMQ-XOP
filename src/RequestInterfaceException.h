@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REQUEST_INTERFACE_EXCEPTION_H
+#define REQUEST_INTERFACE_EXCEPTION_H
 
 #include "CustomExceptions.h"
 
@@ -9,5 +10,13 @@ class RequestInterfaceException : public IgorException
 {
 public:
   explicit RequestInterfaceException(int errorCode);
-  virtual ~RequestInterfaceException() override;
+  ~RequestInterfaceException() override;
+
+  RequestInterfaceException(const RequestInterfaceException &) = default;
+  RequestInterfaceException(RequestInterfaceException &&)      = default;
+  RequestInterfaceException &
+  operator=(const RequestInterfaceException &)                       = default;
+  RequestInterfaceException &operator=(RequestInterfaceException &&) = default;
 };
+
+#endif // REQUEST_INTERFACE_EXCEPTION_H

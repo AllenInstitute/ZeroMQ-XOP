@@ -13,6 +13,8 @@ namespace
 {
 
 using namespace std::chrono_literals;
+
+constexpr auto HEARTBEAT_INTERVAL = 5s;
 std::recursive_mutex threadMutex;
 bool threadShouldFinish;
 std::mutex threadShouldFinishMutex;
@@ -25,7 +27,7 @@ bool WaitForNextHeartbeat()
 {
   std::unique_lock<std::mutex> lock(threadShouldFinishMutex);
 
-  return threadShouldFinishCondition.wait_for(lock, 5s, []
+  return threadShouldFinishCondition.wait_for(lock, HEARTBEAT_INTERVAL, []
                                               { return threadShouldFinish; });
 }
 
@@ -39,7 +41,7 @@ void WorkerThread()
     {
       // check if stop is requested
       {
-        std::lock_guard<std::mutex> lock(threadShouldFinishMutex);
+        const std::scoped_lock<std::mutex> lock(threadShouldFinishMutex);
         if(threadShouldFinish)
         {
           DEBUG_OUTPUT("Exiting");
@@ -50,8 +52,8 @@ void WorkerThread()
       if(GlobalData::Instance().HasBindsOrConnections(SocketTypes::Publisher))
       {
         SendStorageVec sendStorage;
-        sendStorage.emplace_back(SendStorage{"heartbeat"});
-        sendStorage.emplace_back(SendStorage{""});
+        sendStorage.emplace_back("heartbeat");
+        sendStorage.emplace_back("");
 
         auto rc = ZeroMQPublisherSend(sendStorage);
 
@@ -91,7 +93,7 @@ void WorkerThread()
 
 void HeartbeatPublisher::Start()
 {
-  LockGuard lock(threadMutex);
+  const LockGuard lock(threadMutex);
 
   if(m_thread.joinable())
   {
@@ -102,17 +104,17 @@ void HeartbeatPublisher::Start()
   DEBUG_OUTPUT("Trying to start.");
 
   {
-    std::lock_guard<std::mutex> innerLock(threadShouldFinishMutex);
+    const std::scoped_lock<std::mutex> innerLock(threadShouldFinishMutex);
     threadShouldFinish = false;
   }
 
-  auto t = std::thread(WorkerThread);
-  m_thread.swap(t);
+  auto worker = std::thread(WorkerThread);
+  m_thread.swap(worker);
 }
 
 void HeartbeatPublisher::Stop()
 {
-  LockGuard lock(threadMutex);
+  const LockGuard lock(threadMutex);
 
   if(!m_thread.joinable())
   {
@@ -122,7 +124,7 @@ void HeartbeatPublisher::Stop()
   DEBUG_OUTPUT("Shutting down.");
 
   {
-    std::lock_guard<std::mutex> innerLock(threadShouldFinishMutex);
+    const std::scoped_lock<std::mutex> innerLock(threadShouldFinishMutex);
     threadShouldFinish = true;
   }
 
@@ -133,12 +135,22 @@ void HeartbeatPublisher::Stop()
 
 bool HeartbeatPublisher::IsRunning() const
 {
-  LockGuard lock(threadMutex);
+  const LockGuard lock(threadMutex);
 
   return m_thread.joinable();
 }
 
+// FMT_STRING checks the format string at compile time, the format_error
+// thrown when checking it at runtime can not happen
+// NOLINTNEXTLINE(bugprone-exception-escape)
 HeartbeatPublisher::~HeartbeatPublisher()
 {
-  Stop();
+  try
+  {
+    Stop();
+  }
+  catch(const std::exception &e)
+  {
+    EMERGENCY_OUTPUT("Could not stop the thread: {}", e.what());
+  }
 }

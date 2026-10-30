@@ -17,7 +17,7 @@ extern "C" int zeromq_test_serializeWave(zeromq_test_serializeWaveParams *p)
   DEBUG_OUTPUT("output={:.255s}", str);
 
   auto len  = str.size();
-  p->result = WMNewHandle(len);
+  p->result = WMNewHandle(To<BCInt>(len));
   ASSERT(p->result != nullptr);
   memcpy(*(p->result), str.c_str(), len);
 

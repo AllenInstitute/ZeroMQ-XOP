@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MESSAGE_HANDLER_H
+#define MESSAGE_HANDLER_H
 
 #include "ZeroMQ.h"
 
@@ -8,6 +9,11 @@
 class MessageHandler
 {
 public:
+  MessageHandler(const MessageHandler &)            = delete;
+  MessageHandler(MessageHandler &&)                 = delete;
+  MessageHandler &operator=(const MessageHandler &) = delete;
+  MessageHandler &operator=(MessageHandler &&)      = delete;
+
   /// Access to singleton-type global object
   static MessageHandler &Instance()
   {
@@ -22,14 +28,14 @@ public:
   /// Discard the requests and replies of the current connections, called
   /// when the connections are closed
   void DiscardQueuedMessages();
-  bool IsRunning() const;
+  [[nodiscard]] bool IsRunning() const;
 
 private:
   MessageHandler() = default;
   ~MessageHandler();
-  MessageHandler(const MessageHandler &)            = delete;
-  MessageHandler &operator=(const MessageHandler &) = delete;
 
   class thread;
   std::thread m_thread;
 };
+
+#endif // MESSAGE_HANDLER_H

@@ -11,7 +11,7 @@ extern "C" int zeromq_pub_send_multi(zeromq_pub_send_multiParams *p)
 
   const auto sendStorage = GatherPubData(p->payload);
 
-  int rc = ZeroMQPublisherSend(sendStorage);
+  const int rc = ZeroMQPublisherSend(sendStorage);
   ASSERT(rc >= 0);
 
   END_OUTER_CATCH

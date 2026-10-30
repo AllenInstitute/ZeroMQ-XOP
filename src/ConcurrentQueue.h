@@ -1,7 +1,8 @@
-#pragma once
+#ifndef CONCURRENT_QUEUE_H
+#define CONCURRENT_QUEUE_H
 
-#include <queue>
 #include <mutex>
+#include <queue>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -20,21 +21,21 @@ class ConcurrentQueue
 public:
   void push(T data)
   {
-    Lock lock(m_mutex);
+    const Lock lock(m_mutex);
 
-    m_queue.emplace(data);
+    m_queue.emplace(std::move(data));
   }
 
   bool empty() const
   {
-    Lock lock(m_mutex);
+    const Lock lock(m_mutex);
 
     return m_queue.empty();
   }
 
   size_t size() const
   {
-    Lock lock(m_mutex);
+    const Lock lock(m_mutex);
 
     return m_queue.size();
   }
@@ -61,18 +62,18 @@ public:
   ///
   /// m_mutex is not held while F runs, so F can push into this queue.
   template <typename Functor>
-  void apply_to_all(Functor F)
+  void apply_to_all(Functor func)
   {
     std::queue<T> drained;
 
     {
-      Lock lock(m_mutex);
+      const Lock lock(m_mutex);
       std::swap(drained, m_queue);
     }
 
     for(; !drained.empty(); drained.pop())
     {
-      F(drained.front());
+      func(drained.front());
     }
   }
 
@@ -80,3 +81,5 @@ private:
   std::queue<T> m_queue;
   mutable std::mutex m_mutex;
 };
+
+#endif // CONCURRENT_QUEUE_H

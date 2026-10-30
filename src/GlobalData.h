@@ -1,16 +1,17 @@
-#pragma once
+#ifndef GLOBAL_DATA_H
+#define GLOBAL_DATA_H
 
-#include <atomic>
-#include <mutex>
-#include <memory>
-#include "Logging.h"
 #include "ConcurrentQueue.h"
 #include "ConcurrentXOPNotice.h"
+#include "Logging.h"
+#include <atomic>
+#include <memory>
+#include <mutex>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-enum class SocketTypes
+enum class SocketTypes : std::uint8_t
 {
   Client,
   Server,
@@ -25,6 +26,11 @@ AllSocketTypesArray GetAllSocketTypes();
 class GlobalData
 {
 public:
+  GlobalData(const GlobalData &)            = delete;
+  GlobalData(GlobalData &&)                 = delete;
+  GlobalData &operator=(const GlobalData &) = delete;
+  GlobalData &operator=(GlobalData &&)      = delete;
+
   /// Access to singleton-type global object
   static GlobalData &Instance()
   {
@@ -95,9 +101,7 @@ public:
 
 private:
   GlobalData();
-  ~GlobalData()                             = default;
-  GlobalData(const GlobalData &)            = delete;
-  GlobalData &operator=(const GlobalData &) = delete;
+  ~GlobalData() = default;
 
   struct SocketTypeData
   {
@@ -158,3 +162,5 @@ struct fmt::formatter<SocketTypes> : fmt::formatter<std::string>
     return formatter<std::string>::format(name, ctx);
   }
 };
+
+#endif // GLOBAL_DATA_H

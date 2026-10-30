@@ -1,35 +1,54 @@
-# FIXME fix the code and don't disable the following checks
-#
-# hicpp-signed-bitwise
-
 Checks: '*,
-        -abseil-*,
-        -readability-implicit-bool-conversion,
-        -google-runtime-references,
-        -fuchsia-default-arguments,
-        -fuchsia-default-arguments-calls,
-        -fuchsia-default-arguments-declarations,
-        -cppcoreguidelines-pro-type-reinterpret-cast,
+        -altera*,
+        -abseil*,
+        -android*,
+        -boost-use-ranges,
+        -bugprone-easily-swappable-parameters,
+        -clang-analyzer-osx*,
+        -clang-analyzer-unix*,
+        -clang-analyzer-webkit*,
+        -clang-diagnostic-deprecated-declarations,
         -clang-diagnostic-missing-prototypes,
-        -llvm-header-guard,
-        -cppcoreguidelines-macro-usage,
+        -clang-diagnostic-signed-enum-bitfield,
         -clang-diagnostic-unused-macros,
-        -hicpp-signed-bitwise,
-        -modernize-use-trailing-return-type,
-        -llvmlibc-restrict-system-libc-headers,
-        -llvmlibc-callee-namespace,
-        -llvmlibc-implementation-in-namespace,
-        -misc-no-recursion,
-        -readability-use-anyofallof,
-        -clang-diagnostic-extra-semi-stmt,
-        -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
-        -hicpp-no-array-decay,
         -cppcoreguidelines-avoid-non-const-global-variables,
-        -cppcoreguidelines-pro-bounds-pointer-arithmetic,
-        -cppcoreguidelines-pro-type-union-access,
-        -fuchsia-overloaded-operator,
-        -fuchsia-statically-constructed-objects,
-        -clang-diagnostic-signed-enum-bitfield'
+        -cppcoreguidelines-macro-usage,
+        -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+        -cppcoreguidelines-pro-type-reinterpret-cast,
+        -darwin*,
+        -fuchsia*,
+        -google-runtime-references,
+        -google-build-using-namespace,
+        -hicpp-no-array-decay,
+        -linuxkernel*,
+        -llvm-header-guard,
+        -llvm-prefer-static-over-anonymous-namespace,
+        -llvm-use-ranges,
+        -llvmlibc-*,
+        -misc-include-cleaner,
+        -misc-no-recursion,
+        -misc-non-private-member-variables-in-classes,
+        -mpi*,
+        -modernize-use-trailing-return-type,
+        -modernize-use-ranges,
+        -objc*,
+        -openmp*,
+        -portability-template-virtual-member-function,
+        -readability-convert-member-functions-to-static,
+        -readability-implicit-bool-conversion,
+        -readability-use-anyofallof'
+
+CheckOptions:
+  readability-identifier-length.IgnoredVariableNames: '^(_|rc|st|w|wv|it)$'
+  readability-identifier-length.IgnoredParameterNames: '^(p|st|w|wv)$'
+  # json::operator[] inserts missing keys like std::map
+  cppcoreguidelines-pro-bounds-avoid-unchecked-container-access.ExcludeClasses: '::std::map;::std::unordered_map;::std::flat_map;::nlohmann::.*basic_json'
+
+# Check the headers of the XOP but not the ones of the external libraries.
+# XOPSupport, libzmq, json and fmt are SYSTEM include directories, SafeInt is
+# included from the source directory.
+HeaderFilterRegex: '.*'
+ExcludeHeaderFilterRegex: '.*[/\\]SafeInt[/\\].*'
 
 FormatStyle: 'file'
 WarningsAsErrors: '*'

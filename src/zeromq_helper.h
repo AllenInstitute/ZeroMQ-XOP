@@ -1,7 +1,8 @@
-#pragma once
+#ifndef ZEROMQ_HELPER_H
+#define ZEROMQ_HELPER_H
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include <zmq.h>
 
@@ -12,11 +13,17 @@ public:
   ZeroMQMessage();
   ~ZeroMQMessage();
 
-  zmq_msg_t* get();
+  zmq_msg_t *get();
 
-  ZeroMQMessage(const ZeroMQMessage &) = delete;
-  void operator=(const ZeroMQMessage &) = delete;
+  ZeroMQMessage(const ZeroMQMessage &)            = delete;
+  ZeroMQMessage(ZeroMQMessage &&)                 = delete;
+  ZeroMQMessage &operator=(const ZeroMQMessage &) = delete;
+  ZeroMQMessage &operator=(ZeroMQMessage &&)      = delete;
 
 private:
-  zmq_msg_t msg;
+  zmq_msg_t msg{};
 };
+
+using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
+
+#endif // ZEROMQ_HELPER_H

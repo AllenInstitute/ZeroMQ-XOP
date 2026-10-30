@@ -1,21 +1,22 @@
-#pragma once
+#ifndef ZEROMQ_H
+#define ZEROMQ_H
 
-#include <ctime>
+#include <algorithm>
 #include <cerrno>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
-#include <cmath>
-#include <sstream>
-#include <iterator>
-#include <algorithm>
-#include <memory>
-#include <string>
-#include <vector>
-#include <functional>
+#include <ctime>
 #include <exception>
-#include <thread>
-#include <numeric>
+#include <functional>
+#include <iterator>
+#include <memory>
 #include <mutex>
+#include <numeric>
+#include <sstream>
+#include <string>
+#include <thread>
+#include <vector>
 
 #include "zeromq_helper.h"
 
@@ -69,13 +70,7 @@ using RequestInterfacePtr = std::shared_ptr<RequestInterface>;
 
 using StringVector = std::vector<std::string>;
 
-using LockGuard = std::lock_guard<std::recursive_mutex>;
-
-class SendStorage;
-using SendStorageVec = std::vector<SendStorage>;
-
-class ZeroMQMessage;
-using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
+using LockGuard = std::scoped_lock<std::recursive_mutex>;
 
 #ifdef MACIGOR64
 #pragma clang diagnostic push
@@ -98,9 +93,9 @@ using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
 #pragma warning(disable : 4702)
 #endif
 
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <fmt/ranges.h>
-#include <fmt/chrono.h>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -110,24 +105,28 @@ using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
 #pragma clang diagnostic pop
 #endif
 
+// The XOP Toolkit headers come first
 #include "cmake_config.h"
 #include "functions.h"
-#include "GlobalData.h"
-#include "CustomExceptions.h"
-#include "RequestInterfaceException.h"
-#include "HeartbeatPublisher.h"
-#include "IdleGuard.h"
-#include "HelperFunctions.h"
+
 #include "ConcurrentXOPNotice.h"
-#include "Logging.h"
-#include "SocketWithMutex.h"
+#include "CustomExceptions.h"
 #include "Errors.h"
+#include "GlobalData.h"
+#include "HeartbeatPublisher.h"
+#include "HelperFunctions.h"
+#include "IdleGuard.h"
+#include "Logging.h"
+#include "RequestInterfaceException.h"
+#include "SocketWithMutex.h"
 #include "git_version.h"
 
 // see also FunctionInfo XOPSupport function
-const int MAX_NUM_PARAMS        = 100;
-const std::string MESSAGEID_KEY = "messageID";
-const std::string HISTORY_KEY   = "history";
+const int MAX_NUM_PARAMS            = 100;
+constexpr const char *MESSAGEID_KEY = "messageID";
+constexpr const char *HISTORY_KEY   = "history";
 
 /* Prototypes */
 HOST_IMPORT int XOPMain(IORecHandle ioRecHandle);
+
+#endif // ZEROMQ_H

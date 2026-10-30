@@ -13,7 +13,7 @@ extern "C" int zeromq_sub_recv(zeromq_sub_recvParams *p)
   for(;;)
   {
     ZeroMQMessageSharedPtrVec vec;
-    int ret = ZeroMQSubscriberReceive(vec, false);
+    const int ret = ZeroMQSubscriberReceive(vec, false);
 
     if(ret == -1 && zmq_errno() == EAGAIN) // timeout
     {
@@ -34,8 +34,8 @@ extern "C" int zeromq_sub_recv(zeromq_sub_recvParams *p)
 
     ZEROMQ_ASSERT(ret == 0);
 
-    auto filterMsg  = vec[0]->get();
-    auto payloadMsg = vec[1]->get();
+    auto *filterMsg  = vec.at(0)->get();
+    auto *payloadMsg = vec.at(1)->get();
 
     WriteZMsgIntoHandle(&(p->result), payloadMsg);
     WriteZMsgIntoHandle(p->filter, filterMsg);
@@ -43,7 +43,7 @@ extern "C" int zeromq_sub_recv(zeromq_sub_recvParams *p)
     auto msg    = CreateStringFromZMsg(payloadMsg);
     auto filter = CreateStringFromZMsg(filterMsg);
 
-    GlobalData::Instance().AddLogEntry(filter + ":" + msg,
+    GlobalData::Instance().AddLogEntry(fmt::format("{}:{}", filter, msg),
                                        MessageDirection::Incoming);
 
     DEBUG_OUTPUT("ret={}", ret);

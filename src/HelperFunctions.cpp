@@ -7,6 +7,11 @@
 namespace
 {
 
+constexpr size_t MAX_ENDPOINT_LENGTH = 256;
+
+/// Values with a larger magnitude are converted to true
+constexpr double BOOL_TRUE_THRESHOLD = 1e-8;
+
 ExperimentModification MapOutputModeToExperimentModification(OutputMode mode)
 {
   switch(mode)
@@ -34,8 +39,8 @@ std::string GetStringFromHandle(Handle strHandle)
     return "";
   }
 
-  size_t strLen = WMGetHandleSize(strHandle);
-  return std::string(*strHandle, strLen);
+  const size_t strLen = WMGetHandleSize(strHandle);
+  return {*strHandle, strLen};
 }
 
 /// @brief Returns a string from an Igor string Handle and disposes the Handle
@@ -56,31 +61,32 @@ std::string GetStringFromHandleWithDispose(Handle strHandle)
 
 /// @brief Set dimension labels on wave
 ///
-/// @param	h	Wave to set dimension labels on
+/// @param	waveHandle	Wave to set dimension labels on
 /// @param	Dimension	Dimension to set labels on
 /// @param	dimLabels	vector of labels to set
 ///
 /// dimLabels[k] will be assigned to index k of the wave
 ///
 /// @throws Igor error code
-void SetDimensionLabels(waveHndl h, int Dimension,
+void SetDimensionLabels(waveHndl waveHandle, int Dimension,
                         const std::vector<std::string> &dimLabels)
 {
   // Check wave exists.
-  if(h == nullptr)
+  if(waveHandle == nullptr)
   {
     throw IgorException(NULL_WAVE_OP);
   }
 
   for(size_t k = 0; k < dimLabels.size(); k++)
   {
-    if(dimLabels[k].empty())
+    if(dimLabels.at(k).empty())
     {
       // Empty string.  Skip.
       continue;
     }
 
-    if(int RetVal = MDSetDimensionLabel(h, Dimension, k, dimLabels[k].c_str()))
+    if(const int RetVal = MDSetDimensionLabel(
+           waveHandle, Dimension, To<IndexInt>(k), dimLabels.at(k).c_str()))
     {
       throw IgorException(RetVal);
     }
@@ -89,17 +95,21 @@ void SetDimensionLabels(waveHndl h, int Dimension,
 
 bool IsBitSet(int val, int bit)
 {
-  return (val & bit) == bit;
+  const auto ubit = static_cast<unsigned int>(bit);
+
+  return (static_cast<unsigned int>(val) & ubit) == ubit;
 }
 
 int ClearBit(int val, int bit)
 {
-  return val & ~bit;
+  return static_cast<int>(static_cast<unsigned int>(val) &
+                          ~static_cast<unsigned int>(bit));
 }
 
 int SetBit(int val, int bit)
 {
-  return val | bit;
+  return static_cast<int>(static_cast<unsigned int>(val) |
+                          static_cast<unsigned int>(bit));
 }
 
 template <>
@@ -111,7 +121,7 @@ bool lockToIntegerRange<bool>(double val)
     throw IgorException(kDoesNotSupportNaNorINF);
   }
 
-  return std::abs(val) > 1e-8;
+  return std::abs(val) > BOOL_TRUE_THRESHOLD;
 }
 
 std::size_t GetWaveElementSize(int dataType)
@@ -163,7 +173,7 @@ void WaveClear(waveHndl wv)
     return;
   }
 
-  MemClear(WaveData(wv), numBytes);
+  MemClear(WaveData(wv), To<BCInt>(numBytes));
 }
 
 void ApplyFlags(double flags)
@@ -185,7 +195,7 @@ void ApplyFlags(double flags)
 
   DEBUG_OUTPUT("git revision {}", GIT_REVISION);
 
-  if((val & ZeroMQ_SET_FLAGS::DEFAULT) == ZeroMQ_SET_FLAGS::DEFAULT)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::DEFAULT))
   {
     GlobalData::Instance().SetDebugFlag(false);
     GlobalData::Instance().SetRecvBusyWaitingFlag(true);
@@ -196,33 +206,31 @@ void ApplyFlags(double flags)
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::DEBUG) == ZeroMQ_SET_FLAGS::DEBUG)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::DEBUG))
   {
     GlobalData::Instance().SetDebugFlag(true);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::IPV6) == ZeroMQ_SET_FLAGS::IPV6)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::IPV6))
   {
     ToggleIPV6Support(true);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::NO_RECV_BUSY_WAITING) ==
-     ZeroMQ_SET_FLAGS::NO_RECV_BUSY_WAITING)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::NO_RECV_BUSY_WAITING))
   {
     GlobalData::Instance().SetRecvBusyWaitingFlag(false);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::LOGGING) == ZeroMQ_SET_FLAGS::LOGGING)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::LOGGING))
   {
     GlobalData::Instance().SetLoggingFlag(true);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::INTERCEPTOR_FUNCTION) ==
-     ZeroMQ_SET_FLAGS::INTERCEPTOR_FUNCTION)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::INTERCEPTOR_FUNCTION))
   {
     GlobalData::Instance().SetInterceptorFlag(true);
     numMatches++;
@@ -236,16 +244,17 @@ void ApplyFlags(double flags)
   }
 }
 
-std::string GetLastEndPoint(void *s)
+std::string GetLastEndPoint(void *socket)
 {
-  char buf[256];
-  size_t bufSize = sizeof(buf);
-  int rc         = zmq_getsockopt(s, ZMQ_LAST_ENDPOINT, buf, &bufSize);
+  std::array<char, MAX_ENDPOINT_LENGTH> buf{};
+  size_t bufSize = buf.size();
+  const int rc =
+      zmq_getsockopt(socket, ZMQ_LAST_ENDPOINT, buf.data(), &bufSize);
   ZEROMQ_ASSERT(rc == 0);
 
-  buf[bufSize - 1] = '\0';
-  DEBUG_OUTPUT("lastEndPoint={}", buf);
-  return std::string(buf);
+  buf.at(bufSize - 1) = '\0';
+  DEBUG_OUTPUT("lastEndPoint={}", buf.data());
+  return {buf.data()};
 }
 
 void StopThreadsAndCloseConnections()
@@ -258,7 +267,7 @@ void StopThreadsAndCloseConnections()
 
 void ToggleIPV6Support(bool enable)
 {
-  MessageHandlerPauseGuard pauseGuard(true);
+  const MessageHandlerPauseGuard pauseGuard(true);
 
   for(auto st : GetAllSocketTypes())
   {
@@ -412,8 +421,8 @@ int ZeroMQPublisherSend(const SendStorageVec &vec)
   {
     const int flag = i < (vecLen - 1) ? ZMQ_SNDMORE : 0;
 
-    const auto ptr    = vec[i].GetPtr();
-    const auto msgLen = vec[i].GetLength();
+    const auto *const ptr = vec.at(i).GetPtr();
+    const auto msgLen     = vec.at(i).GetLength();
 
     DEBUG_OUTPUT("element[{}]: ptr={}, len={}, flag={}", i, ptr, msgLen, flag);
 
@@ -581,11 +590,12 @@ std::string SerializeDataFolder(DataFolderHandle dataFolderHandle)
     return "free";
   }
 
-  char dataFolderPathOrName[MAXCMDLEN + 1];
-  rc = GetDataFolderNameOrPath(dataFolderHandle, 0x1, dataFolderPathOrName);
+  std::array<char, MAXCMDLEN + 1> dataFolderPathOrName{};
+  rc = GetDataFolderNameOrPath(dataFolderHandle, 0x1,
+                               dataFolderPathOrName.data());
   ASSERT(rc == 0);
 
-  std::string folder(dataFolderPathOrName);
+  std::string folder(dataFolderPathOrName.data());
 
   // datafolder handle refers to non existing datafolder
   if(folder.find(":_killed folder_:") != std::string::npos)
@@ -612,20 +622,19 @@ DataFolderHandle DeSerializeDataFolder(const std::string &path)
 
 std::string CreateStringFromZMsg(zmq_msg_t *msg)
 {
-  return std::string(reinterpret_cast<char *>(zmq_msg_data(msg)),
-                     zmq_msg_size(msg));
+  return {static_cast<char *>(zmq_msg_data(msg)), zmq_msg_size(msg)};
 }
 
 void InitHandle(Handle *handle, size_t size)
 {
   if(*handle == nullptr)
   {
-    *handle = WMNewHandle(size);
+    *handle = WMNewHandle(To<BCInt>(size));
     ASSERT(*handle != nullptr);
   }
   else
   {
-    int ret = WMSetHandleSize(*handle, size);
+    const int ret = WMSetHandleSize(*handle, To<BCInt>(size));
     ASSERT(!ret);
   }
 }
@@ -677,9 +686,9 @@ int GetNumberOfReturnValues(const FunctionInfo &fip)
   // these are before all other parameters
 
   // find the first non-pass-by-ref parameter
-  auto *it = std::find_if(
+  const auto *it = std::find_if(
       std::begin(fip.parameterTypes),
-      std::begin(fip.parameterTypes) + fip.numRequiredParameters,
+      std::next(std::begin(fip.parameterTypes), fip.numRequiredParameters),
       [](int paramType) { return !IsBitSet(paramType, FV_REF_TYPE); });
 
   // all parameters before `it` are considered return values
@@ -712,25 +721,25 @@ std::string CleanupString(std::string str)
     return str;
   }
 
-  constexpr auto ws = " \n\r\t";
+  constexpr auto whitespace = " \n\r\t";
 
-  size_t end = str.find_last_not_of(ws);
+  const size_t end = str.find_last_not_of(whitespace);
   if(end != std::string::npos)
   {
     str.resize(end + 1);
   }
 
-  size_t start = str.find_first_not_of(ws);
+  const size_t start = str.find_first_not_of(whitespace);
   if(start != std::string::npos)
   {
     str = str.substr(start);
   }
 
-  for(auto &c : str)
+  for(auto &chr : str)
   {
-    if(c == '\r')
+    if(chr == '\r')
     {
-      c = '\n';
+      chr = '\n';
     }
   }
 
@@ -762,6 +771,9 @@ struct fmt::formatter<OutputMode> : fmt::formatter<std::string>
   }
 };
 
+namespace
+{
+
 std::string GetHeader(OutputMode mode, const char *func, int line)
 {
   switch(mode)
@@ -776,25 +788,32 @@ std::string GetHeader(OutputMode mode, const char *func, int line)
   ASSERT(0);
 }
 
+} // anonymous namespace
+
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
-          fmt::format_args args)
+          fmt::format_args args) noexcept
 {
-  if(mode == OutputMode::Debug && !GlobalData::Instance().GetDebugFlag())
+  try
   {
-    return;
+    if(mode == OutputMode::Debug && !GlobalData::Instance().GetDebugFlag())
+    {
+      return;
+    }
+
+    const auto header = GetHeader(mode, func, line);
+
+    OutputToHistory_TS(header + fmt::vformat(format, args),
+                       MapOutputModeToExperimentModification(mode));
   }
-
-  const auto header = GetHeader(mode, func, line);
-
-  OutputToHistory_TS(header + fmt::vformat(format, args),
-                     MapOutputModeToExperimentModification(mode));
+  catch(...) // NOLINT(bugprone-empty-catch)
+  {
+    // the output itself failed, there is nowhere left to report it
+  }
 }
 
 int CreateDirectory(const std::string &path)
 {
 #ifdef WINIGOR
-  int error;
-
   // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createdirectorya
   auto ret = CreateDirectoryA(path.c_str(), nullptr);
 
@@ -804,24 +823,24 @@ int CreateDirectory(const std::string &path)
     return 0;
   }
 
-  error = GetLastError();
+  const DWORD error = GetLastError();
 
   if(error == ERROR_ALREADY_EXISTS)
   {
     return FOLDER_EXISTS_NO_OVERWRITE;
   }
-  else if(error == ERROR_PATH_NOT_FOUND)
+  if(error == ERROR_PATH_NOT_FOUND)
   {
     return CANT_OPEN_FOLDER;
   }
-  else
-  {
-    return INTERNAL_ERROR;
-  }
+
+  return INTERNAL_ERROR;
 #else
 #ifdef MACIGOR
+  constexpr mode_t DIRECTORY_PERMISSIONS = 0777;
+
   // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mkdir.2.html
-  auto ret = mkdir(path.c_str(), 0777);
+  auto ret = mkdir(path.c_str(), DIRECTORY_PERMISSIONS);
   if(!ret)
   {
     return 0;
@@ -831,14 +850,12 @@ int CreateDirectory(const std::string &path)
   {
     return FOLDER_EXISTS_NO_OVERWRITE;
   }
-  else if(errno == ENOTDIR)
+  if(errno == ENOTDIR)
   {
     return CANT_OPEN_FOLDER;
   }
-  else
-  {
-    return INTERNAL_ERROR;
-  }
+
+  return INTERNAL_ERROR;
 
 #else
 #error "Unsupported architecture"
@@ -863,19 +880,19 @@ void EnsureDirectoryExists(const std::string &path)
 bool IsFreeWave(waveHndl wv)
 {
   DataFolderHandle dfH = nullptr;
-  int rc               = GetWavesDataFolder(wv, &dfH);
+  const int rc         = GetWavesDataFolder(wv, &dfH);
   ASSERT(rc == 0);
 
   return dfH == nullptr;
 }
 
-void DoBindOrConnect(Handle &h, SocketTypes st)
+void DoBindOrConnect(Handle &handle, SocketTypes st)
 {
-  const auto point = GetStringFromHandle(h);
-  WMDisposeHandle(h);
-  h = nullptr;
+  const auto point = GetStringFromHandle(handle);
+  WMDisposeHandle(handle);
+  handle = nullptr;
 
-  MessageHandlerPauseGuard pauseGuard(st == SocketTypes::Server);
+  const MessageHandlerPauseGuard pauseGuard(st == SocketTypes::Server);
 
   GET_SOCKET(socket, st);
 
@@ -917,17 +934,21 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
 /// @return Igor string handle with the content of the C++ string
 Handle GetHandleFromString(const std::string &str)
 {
-  Handle h = nullptr;
-  if(!(h = WMNewHandle(To<BCInt>(str.size()))))
+  Handle handle = WMNewHandle(To<BCInt>(str.size()));
+  if(handle == nullptr)
   {
     return nullptr;
   }
-  if(PutCStringInHandle(str.c_str(), h))
+  if(PutCStringInHandle(str.c_str(), handle))
   {
+    WMDisposeHandle(handle);
     return nullptr;
   }
-  return h;
+  return handle;
 }
+
+namespace
+{
 
 bool IsFreeDataFolder(DataFolderHandle dfr)
 {
@@ -953,6 +974,11 @@ bool IsFreeDataFolder(DataFolderHandle dfr)
   return false;
 }
 
+} // anonymous namespace
+
+namespace
+{
+
 size_t GetWaveIndexInMemory(waveHndl w, std::vector<IndexInt> &dims)
 {
   if(!w)
@@ -964,25 +990,27 @@ size_t GetWaveIndexInMemory(waveHndl w, std::vector<IndexInt> &dims)
 
   int numDims = 0;
   std::vector<CountInt> dimSizes(MAX_DIMENSIONS + 1, 0);
-  int ret = MDGetWaveDimensions(w, &numDims, dimSizes.data());
+  const int ret = MDGetWaveDimensions(w, &numDims, dimSizes.data());
   ASSERT(ret == 0);
 
   dimSizes.resize(To<size_t>(numDims));
 
   size_t index = 0;
-  size_t i     = 0;
+  size_t dim   = 0;
   size_t block = 1;
-  for(auto &e : dimSizes)
+  for(auto &dimSize : dimSizes)
   {
-    auto dimIndex = To<size_t>(dims[i]);
-    ASSERT(dimIndex < To<size_t>(e));
+    auto dimIndex = To<size_t>(dims.at(dim));
+    ASSERT(dimIndex < To<size_t>(dimSize));
     index += block * dimIndex;
-    block *= To<size_t>(e);
-    i++;
+    block *= To<size_t>(dimSize);
+    dim++;
   }
 
   return index;
 }
+
+} // anonymous namespace
 
 template <>
 void SetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims,
@@ -997,8 +1025,8 @@ void SetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims,
 
   if(WaveType(w) == TEXT_WAVE_TYPE)
   {
-    Handle textH = GetHandleFromString(value);
-    int err      = MDSetTextWavePointValue(w, dims.data(), textH);
+    Handle textH  = GetHandleFromString(value);
+    const int err = MDSetTextWavePointValue(w, dims.data(), textH);
     WMDisposeHandle(textH);
     if(err)
     {
@@ -1132,12 +1160,12 @@ std::string GetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims)
 
   if(WaveType(w) == TEXT_WAVE_TYPE)
   {
-    Handle textH = nullptr;
-    if(!(textH = WMNewHandle(0L)))
+    Handle textH = WMNewHandle(0L);
+    if(textH == nullptr)
     {
       throw IgorException(NOMEM, "Error creating Igor Handle.");
     }
-    if(int err = MDGetTextWavePointValue(w, dims.data(), textH))
+    if(const int err = MDGetTextWavePointValue(w, dims.data(), textH))
     {
       WMDisposeHandle(textH);
       throw IgorException(err, "Error reading value from text wave");
@@ -1158,7 +1186,7 @@ void CheckWaveDimension(waveHndl w, const std::vector<CountInt> &expectedDims,
   std::copy(expectedDims.begin(), expectedDims.begin() + size,
             compDims.begin());
 
-  std::vector<CountInt> dims = GetWaveDimension(w);
+  const std::vector<CountInt> dims = GetWaveDimension(w);
   if(compDims != dims)
   {
     throw IgorException(ERR_INVALID_TYPE, errorMsg);
@@ -1178,7 +1206,7 @@ std::vector<CountInt> GetWaveDimension(waveHndl w, int &numDims)
     throw IgorException(NOWAV);
   }
   std::vector<CountInt> dims(MAX_DIMENSIONS + 1, 0);
-  if(int err = MDGetWaveDimensions(w, &numDims, dims.data()))
+  if(const int err = MDGetWaveDimensions(w, &numDims, dims.data()))
   {
     throw IgorException(err, "Error retrieving wave dimension.");
   }
@@ -1200,8 +1228,10 @@ waveHndl MakeFreeWave(std::vector<CountInt> dims, int type)
   dims.resize(MAX_DIMENSIONS + 1, 0);
 
   waveHndl wv = nullptr;
-  auto ret    = MDMakeWave(&wv, "free", reinterpret_cast<DataFolderHandle>(-1),
-                           dims.data(), type, -1);
+  // the XOP Toolkit creates a free wave for the data folder handle -1
+  // NOLINTNEXTLINE(performance-no-int-to-ptr)
+  auto ret = MDMakeWave(&wv, "free", reinterpret_cast<DataFolderHandle>(-1),
+                        dims.data(), type, -1);
 
   if(ret || wv == nullptr)
   {

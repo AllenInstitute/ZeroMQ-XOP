@@ -92,6 +92,8 @@ our $registerFunctionTemplate= <<EOF;
 #include "XOPStandardHeaders.h" // Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
 #include "functions.h"
 
+#include <array>
+
 XOPIORecResult RegisterFunction()
 {
   /*  NOTE:
@@ -99,25 +101,29 @@ XOPIORecResult RegisterFunction()
     See XOP manual "Restrictions on Direct XFUNCs" section.
   */
 
-  XOPIORecParam funcIndex = GetXOPItem(0);    /* which function invoked ? */
-  XOPIORecResult returnValue = NIL;
-
-  switch (funcIndex)
-  {
+  const std::array<XOPIORecResult, %%numFunctions%%> functions = {
 %%caseLine%%
+  };
+
+  const XOPIORecParam funcIndex = GetXOPItem(0);    /* which function invoked ? */
+
+  if(funcIndex < 0 || static_cast<size_t>(funcIndex) >= functions.size())
+  {
+    return NIL;
   }
-  return returnValue;
+
+  return functions.at(static_cast<size_t>(funcIndex));
 }
 EOF
 
 our $registerFunctionCaseTemplate = <<EOF;
-  case %%funcIndex%%:
-    returnValue = reinterpret_cast<XOPIORecResult>(%%funcName%%);
-    break;
+    reinterpret_cast<XOPIORecResult>(%%funcName%%),
 EOF
 
 our $hfileHeader = <<EOF;
-#pragma once
+#ifndef FUNCTIONS_H
+#define FUNCTIONS_H
+
 #include "XOPStandardHeaders.h" // Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
 
 XOPIORecResult RegisterFunction();
@@ -137,7 +143,6 @@ struct %%funcName%%Params
 {
 %%functionParamterLine%%
 };
-typedef struct %%funcName%%Params %%funcName%%Params;
 #pragma pack()
 EOF
 
@@ -363,6 +368,7 @@ while($line = <$in>){
 
   $registerFunctionBodyContent = $registerFunctionTemplate;
   $registerFunctionBodyContent =~ s/%%caseLine%%/$allCaseLines/;
+  $registerFunctionBodyContent =~ s/%%numFunctions%%/$funcIndex/;
 
   print $out $commonHeader;
   print $out $registerFunctionBodyContent;
@@ -381,6 +387,7 @@ while($line = <$in>){
   print $out $hfileHeader;
   print $out $allStructs;
   print $out $allDeclLines;
+  print $out "\n#endif // FUNCTIONS_H\n";
 
   close($out);
 

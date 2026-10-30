@@ -4,26 +4,39 @@
 
 namespace
 {
-constexpr char DEFAULT_TEMPLATE[]     = "{}";
-constexpr char SESSION_START_MARKER[] = "{}";
-constexpr char IDENTITY_KEY[]         = "remote identity";
+constexpr const char *DEFAULT_TEMPLATE     = "{}";
+constexpr const char *SESSION_START_MARKER = "{}";
+constexpr const char *IDENTITY_KEY         = "remote identity";
 
-constexpr char TEMPLATE_KEY_JSON[]      = "json";
-constexpr char TEMPLATE_KEY_STR[]       = "str";
-constexpr char TEMPLATE_KEY_DIRECTION[] = "direction";
-constexpr char TEMPLATE_KEY_TS[]        = "ts";
+constexpr const char *TEMPLATE_KEY_JSON      = "json";
+constexpr const char *TEMPLATE_KEY_STR       = "str";
+constexpr const char *TEMPLATE_KEY_DIRECTION = "direction";
+constexpr const char *TEMPLATE_KEY_TS        = "ts";
 
 constexpr std::array<const char *, 4> RESERVED_KEYS = {
     TEMPLATE_KEY_DIRECTION, TEMPLATE_KEY_JSON, TEMPLATE_KEY_STR,
     TEMPLATE_KEY_TS};
 
 #ifdef WINIGOR
-constexpr const char DIR_SEPARATOR[] = "\\";
+constexpr const char *DIR_SEPARATOR = "\\";
 #else
 #ifdef MACIGOR
-constexpr const char DIR_SEPARATOR[] = "/";
+constexpr const char *DIR_SEPARATOR = "/";
 #endif // MACIGOR
 #endif // WINIGOR
+
+bool IsValidUTF8(const std::string &str)
+{
+  try
+  {
+    json(str).dump();
+    return true;
+  }
+  catch(const json::type_error &)
+  {
+    return false;
+  }
+}
 
 /// ZeroMQ generates binary identities, starting with a zero byte, for clients
 /// which don't set one, see ZMQ_ROUTING_ID. A JSON string can only hold UTF-8.
@@ -31,22 +44,14 @@ std::string ToLoggableIdentity(const std::string &identity)
 {
   ASSERT(!identity.empty());
 
-  if(identity.front() != '\0')
+  if(identity.front() != '\0' && IsValidUTF8(identity))
   {
-    try
-    {
-      json(identity).dump();
-      return identity;
-    }
-    catch(const json::type_error &)
-    {
-    }
+    return identity;
   }
 
-  const auto *bytes = reinterpret_cast<const unsigned char *>(identity.data());
+  const std::vector<unsigned char> bytes(identity.begin(), identity.end());
 
-  return fmt::format(FMT_STRING("0x{:02x}"),
-                     fmt::join(bytes, bytes + identity.size(), ""));
+  return fmt::format(FMT_STRING("0x{:02x}"), fmt::join(bytes, ""));
 }
 
 json ParseLoggingTemplate(const std::string &str)
@@ -129,27 +134,27 @@ public:
                    const std::optional<std::string> &identity,
                    std::optional<MessageDirection> dir) const
   {
-    json j = m_template;
+    json doc = m_template;
 
-    j[key] = entry;
+    doc[key] = entry;
 
     if(dir.has_value())
     {
-      j[TEMPLATE_KEY_DIRECTION] = fmt::to_string(dir.value());
+      doc[TEMPLATE_KEY_DIRECTION] = fmt::to_string(dir.value());
     }
 
     if(identity.has_value() && !identity->empty())
     {
-      j[IDENTITY_KEY] = ToLoggableIdentity(identity.value());
+      doc[IDENTITY_KEY] = ToLoggableIdentity(identity.value());
     }
 
     const auto now = std::chrono::system_clock::now();
     // see https://stackoverflow.com/a/67076017
-    const auto ts = fmt::format(FMT_STRING("{0:%FT%H:%M:}{1:%S}{0:%z}"), now,
-                                now.time_since_epoch());
-    j[TEMPLATE_KEY_TS] = ts;
+    const auto timestamp = fmt::format(FMT_STRING("{0:%FT%H:%M:}{1:%S}{0:%z}"),
+                                       now, now.time_since_epoch());
+    doc[TEMPLATE_KEY_TS] = timestamp;
 
-    WriteIntoLogfile(j.dump(-1, ' ', false, json::error_handler_t::replace));
+    WriteIntoLogfile(doc.dump(-1, ' ', false, json::error_handler_t::replace));
   }
 
 #ifdef _MSC_VER
@@ -173,7 +178,8 @@ public:
     auto bytesToWrite   = static_cast<SInt64>(str.size());
     SInt64 bytesWritten = 0;
     int rc = XOPWriteFile64(fileRef, bytesToWrite, str.c_str(), &bytesWritten);
-    ASSERT(rc == 0 && bytesWritten == bytesToWrite);
+    ASSERT(rc == 0);
+    ASSERT(bytesWritten == bytesToWrite);
 
     rc = XOPCloseFile(fileRef);
     ASSERT(rc == 0);
@@ -185,13 +191,13 @@ public:
 
   void CreatePackageDirectory(const std::string &package)
   {
-    char pathOut[MAX_PATH_LEN + 1];
+    std::array<char, MAX_PATH_LEN + 1> pathOut{};
 
-    auto rc = SpecialDirPath("Igor Preferences", 0, 0x1, 1, pathOut);
+    auto rc = SpecialDirPath("Igor Preferences", 0, 0x1, 1, pathOut.data());
     ASSERT(rc == 0);
 
-    const auto path = fmt::format("{}Packages{}{}{}", pathOut, DIR_SEPARATOR,
-                                  package, DIR_SEPARATOR);
+    const auto path = fmt::format("{}Packages{}{}{}", pathOut.data(),
+                                  DIR_SEPARATOR, package, DIR_SEPARATOR);
 
     EnsureDirectoryExists(path);
 
@@ -222,7 +228,7 @@ Logging::~Logging() = default;
 
 void Logging::AddLogEntry(const json &doc, MessageDirection dir) const
 {
-  std::optional<std::string> identity;
+  const std::optional<std::string> identity;
   m_impl->AddLogEntry(TEMPLATE_KEY_JSON, doc, identity, dir);
 }
 
@@ -234,14 +240,14 @@ void Logging::AddLogEntry(const json &doc, const std::string &identity,
 
 void Logging::AddLogEntry(const std::string &str) const
 {
-  std::optional<std::string> identity;
-  std::optional<MessageDirection> dir;
+  const std::optional<std::string> identity;
+  const std::optional<MessageDirection> dir;
   m_impl->AddLogEntry(TEMPLATE_KEY_STR, str, identity, dir);
 }
 
 void Logging::AddLogEntry(const std::string &str, MessageDirection dir) const
 {
-  std::optional<std::string> identity;
+  const std::optional<std::string> identity;
   m_impl->AddLogEntry(TEMPLATE_KEY_STR, str, identity, dir);
 }
 

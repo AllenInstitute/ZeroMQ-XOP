@@ -14,6 +14,8 @@ using namespace std::chrono_literals;
 
 constexpr auto TIMEOUT = 10s;
 
+constexpr int REENTRANT_VALUE = 99;
+
 } // anonymous namespace
 
 // variable zeromq_test_queueswap()
@@ -42,7 +44,7 @@ extern "C" int zeromq_test_queueswap(zeromq_test_queueswapParams *p)
                 if(value == 1)
                 {
                   // Reentrant push from same thread
-                  queue.push(99);
+                  queue.push(REENTRANT_VALUE);
                 }
               });
 

@@ -16,8 +16,8 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
 
   const auto dimensions = GetWaveDimension(containerWaveHandle);
 
-  const auto numRows = dimensions[0];
-  const auto numCols = dimensions[1];
+  const auto numRows = dimensions.at(0);
+  const auto numCols = dimensions.at(1);
 
   if(numRows < 2)
   {
@@ -30,14 +30,15 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
   }
 
   SendStorageVec sendStorage;
-  std::string filter, payload;
+  std::string filter;
+  std::string payload;
 
   for(CountInt i = 0; i < numRows; i += 1)
   {
     std::vector<IndexInt> containerDims(MAX_DIMENSIONS, 0);
-    containerDims[0] = i;
+    containerDims.at(0) = i;
 
-    auto wv = GetWaveElement<waveHndl>(containerWaveHandle, containerDims);
+    auto *wv = GetWaveElement<waveHndl>(containerWaveHandle, containerDims);
 
     if(wv == nullptr)
     {
@@ -66,9 +67,9 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
       CheckWaveDimension(wv, {1}, "Text waves need to be single point only");
 
       std::vector<IndexInt> dims(MAX_DIMENSIONS, 0);
-      std::string elem = GetWaveElement<std::string>(wv, dims);
+      const std::string elem = GetWaveElement<std::string>(wv, dims);
 
-      sendStorage.emplace_back(SendStorage(elem));
+      sendStorage.emplace_back(elem);
 
       if(i == 0)
       {
@@ -81,9 +82,9 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
     }
     else
     {
-      auto ptr            = GetWaveDataPtr<void>(wv);
+      auto *ptr           = GetWaveDataPtr<void>(wv);
       const auto numBytes = WavePoints(wv) * GetWaveElementSize(waveType);
-      sendStorage.emplace_back(SendStorage(ptr, numBytes));
+      sendStorage.emplace_back(ptr, numBytes);
     }
   }
 
@@ -92,6 +93,99 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
 
   return sendStorage;
 }
+
+namespace
+{
+
+/// Return the wave for the message at index of the container wave, creating
+/// or resizing it for the message size
+waveHndl GetMessageWave(waveHndl containerWaveHandle, size_t index,
+                        size_t msgSize)
+{
+  std::vector<IndexInt> containerDims(MAX_DIMENSIONS, 0);
+  containerDims.at(0) = To<IndexInt>(index);
+  auto *wv = GetWaveElement<waveHndl>(containerWaveHandle, containerDims);
+
+  std::vector<IndexInt> dims(MAX_DIMENSIONS, 0);
+
+  if(wv == nullptr)
+  {
+    int waveType = 0;
+
+    // first two must be single point text waves
+    if(index < 2)
+    {
+      dims.at(0) = 1;
+      waveType   = TEXT_WAVE_TYPE;
+    }
+    else
+    {
+      dims.at(0) = To<IndexInt>(msgSize);
+      waveType   = NT_I8 | NT_UNSIGNED;
+    }
+
+    wv            = MakeFreeWave(dims, waveType);
+    const int ret = HoldWave(wv);
+    ASSERT(ret == 0);
+
+    SetWaveElement<waveHndl>(containerWaveHandle, containerDims, wv);
+
+    return wv;
+  }
+
+  const int waveType = WaveType(wv);
+
+  // complain at non-numeric waves
+  if(waveType == DATAFOLDER_TYPE || waveType == WAVE_TYPE)
+  {
+    throw IgorException(ERR_INVALID_TYPE);
+  }
+
+  const bool isTextWave = (waveType == TEXT_WAVE_TYPE);
+
+  // first two must be text waves
+  if(index < 2 && !isTextWave)
+  {
+    throw IgorException(ERR_INVALID_TYPE);
+  }
+
+  if(isTextWave)
+  {
+    dims.at(0) = 1;
+  }
+  else
+  {
+    dims.at(0) = To<IndexInt>(msgSize / GetWaveElementSize(waveType));
+  }
+
+  RedimensionWave(wv, dims);
+
+  return wv;
+}
+
+void WriteMessageIntoWave(waveHndl wv, zmq_msg_t *msg, size_t index)
+{
+  const auto msgSize = zmq_msg_size(msg);
+
+  if(WaveType(wv) == TEXT_WAVE_TYPE)
+  {
+    auto str = CreateStringFromZMsg(msg);
+    std::vector<IndexInt> dims(MAX_DIMENSIONS, 0);
+    SetWaveElement<std::string>(wv, dims, str);
+
+    DEBUG_OUTPUT("element[{}]: data={}, length={}", index, str, msgSize);
+    return;
+  }
+
+  void *dest      = GetWaveDataPtr<void>(wv);
+  const void *src = zmq_msg_data(msg);
+
+  DEBUG_OUTPUT("element[{}]: ptr={}, length={}", index, src, msgSize);
+
+  memcpy(dest, src, msgSize);
+}
+
+} // anonymous namespace
 
 void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
                     waveHndl containerWaveHandle)
@@ -110,99 +204,20 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
   }
 
   std::vector<IndexInt> resizeDims(MAX_DIMENSIONS, 0);
-  resizeDims[0] = numMsg;
+  resizeDims.at(0) = To<IndexInt>(numMsg);
   RedimensionWave(containerWaveHandle, resizeDims);
 
   for(size_t i = 0; i < numMsg; i += 1)
   {
-    const auto msg     = vec[i]->get();
-    const auto msgSize = zmq_msg_size(msg);
+    auto *const msg = vec.at(i)->get();
+    auto *wv        = GetMessageWave(containerWaveHandle, i, zmq_msg_size(msg));
 
-    std::vector<IndexInt> containerDims(MAX_DIMENSIONS, 0);
-    containerDims[0] = i;
-    auto wv = GetWaveElement<waveHndl>(containerWaveHandle, containerDims);
-
-    int waveType;
-    bool isTextWave;
-
-    if(wv == nullptr)
-    {
-      std::vector<IndexInt> dims(MAX_DIMENSIONS, 0);
-
-      // first two must be single point text waves
-      if(i < 2)
-      {
-        dims[0]  = 1;
-        waveType = TEXT_WAVE_TYPE;
-      }
-      else
-      {
-        dims[0]  = msgSize;
-        waveType = NT_I8 | NT_UNSIGNED;
-      }
-
-      isTextWave = (waveType == TEXT_WAVE_TYPE);
-
-      wv      = MakeFreeWave(dims, waveType);
-      int ret = HoldWave(wv);
-      ASSERT(ret == 0);
-
-      SetWaveElement<waveHndl>(containerWaveHandle, containerDims, wv);
-    }
-    else
-    {
-      waveType = WaveType(wv);
-
-      // complain at non-numeric waves
-      if(waveType == DATAFOLDER_TYPE || waveType == WAVE_TYPE)
-      {
-        throw IgorException(ERR_INVALID_TYPE);
-      }
-
-      isTextWave = (waveType == TEXT_WAVE_TYPE);
-
-      // first two must be text waves
-      if(i < 2 && !isTextWave)
-      {
-        throw IgorException(ERR_INVALID_TYPE);
-      }
-
-      std::vector<IndexInt> dims(MAX_DIMENSIONS, 0);
-
-      if(isTextWave)
-      {
-        dims[0] = 1;
-      }
-      else
-      {
-        dims[0] = msgSize / GetWaveElementSize(waveType);
-      }
-
-      RedimensionWave(wv, dims);
-    }
-
-    if(isTextWave)
-    {
-      auto str = CreateStringFromZMsg(msg);
-      std::vector<IndexInt> dims(MAX_DIMENSIONS, 0);
-      SetWaveElement<std::string>(wv, dims, str);
-
-      DEBUG_OUTPUT("element[{}]: data={}, length={}", i, str, msgSize);
-    }
-    else
-    {
-      void *dest      = GetWaveDataPtr<void *>(wv);
-      const void *src = zmq_msg_data(msg);
-
-      DEBUG_OUTPUT("element[{}]: ptr={}, length={}", i, src, msgSize);
-
-      memcpy(dest, src, msgSize);
-    }
+    WriteMessageIntoWave(wv, msg, i);
   }
 
   ASSERT(numMsg >= 2);
-  auto filter  = CreateStringFromZMsg(vec[0]->get());
-  auto payload = CreateStringFromZMsg(vec[1]->get());
+  auto filter  = CreateStringFromZMsg(vec.at(0)->get());
+  auto payload = CreateStringFromZMsg(vec.at(1)->get());
 
   GlobalData::Instance().AddLogEntry(filter + ":" + payload + " + [...]",
                                      MessageDirection::Incoming);

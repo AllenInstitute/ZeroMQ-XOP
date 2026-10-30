@@ -23,10 +23,10 @@ extern "C" int zeromq_test_idleguard(zeromq_test_idleguardParams *p)
 
   try
   {
-    IdleGuard guard;
+    const IdleGuard guard;
     throw IdleGuardTestException{};
   }
-  catch(const IdleGuardTestException &)
+  catch(const IdleGuardTestException &) // NOLINT(bugprone-empty-catch)
   {
     // expected
   }

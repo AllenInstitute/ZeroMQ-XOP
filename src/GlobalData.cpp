@@ -12,7 +12,7 @@
 namespace
 {
 
-constexpr char PACKAGE_NAME[] = "ZeroMQ";
+constexpr const char *PACKAGE_NAME = "ZeroMQ";
 
 /// A ROUTER socket routes to one connection per identity, so every client
 /// socket of every Igor Pro instance needs its own identity
@@ -29,19 +29,19 @@ std::string CreateClientIdentity()
   return fmt::format(FMT_STRING("zeromq xop: dealer {}-{}"), pid, counter++);
 }
 
-void ApplySocketDefaults(void *s, SocketTypes st)
+void ApplySocketDefaults(void *socket, SocketTypes st)
 {
   int valZero = 0;
   int valOne  = 1;
   int rc      = 0;
 
-  rc = zmq_setsockopt(s, ZMQ_LINGER, &valZero, sizeof(valZero));
+  rc = zmq_setsockopt(socket, ZMQ_LINGER, &valZero, sizeof(valZero));
   ZEROMQ_ASSERT(rc == 0);
 
-  rc = zmq_setsockopt(s, ZMQ_SNDTIMEO, &valZero, sizeof(valZero));
+  rc = zmq_setsockopt(socket, ZMQ_SNDTIMEO, &valZero, sizeof(valZero));
   ZEROMQ_ASSERT(rc == 0);
 
-  rc = zmq_setsockopt(s, ZMQ_RCVTIMEO, &valOne, sizeof(valOne));
+  rc = zmq_setsockopt(socket, ZMQ_RCVTIMEO, &valOne, sizeof(valOne));
   ZEROMQ_ASSERT(rc == 0);
 
   switch(st)
@@ -49,7 +49,8 @@ void ApplySocketDefaults(void *s, SocketTypes st)
   case SocketTypes::Client:
   {
     const auto identity = CreateClientIdentity();
-    rc = zmq_setsockopt(s, ZMQ_IDENTITY, identity.c_str(), identity.length());
+    rc                  = zmq_setsockopt(socket, ZMQ_IDENTITY, identity.c_str(),
+                                         identity.length());
     ZEROMQ_ASSERT(rc == 0);
     return;
   }
@@ -58,10 +59,10 @@ void ApplySocketDefaults(void *s, SocketTypes st)
     return;
   case SocketTypes::Server:
   {
-    rc = zmq_setsockopt(s, ZMQ_ROUTER_MANDATORY, &valOne, sizeof(valOne));
+    rc = zmq_setsockopt(socket, ZMQ_ROUTER_MANDATORY, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
 
-    rc = zmq_setsockopt(s, ZMQ_ROUTER_HANDOVER, &valOne, sizeof(valOne));
+    rc = zmq_setsockopt(socket, ZMQ_ROUTER_HANDOVER, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
 
     return;
@@ -100,9 +101,8 @@ AllSocketTypesArray GetAllSocketTypes()
 
 GlobalData::GlobalData()
     : m_debugging(false), m_busyWaiting(true), m_logging(false),
-      m_interceptor(false)
+      m_interceptor(false), zmq_context(zmq_ctx_new())
 {
-  zmq_context = zmq_ctx_new();
   ZEROMQ_ASSERT(zmq_context != nullptr);
 }
 
@@ -128,7 +128,7 @@ void *GlobalData::GetOrCreateSocket(SocketTypes st)
 
 bool GlobalData::HasBindsOrConnections(SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  const LockGuard lock(GetMutex(st));
 
   auto &socketData = GetSocketTypeData(st);
 
@@ -137,7 +137,7 @@ bool GlobalData::HasBindsOrConnections(SocketTypes st)
 
 bool GlobalData::HasSocket(SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  const LockGuard lock(GetMutex(st));
 
   auto &socketData = GetSocketTypeData(st);
   return socketData.m_zmq_socket != nullptr;
@@ -145,7 +145,7 @@ bool GlobalData::HasSocket(SocketTypes st)
 
 void GlobalData::SetDebugFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  const LockGuard lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
   m_debugging = val;
@@ -158,7 +158,7 @@ bool GlobalData::GetDebugFlag() const
 
 void GlobalData::SetRecvBusyWaitingFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  const LockGuard lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
   m_busyWaiting = val;
@@ -171,7 +171,7 @@ bool GlobalData::GetRecvBusyWaitingFlag() const
 
 void GlobalData::SetInterceptorFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  const LockGuard lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
   m_interceptor = val;
@@ -195,14 +195,14 @@ double GlobalData::GetClientRecvTimeout() const
 
 void GlobalData::ClientRequestSent()
 {
-  LockGuard lock(GetMutex(SocketTypes::Client));
+  const LockGuard lock(GetMutex(SocketTypes::Client));
 
   m_clientPendingReplies++;
 }
 
 void GlobalData::AbandonClientReplies()
 {
-  LockGuard lock(GetMutex(SocketTypes::Client));
+  const LockGuard lock(GetMutex(SocketTypes::Client));
 
   DEBUG_OUTPUT("pending replies={}", m_clientPendingReplies);
   m_clientAbandonedReplies = m_clientPendingReplies;
@@ -210,7 +210,7 @@ void GlobalData::AbandonClientReplies()
 
 bool GlobalData::ClientReplyReceived()
 {
-  LockGuard lock(GetMutex(SocketTypes::Client));
+  const LockGuard lock(GetMutex(SocketTypes::Client));
 
   if(m_clientPendingReplies > 0)
   {
@@ -235,7 +235,7 @@ void GlobalData::CloseConnections()
 
   for(auto st : GetAllSocketTypes())
   {
-    LockGuard lock(GetMutex(st));
+    const LockGuard lock(GetMutex(st));
 
     if(!HasSocket(st))
     {
@@ -282,9 +282,10 @@ void GlobalData::CloseConnections()
       ZEROMQ_ASSERT(rc == 0);
       socketData.m_zmq_socket = nullptr;
     }
-    catch(...)
+    catch(const std::exception &e)
     {
-      // ignore errors
+      DEBUG_OUTPUT("Ignoring the error of closing the {} socket: {}", st,
+                   e.what());
     }
   }
 }
@@ -292,7 +293,7 @@ void GlobalData::CloseConnections()
 void GlobalData::AddToListOfBindsOrConnections(const std::string &point,
                                                SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  const LockGuard lock(GetMutex(st));
 
   auto &socketData = GetSocketTypeData(st);
   socketData.m_list.push_back(point);
@@ -300,7 +301,7 @@ void GlobalData::AddToListOfBindsOrConnections(const std::string &point,
 
 std::vector<std::string> GlobalData::GetListOfBindsOrConnections(SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  const LockGuard lock(GetMutex(st));
 
   return GetSocketTypeData(st).m_list;
 }
@@ -312,7 +313,7 @@ ConcurrentQueue<OutputMessagePtr> &GlobalData::GetXOPNoticeQueue()
 
 void GlobalData::SetLoggingFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  const LockGuard lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
 
@@ -331,7 +332,7 @@ void GlobalData::AddLogEntry(const json &doc, MessageDirection dir)
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(doc, dir);
 }
@@ -344,7 +345,7 @@ void GlobalData::AddLogEntry(const json &doc, const std::string &identity,
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(doc, identity, dir);
 }
@@ -356,7 +357,7 @@ void GlobalData::AddLogEntry(const std::string &str)
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(str);
 }
@@ -368,7 +369,7 @@ void GlobalData::AddLogEntry(const std::string &str, MessageDirection dir)
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(str, dir);
 }
@@ -381,28 +382,28 @@ void GlobalData::AddLogEntry(const std::string &str,
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(str, identity, dir);
 }
 
 void GlobalData::SetLoggingTemplate(const std::string &loggingTemplate)
 {
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME, loggingTemplate);
 }
 
 void GlobalData::InitLogging()
 {
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME);
 }
 
 void GlobalData::SetInterceptorFunctionName(const std::string &funcName)
 {
-  LockGuard lock(m_interceptorLock);
+  const LockGuard lock(m_interceptorLock);
 
   FunctionInfo fip{};
   auto rc = GetFunctionInfo(funcName.c_str(), &fip);
@@ -412,9 +413,10 @@ void GlobalData::SetInterceptorFunctionName(const std::string &funcName)
                         fmt::format("Function name={}", funcName));
   }
 
-  int reqParamTypes[] = {HSTRING_TYPE, HSTRING_TYPE, NT_FP64};
+  std::array<int, 3> reqParamTypes = {HSTRING_TYPE, HSTRING_TYPE, NT_FP64};
   int badParamNumber{};
-  rc = CheckFunctionForm(&fip, 3, reqParamTypes, &badParamNumber, NT_FP64);
+  rc = CheckFunctionForm(&fip, To<int>(reqParamTypes.size()),
+                         reqParamTypes.data(), &badParamNumber, NT_FP64);
   if(rc != 0)
   {
     throw IgorException(
@@ -428,7 +430,7 @@ void GlobalData::SetInterceptorFunctionName(const std::string &funcName)
 
 std::string GlobalData::GetInterceptorFunctionName()
 {
-  LockGuard lock(m_interceptorLock);
+  const LockGuard lock(m_interceptorLock);
 
   return m_interceptorFuncName;
 }

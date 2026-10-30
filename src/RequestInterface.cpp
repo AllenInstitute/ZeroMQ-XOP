@@ -14,17 +14,21 @@ const size_t MAX_MESSAGEID_LENGTH = 255;
 
 bool IsValidMessageId(const std::string &messageId)
 {
-  return messageId.length() != 0 && messageId.length() <= MAX_MESSAGEID_LENGTH;
+  return !messageId.empty() && messageId.length() <= MAX_MESSAGEID_LENGTH;
 }
 
 class InterceptorCaller
 {
 public:
-  InterceptorCaller(std::shared_ptr<const RequestInterface> req) : m_req(req)
+  explicit InterceptorCaller(std::shared_ptr<const RequestInterface> req)
+      : m_req(std::move(req))
   {
     m_req->CallInterceptor(InterceptorMode::Begin);
   }
 
+  // FMT_STRING checks the format string at compile time, the format_error
+  // thrown when checking it at runtime can not happen
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   ~InterceptorCaller()
   {
     try
@@ -37,9 +41,14 @@ public:
     }
     catch(...)
     {
-      // do nothing
+      DEBUG_OUTPUT("Caught unknown exception");
     }
   }
+
+  InterceptorCaller(const InterceptorCaller &)            = delete;
+  InterceptorCaller(InterceptorCaller &&)                 = delete;
+  InterceptorCaller &operator=(const InterceptorCaller &) = delete;
+  InterceptorCaller &operator=(InterceptorCaller &&)      = delete;
 
 private:
   std::shared_ptr<const RequestInterface> m_req;
@@ -47,7 +56,8 @@ private:
 
 } // anonymous namespace
 
-RequestInterface::RequestInterface(Private, std::string callerIdentity,
+RequestInterface::RequestInterface(Private /*unused*/,
+                                   std::string callerIdentity,
                                    const std::string &payload)
     : m_callerIdentity(std::move(callerIdentity))
 {
@@ -71,7 +81,8 @@ RequestInterface::RequestInterface(Private, std::string callerIdentity,
   FillFromJSON(doc);
 }
 
-RequestInterface::RequestInterface(Private, const std::string &payload)
+RequestInterface::RequestInterface(Private /*unused*/,
+                                   const std::string &payload)
     : RequestInterface(Private(), "", payload)
 {
 }
@@ -79,7 +90,8 @@ RequestInterface::RequestInterface(Private, const std::string &payload)
 RequestInterfacePtr RequestInterface::Create(std::string callerIdentity,
                                              const std::string &payload)
 {
-  return std::make_shared<RequestInterface>(Private(), callerIdentity, payload);
+  return std::make_shared<RequestInterface>(Private(),
+                                            std::move(callerIdentity), payload);
 }
 
 RequestInterfacePtr RequestInterface::Create(const std::string &payload)
@@ -104,7 +116,7 @@ json RequestInterface::Call() const
   ASSERT(m_op);
 
   auto req = shared_from_this();
-  InterceptorCaller ic{req};
+  const InterceptorCaller interceptorCaller{req};
   auto reply = m_op->Call();
 
   if(HasValidMessageId())
@@ -136,11 +148,11 @@ std::string RequestInterface::GetHistoryDuringOperation() const
   return m_op->GetHistoryDuringCall();
 }
 
-void RequestInterface::FillFromJSON(json j)
+void RequestInterface::FillFromJSON(json doc)
 {
-  auto it = j.find("version");
+  auto it = doc.find("version");
 
-  if(it == j.end() || !it.value().is_number_integer())
+  if(it == doc.end() || !it.value().is_number_integer())
   {
     throw RequestInterfaceException(REQ_INVALID_VERSION);
   }
@@ -154,9 +166,9 @@ void RequestInterface::FillFromJSON(json j)
 
   m_version = version;
 
-  it = j.find(MESSAGEID_KEY);
+  it = doc.find(MESSAGEID_KEY);
 
-  if(it != j.end()) // messageID is optional
+  if(it != doc.end()) // messageID is optional
   {
     if(!it.value().is_string())
     {
@@ -173,9 +185,9 @@ void RequestInterface::FillFromJSON(json j)
     m_messageId = messageId;
   }
 
-  it = j.find("CallFunction");
+  it = doc.find("CallFunction");
 
-  if(it == j.end() || !it.value().is_object())
+  if(it == doc.end() || !it.value().is_object())
   {
     throw RequestInterfaceException(REQ_INVALID_OPERATION);
   }

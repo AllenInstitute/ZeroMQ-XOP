@@ -1,3 +1,6 @@
-#pragma once
+#ifndef CMAKE_CONFIG_H
+#define CMAKE_CONFIG_H
 
 constexpr int XOP_MINIMUM_IGORVERSION = @XOP_MINIMUM_IGORVERSION@;
+
+#endif // CMAKE_CONFIG_H

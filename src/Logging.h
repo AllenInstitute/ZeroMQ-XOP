@@ -1,9 +1,11 @@
-#pragma once
+#ifndef LOGGING_H
+#define LOGGING_H
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
-enum class MessageDirection
+enum class MessageDirection : std::uint8_t
 {
   Incoming = 0,
   Outgoing
@@ -17,23 +19,25 @@ class Logging
 {
 public:
   Logging(const std::string &package, const std::string &loggingTemplate);
-  Logging(const std::string &package);
+  explicit Logging(const std::string &package);
   ~Logging();
+
+  Logging(const Logging &)            = delete;
+  Logging(Logging &&)                 = delete;
+  Logging &operator=(const Logging &) = delete;
+  Logging &operator=(Logging &&)      = delete;
 
   void AddLogEntry(const json &doc, MessageDirection dir) const;
   void AddLogEntry(const json &doc, const std::string &identity,
                    MessageDirection dir) const;
   void AddLogEntry(const std::string &str) const;
   void AddLogEntry(const std::string &str, MessageDirection dir) const;
-  void AddLogEntry(const std::string &doc, const std::string &identity,
+  void AddLogEntry(const std::string &str, const std::string &identity,
                    MessageDirection dir) const;
 
 private:
-  Logging(const Logging &)        = delete;
-  Logging(const Logging &&)       = delete;
-  Logging &operator=(Logging &)   = delete;
-  Logging &&operator=(Logging &&) = delete;
-
   class Implementation;
   std::unique_ptr<Logging::Implementation> m_impl;
 };
+
+#endif // LOGGING_H
