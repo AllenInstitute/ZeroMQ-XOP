@@ -7,6 +7,31 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
+namespace
+{
+
+bool IsSupportedReturnType(int returnType)
+{
+  return returnType == NT_FP64 || returnType == HSTRING_TYPE ||
+         returnType == WAVE_TYPE || returnType == DATAFOLDER_TYPE ||
+         returnType == FV_NORETURN_TYPE;
+}
+
+bool IsSupportedInputParameterType(int igorType)
+{
+  return (IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX)) ||
+         IsBitSet(igorType, HSTRING_TYPE) ||
+         IsBitSet(igorType, DATAFOLDER_TYPE);
+}
+
+/// Output parameters of the multiple return value syntax can also be waves
+bool IsSupportedOutputParameterType(int igorType)
+{
+  return IsSupportedInputParameterType(igorType) || IsWaveType(igorType);
+}
+
+} // anonymous namespace
+
 CallFunctionOperation::CallFunctionOperation(json doc) : m_json(std::move(doc))
 {
   DEBUG_OUTPUT("size={}", m_json.size());
@@ -118,72 +143,48 @@ void CallFunctionOperation::CanBeProcessed() const
   const auto firstInputParamIndex =
       GetFirstInputParameterIndex(fip, numReturnValues);
 
+  const std::vector<int> paramTypes(std::begin(fip.parameterTypes),
+                                    std::end(fip.parameterTypes));
+
   // check passed input parameters
   for(auto i = 0; i < numParamsSupplied; i += 1)
   {
-    auto igorType = fip.parameterTypes[firstInputParamIndex + i];
+    const auto igorType = paramTypes.at(firstInputParamIndex + i);
 
-    if(IsBitSet(igorType, NT_FP64))
+    if(IsBitSet(igorType, NT_FP64) && !IsConvertibleToDouble(m_params.at(i)))
     {
-      if(!IsConvertibleToDouble(m_params.at(i)))
-      {
-        throw RequestInterfaceException(REQ_INVALID_PARAM_FORMAT);
-      }
+      throw RequestInterfaceException(REQ_INVALID_PARAM_FORMAT);
     }
   }
 
   // check the function signature
 
   // 1: return values
-  if(fip.returnType != NT_FP64 && fip.returnType != HSTRING_TYPE &&
-     fip.returnType != WAVE_TYPE && fip.returnType != DATAFOLDER_TYPE &&
-     fip.returnType != FV_NORETURN_TYPE)
+  if(!IsSupportedReturnType(fip.returnType))
   {
     throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
   }
 
   for(auto i = 0; i < fip.numRequiredParameters; i += 1)
   {
-    auto igorType = fip.parameterTypes[i];
+    const auto igorType = paramTypes.at(i);
 
     // 2: output parameter (aka multiple return value)
     if(i < firstInputParamIndex)
     {
-      if(IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX))
+      if(!IsSupportedOutputParameterType(igorType))
       {
-        continue;
-      }
-      if(IsBitSet(igorType, HSTRING_TYPE))
-      {
-        continue;
-      }
-      else if(IsBitSet(igorType, DATAFOLDER_TYPE))
-      {
-        continue;
-      }
-      else if(IsWaveType(igorType))
-      {
-        continue;
+        throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
       }
 
-      throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
+      continue;
     }
 
     // 3: input parameter
-    if(IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX))
+    if(!IsSupportedInputParameterType(igorType))
     {
-      continue;
+      throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
     }
-    else if(IsBitSet(igorType, HSTRING_TYPE))
-    {
-      continue;
-    }
-    else if(IsBitSet(igorType, DATAFOLDER_TYPE))
-    {
-      continue;
-    }
-
-    throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
   }
 
   DEBUG_OUTPUT("Request Object can be processed: {}", *this);
