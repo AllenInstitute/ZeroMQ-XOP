@@ -929,13 +929,14 @@ void DoBindOrConnect(Handle &handle, SocketTypes st)
 /// @return Igor string handle with the content of the C++ string
 Handle GetHandleFromString(const std::string &str)
 {
-  Handle handle = nullptr;
-  if(!(handle = WMNewHandle(To<BCInt>(str.size()))))
+  Handle handle = WMNewHandle(To<BCInt>(str.size()));
+  if(handle == nullptr)
   {
     return nullptr;
   }
   if(PutCStringInHandle(str.c_str(), handle))
   {
+    WMDisposeHandle(handle);
     return nullptr;
   }
   return handle;
@@ -1144,8 +1145,8 @@ std::string GetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims)
 
   if(WaveType(w) == TEXT_WAVE_TYPE)
   {
-    Handle textH = nullptr;
-    if(!(textH = WMNewHandle(0L)))
+    Handle textH = WMNewHandle(0L);
+    if(textH == nullptr)
     {
       throw IgorException(NOMEM, "Error creating Igor Handle.");
     }
