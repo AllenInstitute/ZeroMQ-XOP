@@ -30,7 +30,8 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
   }
 
   SendStorageVec sendStorage;
-  std::string filter, payload;
+  std::string filter;
+  std::string payload;
 
   for(CountInt i = 0; i < numRows; i += 1)
   {
