@@ -154,7 +154,7 @@ struct WriteIntoStream<float, withComma>
 template <int withComma>
 struct WriteIntoStream<char *, withComma>
 {
-  void operator()(fmt::memory_buffer &buf, char *val)
+  void operator()(fmt::memory_buffer &buf, const char *val)
   {
     auto formatSpec = GetFormatString<char *, withComma>()();
 
