@@ -12,9 +12,9 @@ public:
   ZeroMQMessage();
   ~ZeroMQMessage();
 
-  zmq_msg_t* get();
+  zmq_msg_t *get();
 
-  ZeroMQMessage(const ZeroMQMessage &) = delete;
+  ZeroMQMessage(const ZeroMQMessage &)  = delete;
   void operator=(const ZeroMQMessage &) = delete;
 
 private:
