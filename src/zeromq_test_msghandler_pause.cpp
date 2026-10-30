@@ -29,13 +29,13 @@ zeromq_test_msghandler_pause(zeromq_test_msghandler_pauseParams *p)
   ASSERT(MessageHandler::Instance().IsRunning());
 
   {
-    MessageHandlerPauseGuard pauseGuard(true);
+    const MessageHandlerPauseGuard pauseGuard(true);
     ASSERT(!MessageHandler::Instance().IsRunning());
   }
   ASSERT(MessageHandler::Instance().IsRunning());
 
   {
-    MessageHandlerPauseGuard pauseGuard(false);
+    const MessageHandlerPauseGuard pauseGuard(false);
     ASSERT(MessageHandler::Instance().IsRunning());
   }
   ASSERT(MessageHandler::Instance().IsRunning());

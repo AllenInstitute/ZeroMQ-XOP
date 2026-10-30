@@ -104,7 +104,7 @@ json RequestInterface::Call() const
   ASSERT(m_op);
 
   auto req = shared_from_this();
-  InterceptorCaller ic{req};
+  const InterceptorCaller ic{req};
   auto reply = m_op->Call();
 
   if(HasValidMessageId())

@@ -188,7 +188,7 @@ struct GetFormatString<double, withComma>
 template <typename T>
 std::string To_stringHighRes(const T val)
 {
-  std::string fmt = GetFormatString<T, 0>()();
+  const std::string fmt = GetFormatString<T, 0>()();
 
   return fmt::format(fmt, val);
 }

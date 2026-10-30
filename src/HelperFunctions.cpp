@@ -34,7 +34,7 @@ std::string GetStringFromHandle(Handle strHandle)
     return "";
   }
 
-  size_t strLen = WMGetHandleSize(strHandle);
+  const size_t strLen = WMGetHandleSize(strHandle);
   return std::string(*strHandle, strLen);
 }
 
@@ -80,7 +80,8 @@ void SetDimensionLabels(waveHndl h, int Dimension,
       continue;
     }
 
-    if(int RetVal = MDSetDimensionLabel(h, Dimension, k, dimLabels[k].c_str()))
+    if(const int RetVal =
+           MDSetDimensionLabel(h, Dimension, k, dimLabels[k].c_str()))
     {
       throw IgorException(RetVal);
     }
@@ -240,7 +241,7 @@ std::string GetLastEndPoint(void *s)
 {
   char buf[256];
   size_t bufSize = sizeof(buf);
-  int rc         = zmq_getsockopt(s, ZMQ_LAST_ENDPOINT, buf, &bufSize);
+  const int rc   = zmq_getsockopt(s, ZMQ_LAST_ENDPOINT, buf, &bufSize);
   ZEROMQ_ASSERT(rc == 0);
 
   buf[bufSize - 1] = '\0';
@@ -258,7 +259,7 @@ void StopThreadsAndCloseConnections()
 
 void ToggleIPV6Support(bool enable)
 {
-  MessageHandlerPauseGuard pauseGuard(true);
+  const MessageHandlerPauseGuard pauseGuard(true);
 
   for(auto st : GetAllSocketTypes())
   {
@@ -625,7 +626,7 @@ void InitHandle(Handle *handle, size_t size)
   }
   else
   {
-    int ret = WMSetHandleSize(*handle, size);
+    const int ret = WMSetHandleSize(*handle, size);
     ASSERT(!ret);
   }
 }
@@ -714,13 +715,13 @@ std::string CleanupString(std::string str)
 
   constexpr auto ws = " \n\r\t";
 
-  size_t end = str.find_last_not_of(ws);
+  const size_t end = str.find_last_not_of(ws);
   if(end != std::string::npos)
   {
     str.resize(end + 1);
   }
 
-  size_t start = str.find_first_not_of(ws);
+  const size_t start = str.find_first_not_of(ws);
   if(start != std::string::npos)
   {
     str = str.substr(start);
@@ -863,7 +864,7 @@ void EnsureDirectoryExists(const std::string &path)
 bool IsFreeWave(waveHndl wv)
 {
   DataFolderHandle dfH = nullptr;
-  int rc               = GetWavesDataFolder(wv, &dfH);
+  const int rc         = GetWavesDataFolder(wv, &dfH);
   ASSERT(rc == 0);
 
   return dfH == nullptr;
@@ -875,7 +876,7 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
   WMDisposeHandle(h);
   h = nullptr;
 
-  MessageHandlerPauseGuard pauseGuard(st == SocketTypes::Server);
+  const MessageHandlerPauseGuard pauseGuard(st == SocketTypes::Server);
 
   GET_SOCKET(socket, st);
 
@@ -964,7 +965,7 @@ size_t GetWaveIndexInMemory(waveHndl w, std::vector<IndexInt> &dims)
 
   int numDims = 0;
   std::vector<CountInt> dimSizes(MAX_DIMENSIONS + 1, 0);
-  int ret = MDGetWaveDimensions(w, &numDims, dimSizes.data());
+  const int ret = MDGetWaveDimensions(w, &numDims, dimSizes.data());
   ASSERT(ret == 0);
 
   dimSizes.resize(To<size_t>(numDims));
@@ -997,8 +998,8 @@ void SetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims,
 
   if(WaveType(w) == TEXT_WAVE_TYPE)
   {
-    Handle textH = GetHandleFromString(value);
-    int err      = MDSetTextWavePointValue(w, dims.data(), textH);
+    Handle textH  = GetHandleFromString(value);
+    const int err = MDSetTextWavePointValue(w, dims.data(), textH);
     WMDisposeHandle(textH);
     if(err)
     {
@@ -1137,7 +1138,7 @@ std::string GetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims)
     {
       throw IgorException(NOMEM, "Error creating Igor Handle.");
     }
-    if(int err = MDGetTextWavePointValue(w, dims.data(), textH))
+    if(const int err = MDGetTextWavePointValue(w, dims.data(), textH))
     {
       WMDisposeHandle(textH);
       throw IgorException(err, "Error reading value from text wave");
@@ -1158,7 +1159,7 @@ void CheckWaveDimension(waveHndl w, const std::vector<CountInt> &expectedDims,
   std::copy(expectedDims.begin(), expectedDims.begin() + size,
             compDims.begin());
 
-  std::vector<CountInt> dims = GetWaveDimension(w);
+  const std::vector<CountInt> dims = GetWaveDimension(w);
   if(compDims != dims)
   {
     throw IgorException(ERR_INVALID_TYPE, errorMsg);
@@ -1178,7 +1179,7 @@ std::vector<CountInt> GetWaveDimension(waveHndl w, int &numDims)
     throw IgorException(NOWAV);
   }
   std::vector<CountInt> dims(MAX_DIMENSIONS + 1, 0);
-  if(int err = MDGetWaveDimensions(w, &numDims, dims.data()))
+  if(const int err = MDGetWaveDimensions(w, &numDims, dims.data()))
   {
     throw IgorException(err, "Error retrieving wave dimension.");
   }

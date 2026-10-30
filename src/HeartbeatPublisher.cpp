@@ -39,7 +39,7 @@ void WorkerThread()
     {
       // check if stop is requested
       {
-        std::scoped_lock<std::mutex> lock(threadShouldFinishMutex);
+        const std::scoped_lock<std::mutex> lock(threadShouldFinishMutex);
         if(threadShouldFinish)
         {
           DEBUG_OUTPUT("Exiting");
@@ -91,7 +91,7 @@ void WorkerThread()
 
 void HeartbeatPublisher::Start()
 {
-  LockGuard lock(threadMutex);
+  const LockGuard lock(threadMutex);
 
   if(m_thread.joinable())
   {
@@ -102,7 +102,7 @@ void HeartbeatPublisher::Start()
   DEBUG_OUTPUT("Trying to start.");
 
   {
-    std::scoped_lock<std::mutex> innerLock(threadShouldFinishMutex);
+    const std::scoped_lock<std::mutex> innerLock(threadShouldFinishMutex);
     threadShouldFinish = false;
   }
 
@@ -112,7 +112,7 @@ void HeartbeatPublisher::Start()
 
 void HeartbeatPublisher::Stop()
 {
-  LockGuard lock(threadMutex);
+  const LockGuard lock(threadMutex);
 
   if(!m_thread.joinable())
   {
@@ -122,7 +122,7 @@ void HeartbeatPublisher::Stop()
   DEBUG_OUTPUT("Shutting down.");
 
   {
-    std::scoped_lock<std::mutex> innerLock(threadShouldFinishMutex);
+    const std::scoped_lock<std::mutex> innerLock(threadShouldFinishMutex);
     threadShouldFinish = true;
   }
 
@@ -133,7 +133,7 @@ void HeartbeatPublisher::Stop()
 
 bool HeartbeatPublisher::IsRunning() const
 {
-  LockGuard lock(threadMutex);
+  const LockGuard lock(threadMutex);
 
   return m_thread.joinable();
 }

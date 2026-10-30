@@ -247,7 +247,7 @@ json CallFunctionOperation::Call()
 
   CallFunctionParameterHandler p(m_params, fip);
 
-  HistoryGrabber histGrabber;
+  const HistoryGrabber histGrabber;
 
   rc = CallFunction(&fip, p.GetParameterValueStorage(),
                     p.GetReturnValueStorage());

@@ -128,7 +128,7 @@ void *GlobalData::GetOrCreateSocket(SocketTypes st)
 
 bool GlobalData::HasBindsOrConnections(SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  const LockGuard lock(GetMutex(st));
 
   auto &socketData = GetSocketTypeData(st);
 
@@ -137,7 +137,7 @@ bool GlobalData::HasBindsOrConnections(SocketTypes st)
 
 bool GlobalData::HasSocket(SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  const LockGuard lock(GetMutex(st));
 
   auto &socketData = GetSocketTypeData(st);
   return socketData.m_zmq_socket != nullptr;
@@ -145,7 +145,7 @@ bool GlobalData::HasSocket(SocketTypes st)
 
 void GlobalData::SetDebugFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  const LockGuard lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
   m_debugging = val;
@@ -158,7 +158,7 @@ bool GlobalData::GetDebugFlag() const
 
 void GlobalData::SetRecvBusyWaitingFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  const LockGuard lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
   m_busyWaiting = val;
@@ -171,7 +171,7 @@ bool GlobalData::GetRecvBusyWaitingFlag() const
 
 void GlobalData::SetInterceptorFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  const LockGuard lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
   m_interceptor = val;
@@ -195,14 +195,14 @@ double GlobalData::GetClientRecvTimeout() const
 
 void GlobalData::ClientRequestSent()
 {
-  LockGuard lock(GetMutex(SocketTypes::Client));
+  const LockGuard lock(GetMutex(SocketTypes::Client));
 
   m_clientPendingReplies++;
 }
 
 void GlobalData::AbandonClientReplies()
 {
-  LockGuard lock(GetMutex(SocketTypes::Client));
+  const LockGuard lock(GetMutex(SocketTypes::Client));
 
   DEBUG_OUTPUT("pending replies={}", m_clientPendingReplies);
   m_clientAbandonedReplies = m_clientPendingReplies;
@@ -210,7 +210,7 @@ void GlobalData::AbandonClientReplies()
 
 bool GlobalData::ClientReplyReceived()
 {
-  LockGuard lock(GetMutex(SocketTypes::Client));
+  const LockGuard lock(GetMutex(SocketTypes::Client));
 
   if(m_clientPendingReplies > 0)
   {
@@ -235,7 +235,7 @@ void GlobalData::CloseConnections()
 
   for(auto st : GetAllSocketTypes())
   {
-    LockGuard lock(GetMutex(st));
+    const LockGuard lock(GetMutex(st));
 
     if(!HasSocket(st))
     {
@@ -292,7 +292,7 @@ void GlobalData::CloseConnections()
 void GlobalData::AddToListOfBindsOrConnections(const std::string &point,
                                                SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  const LockGuard lock(GetMutex(st));
 
   auto &socketData = GetSocketTypeData(st);
   socketData.m_list.push_back(point);
@@ -300,7 +300,7 @@ void GlobalData::AddToListOfBindsOrConnections(const std::string &point,
 
 std::vector<std::string> GlobalData::GetListOfBindsOrConnections(SocketTypes st)
 {
-  LockGuard lock(GetMutex(st));
+  const LockGuard lock(GetMutex(st));
 
   return GetSocketTypeData(st).m_list;
 }
@@ -312,7 +312,7 @@ ConcurrentQueue<OutputMessagePtr> &GlobalData::GetXOPNoticeQueue()
 
 void GlobalData::SetLoggingFlag(bool val)
 {
-  LockGuard lock(m_settingsMutex);
+  const LockGuard lock(m_settingsMutex);
 
   DEBUG_OUTPUT("new value={}", val);
 
@@ -331,7 +331,7 @@ void GlobalData::AddLogEntry(const json &doc, MessageDirection dir)
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(doc, dir);
 }
@@ -344,7 +344,7 @@ void GlobalData::AddLogEntry(const json &doc, const std::string &identity,
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(doc, identity, dir);
 }
@@ -356,7 +356,7 @@ void GlobalData::AddLogEntry(const std::string &str)
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(str);
 }
@@ -368,7 +368,7 @@ void GlobalData::AddLogEntry(const std::string &str, MessageDirection dir)
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(str, dir);
 }
@@ -381,28 +381,28 @@ void GlobalData::AddLogEntry(const std::string &str,
     return;
   }
 
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink->AddLogEntry(str, identity, dir);
 }
 
 void GlobalData::SetLoggingTemplate(const std::string &loggingTemplate)
 {
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME, loggingTemplate);
 }
 
 void GlobalData::InitLogging()
 {
-  LockGuard lock(m_loggingLock);
+  const LockGuard lock(m_loggingLock);
 
   m_loggingSink = std::make_unique<Logging>(PACKAGE_NAME);
 }
 
 void GlobalData::SetInterceptorFunctionName(const std::string &funcName)
 {
-  LockGuard lock(m_interceptorLock);
+  const LockGuard lock(m_interceptorLock);
 
   FunctionInfo fip{};
   auto rc = GetFunctionInfo(funcName.c_str(), &fip);
@@ -428,7 +428,7 @@ void GlobalData::SetInterceptorFunctionName(const std::string &funcName)
 
 std::string GlobalData::GetInterceptorFunctionName()
 {
-  LockGuard lock(m_interceptorLock);
+  const LockGuard lock(m_interceptorLock);
 
   return m_interceptorFuncName;
 }
