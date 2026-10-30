@@ -238,9 +238,10 @@ ADD_CUSTOM_TARGET("XOP_Toolkit" SOURCES ${XOPTOOLKIT_SOURCES}
                                 COMMAND "echo"
                                 COMMENT "Fake target for convenience. This does nothing.")
 
-INCLUDE_DIRECTORIES(${XOP_SUPPORT_PATH})
+# SYSTEM excludes the external libraries from compiler warnings and clang-tidy
+INCLUDE_DIRECTORIES(SYSTEM ${XOP_SUPPORT_PATH})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${installFolderLibZMQ}/include)
+INCLUDE_DIRECTORIES(SYSTEM ${installFolderLibZMQ}/include)
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 SET(CMAKE_CXX_STANDARD 17)
@@ -431,6 +432,12 @@ TARGET_LINK_LIBRARIES(${libname} PRIVATE nlohmann_json::nlohmann_json)
 ADD_SUBDIRECTORY(fmt EXCLUDE_FROM_ALL)
 
 TARGET_LINK_LIBRARIES(${libname} PRIVATE fmt-header-only)
+
+# ADD_SUBDIRECTORY(... SYSTEM) requires CMake 3.25
+FOREACH(target IN ITEMS nlohmann_json fmt-header-only)
+  GET_TARGET_PROPERTY(includeDirs ${target} INTERFACE_INCLUDE_DIRECTORIES)
+  SET_TARGET_PROPERTIES(${target} PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${includeDirs}")
+ENDFOREACH()
 
 # LLVM 14 and later install the script without the .py extension
 FIND_PROGRAM(RUN_CLANG_TIDY PATHS ${LLVM_BREW} NAMES run-clang-tidy run-clang-tidy.py)
