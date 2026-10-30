@@ -26,10 +26,10 @@ TickCountInt ConvertToUnixEpochUTC(TickCountInt secs)
   }
 
   // calculate the offset including local time zone to the unix epoch
-  short year       = 1970;
-  short month      = 1;
-  short dayOfMonth = 1;
-  double offset    = std::numeric_limits<double>::quiet_NaN();
+  std::int16_t year       = 1970;
+  std::int16_t month      = 1;
+  std::int16_t dayOfMonth = 1;
+  double offset           = std::numeric_limits<double>::quiet_NaN();
 
   auto rc = DateToIgorDateInSeconds(1, &year, &month, &dayOfMonth, &offset);
   ASSERT(rc == 0);
