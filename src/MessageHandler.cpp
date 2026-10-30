@@ -61,6 +61,39 @@ void QueueErrorReply(const std::string &identity,
       {nullptr, identity, reply.dump(DEFAULT_INDENT), connectionGeneration});
 }
 
+void SendReply(const OutgoingReply &reply)
+{
+  try
+  {
+    if(reply.generation != connectionGeneration)
+    {
+      DEBUG_OUTPUT("Discarding the reply to a closed connection");
+      return;
+    }
+
+    // the client might have disconnected in the meantime
+    auto rc = ZeroMQServerSend(reply.identity, reply.message, false);
+
+    if(rc < 0)
+    {
+      DEBUG_OUTPUT("Discarding the reply to a disconnected client");
+      return;
+    }
+
+    DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
+  }
+  catch(const std::exception &e)
+  {
+    EMERGENCY_OUTPUT(
+        "Caught std::exception with what=\"{}\". This must NOT happen!",
+        e.what());
+  }
+  catch(...)
+  {
+    EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
+  }
+}
+
 void DrainOutgoingReplies()
 {
   if(RunningInMainThread() || GetOutgoingQueue().empty())
@@ -68,39 +101,7 @@ void DrainOutgoingReplies()
     return;
   }
 
-  GetOutgoingQueue().apply_to_all(
-      [](const OutgoingReply &reply)
-      {
-        try
-        {
-          if(reply.generation != connectionGeneration)
-          {
-            DEBUG_OUTPUT("Discarding the reply to a closed connection");
-            return;
-          }
-
-          // the client might have disconnected in the meantime
-          auto rc = ZeroMQServerSend(reply.identity, reply.message, false);
-
-          if(rc < 0)
-          {
-            DEBUG_OUTPUT("Discarding the reply to a disconnected client");
-            return;
-          }
-
-          DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
-        }
-        catch(const std::exception &e)
-        {
-          EMERGENCY_OUTPUT(
-              "Caught std::exception with what=\"{}\". This must NOT happen!",
-              e.what());
-        }
-        catch(...)
-        {
-          EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
-        }
-      });
+  GetOutgoingQueue().apply_to_all(SendReply);
 }
 
 void WorkerThread()
