@@ -49,10 +49,9 @@ std::string ToLoggableIdentity(const std::string &identity)
     return identity;
   }
 
-  const auto *bytes = reinterpret_cast<const unsigned char *>(identity.data());
+  const std::vector<unsigned char> bytes(identity.begin(), identity.end());
 
-  return fmt::format(FMT_STRING("0x{:02x}"),
-                     fmt::join(bytes, bytes + identity.size(), ""));
+  return fmt::format(FMT_STRING("0x{:02x}"), fmt::join(bytes, ""));
 }
 
 json ParseLoggingTemplate(const std::string &str)

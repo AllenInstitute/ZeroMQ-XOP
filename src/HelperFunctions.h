@@ -456,7 +456,8 @@ T *GetWaveDataPtr(waveHndl waveH)
         fmt::format("MDAccessNumericWaveData returned error {}", ret));
   }
 
-  return reinterpret_cast<T *>(reinterpret_cast<char *>(*waveH) + dataOffset);
+  return reinterpret_cast<T *>(
+      std::next(reinterpret_cast<char *>(*waveH), dataOffset));
 }
 
 /// @brief Retrieves dimensions of a wave.

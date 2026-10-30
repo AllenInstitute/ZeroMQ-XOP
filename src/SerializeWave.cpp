@@ -206,10 +206,10 @@ void OutputArray(fmt::memory_buffer &buf, T *data, CountInt dataLength)
   CountInt index = 0;
   for(index = 0; index < dataLength - 1; index++)
   {
-    streamWriterWithComma(buf, *(data + index));
+    streamWriterWithComma(buf, *std::next(data, index));
   }
 
-  streamWriter(buf, *(data + index));
+  streamWriter(buf, *std::next(data, index));
 
   fmt::format_to(std::back_inserter(buf), "]");
 }
@@ -225,8 +225,7 @@ void ToString(fmt::memory_buffer &buf, waveHndl waveHandle, CountInt offset)
     return;
   }
 
-  T *data = GetWaveDataPtr<T>(waveHandle);
-  data += offset;
+  T *data = std::next(GetWaveDataPtr<T>(waveHandle), offset);
 
   OutputArray(buf, data, dataLength);
 }
@@ -259,7 +258,7 @@ void ToString<char *>(fmt::memory_buffer &buf, waveHndl waveHandle,
   for(index = 0; index < dataLength - 1; index++)
   {
     streamWriterWithComma(buf, data);
-    data += strlen(data) + 1;
+    data = std::next(data, To<std::ptrdiff_t>(strlen(data) + 1));
   }
 
   streamWriter(buf, data);

@@ -686,7 +686,7 @@ int GetNumberOfReturnValues(const FunctionInfo &fip)
   // find the first non-pass-by-ref parameter
   const auto *it = std::find_if(
       std::begin(fip.parameterTypes),
-      std::begin(fip.parameterTypes) + fip.numRequiredParameters,
+      std::next(std::begin(fip.parameterTypes), fip.numRequiredParameters),
       [](int paramType) { return !IsBitSet(paramType, FV_REF_TYPE); });
 
   // all parameters before `it` are considered return values
