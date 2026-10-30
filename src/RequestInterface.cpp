@@ -20,7 +20,8 @@ bool IsValidMessageId(const std::string &messageId)
 class InterceptorCaller
 {
 public:
-  InterceptorCaller(std::shared_ptr<const RequestInterface> req) : m_req(req)
+  InterceptorCaller(std::shared_ptr<const RequestInterface> req)
+      : m_req(std::move(req))
   {
     m_req->CallInterceptor(InterceptorMode::Begin);
   }
@@ -89,7 +90,8 @@ RequestInterface::RequestInterface(Private /*unused*/,
 RequestInterfacePtr RequestInterface::Create(std::string callerIdentity,
                                              const std::string &payload)
 {
-  return std::make_shared<RequestInterface>(Private(), callerIdentity, payload);
+  return std::make_shared<RequestInterface>(Private(),
+                                            std::move(callerIdentity), payload);
 }
 
 RequestInterfacePtr RequestInterface::Create(const std::string &payload)
