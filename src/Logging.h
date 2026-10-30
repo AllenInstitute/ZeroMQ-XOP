@@ -19,7 +19,7 @@ class Logging
 {
 public:
   Logging(const std::string &package, const std::string &loggingTemplate);
-  Logging(const std::string &package);
+  explicit Logging(const std::string &package);
   ~Logging();
 
   Logging(const Logging &)            = delete;

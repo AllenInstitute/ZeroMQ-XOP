@@ -18,7 +18,7 @@ public:
   {
   }
 
-  SendStorage(std::string str) : storage(std::move(str))
+  explicit SendStorage(std::string str) : storage(std::move(str))
   {
   }
 
