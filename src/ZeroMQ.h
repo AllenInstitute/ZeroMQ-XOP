@@ -72,12 +72,6 @@ using StringVector = std::vector<std::string>;
 
 using LockGuard = std::scoped_lock<std::recursive_mutex>;
 
-class SendStorage;
-using SendStorageVec = std::vector<SendStorage>;
-
-class ZeroMQMessage;
-using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
-
 #ifdef MACIGOR64
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wpadded"

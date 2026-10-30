@@ -24,4 +24,6 @@ private:
   zmq_msg_t msg{};
 };
 
+using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
+
 #endif // ZEROMQ_HELPER_H

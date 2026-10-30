@@ -1,7 +1,7 @@
 #ifndef HEARTBEAT_PUBLISHER_H
 #define HEARTBEAT_PUBLISHER_H
 
-#include "ZeroMQ.h"
+#include <thread>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.

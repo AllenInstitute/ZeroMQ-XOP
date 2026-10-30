@@ -5,7 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "ZeroMQ.h"
+#include "XOPStandardHeaders.h" // Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
+#include "zeromq_helper.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -47,6 +48,8 @@ private:
   size_t len{0};
   std::optional<std::string> storage;
 };
+
+using SendStorageVec = std::vector<SendStorage>;
 
 SendStorageVec GatherPubData(waveHndl containerWaveHandle);
 void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
