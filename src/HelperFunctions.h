@@ -123,15 +123,12 @@ void ApplyFlags(double flags);
 namespace ZeroMQ_SET_FLAGS
 {
 
-enum ZeroMQ_SET_FLAGS
-{
-  DEFAULT              = 1,
-  DEBUG                = 2,
-  IPV6                 = 4,
-  NO_RECV_BUSY_WAITING = 8,
-  LOGGING              = 16,
-  INTERCEPTOR_FUNCTION = 32
-};
+constexpr int DEFAULT              = 1;
+constexpr int DEBUG                = 2;
+constexpr int IPV6                 = 4;
+constexpr int NO_RECV_BUSY_WAITING = 8;
+constexpr int LOGGING              = 16;
+constexpr int INTERCEPTOR_FUNCTION = 32;
 } // namespace ZeroMQ_SET_FLAGS
 
 /// Return the ID of the Igor Pro process
