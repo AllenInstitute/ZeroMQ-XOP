@@ -74,14 +74,14 @@ void SetDimensionLabels(waveHndl h, int Dimension,
 
   for(size_t k = 0; k < dimLabels.size(); k++)
   {
-    if(dimLabels[k].empty())
+    if(dimLabels.at(k).empty())
     {
       // Empty string.  Skip.
       continue;
     }
 
     if(const int RetVal =
-           MDSetDimensionLabel(h, Dimension, k, dimLabels[k].c_str()))
+           MDSetDimensionLabel(h, Dimension, k, dimLabels.at(k).c_str()))
     {
       throw IgorException(RetVal);
     }
@@ -413,8 +413,8 @@ int ZeroMQPublisherSend(const SendStorageVec &vec)
   {
     const int flag = i < (vecLen - 1) ? ZMQ_SNDMORE : 0;
 
-    const auto *const ptr = vec[i].GetPtr();
-    const auto msgLen     = vec[i].GetLength();
+    const auto *const ptr = vec.at(i).GetPtr();
+    const auto msgLen     = vec.at(i).GetLength();
 
     DEBUG_OUTPUT("element[{}]: ptr={}, len={}, flag={}", i, ptr, msgLen, flag);
 
@@ -975,7 +975,7 @@ size_t GetWaveIndexInMemory(waveHndl w, std::vector<IndexInt> &dims)
   size_t block = 1;
   for(auto &e : dimSizes)
   {
-    auto dimIndex = To<size_t>(dims[i]);
+    auto dimIndex = To<size_t>(dims.at(i));
     ASSERT(dimIndex < To<size_t>(e));
     index += block * dimIndex;
     block *= To<size_t>(e);

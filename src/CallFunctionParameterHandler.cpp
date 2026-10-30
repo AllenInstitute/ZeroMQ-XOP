@@ -132,25 +132,25 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
 
   for(int i = 0; i < fip.numRequiredParameters; i++)
   {
-    DEBUG_OUTPUT("Parameter={} with type {:X}", i, m_paramTypes[i]);
+    DEBUG_OUTPUT("Parameter={} with type {:X}", i, m_paramTypes.at(i));
 
-    const auto type = ClearBit(m_paramTypes[i], FV_REF_TYPE);
+    const auto type = ClearBit(m_paramTypes.at(i), FV_REF_TYPE);
 
     switch(type)
     {
     case NT_FP64:
-      m_paramSizesInBytes[i] = sizeof(double);
+      m_paramSizesInBytes.at(i) = sizeof(double);
       break;
     case HSTRING_TYPE:
-      m_paramSizesInBytes[i] = sizeof(Handle);
+      m_paramSizesInBytes.at(i) = sizeof(Handle);
       break;
     case DATAFOLDER_TYPE:
-      m_paramSizesInBytes[i] = sizeof(DataFolderHandle);
+      m_paramSizesInBytes.at(i) = sizeof(DataFolderHandle);
       break;
     default:
       if(IsWaveType(type))
       {
-        m_paramSizesInBytes[i] = sizeof(waveHndl);
+        m_paramSizesInBytes.at(i) = sizeof(waveHndl);
         break;
       }
       ASSERT(0);
@@ -165,15 +165,15 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
     if(i >= firstInputParamIndex)
     {
       const auto u = ConvertStringToIgorTypeUnion(
-          inputParams[i - firstInputParamIndex], m_paramTypes[i]);
+          inputParams.at(i - firstInputParamIndex), m_paramTypes.at(i));
 
       // we write one parameter after another into our array
       // we can not use IgorTypeUnion here as the padding on 32bit
       // (void* is 4, but a double 8) breaks the reading code in CallFunction.
-      memcpy(dest, &u, m_paramSizesInBytes[i]);
+      memcpy(dest, &u, m_paramSizesInBytes.at(i));
     }
 
-    dest += m_paramSizesInBytes[i];
+    dest += m_paramSizesInBytes.at(i);
   }
 }
 
@@ -219,10 +219,10 @@ CallFunctionParameterHandler::~CallFunctionParameterHandler()
 
   for(size_t i = 0; i < m_paramTypes.size(); i++)
   {
-    switch(m_paramTypes[i])
+    switch(m_paramTypes.at(i))
     {
     case HSTRING_TYPE | FV_REF_TYPE:
-      memcpy(&u, src, m_paramSizesInBytes[i]);
+      memcpy(&u, src, m_paramSizesInBytes.at(i));
       if(u.stringHandle != nullptr)
       {
         WMDisposeHandle(u.stringHandle);
@@ -230,7 +230,7 @@ CallFunctionParameterHandler::~CallFunctionParameterHandler()
       break;
     }
 
-    src += m_paramSizesInBytes[i];
+    src += m_paramSizesInBytes.at(i);
   }
 }
 
@@ -242,7 +242,7 @@ json CallFunctionParameterHandler::ReadPassByRefParameters(int first, int last)
 
   for(int i = 0; i < static_cast<int>(m_paramTypes.size()) && i < last; i++)
   {
-    const auto igorType = m_paramTypes[i];
+    const auto igorType = m_paramTypes.at(i);
 
     if(i >= first && IsBitSet(igorType, FV_REF_TYPE))
     {
@@ -252,8 +252,8 @@ json CallFunctionParameterHandler::ReadPassByRefParameters(int first, int last)
         json doc;
 
         doc["value"] = ExtractFromUnion(reinterpret_cast<IgorTypeUnion *>(src),
-                                        m_paramTypes[i]);
-        doc["type"]  = GetTypeStringForIgorType(m_paramTypes[i]);
+                                        m_paramTypes.at(i));
+        doc["type"]  = GetTypeStringForIgorType(m_paramTypes.at(i));
 
         elems.push_back(doc);
       }
@@ -263,7 +263,7 @@ json CallFunctionParameterHandler::ReadPassByRefParameters(int first, int last)
       }
     }
 
-    src += m_paramSizesInBytes[i];
+    src += m_paramSizesInBytes.at(i);
   }
 
   return elems;

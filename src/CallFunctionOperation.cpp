@@ -125,7 +125,7 @@ void CallFunctionOperation::CanBeProcessed() const
 
     if(IsBitSet(igorType, NT_FP64))
     {
-      if(!IsConvertibleToDouble(m_params[i]))
+      if(!IsConvertibleToDouble(m_params.at(i)))
       {
         throw RequestInterfaceException(REQ_INVALID_PARAM_FORMAT);
       }

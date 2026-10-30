@@ -44,7 +44,7 @@ extern "C" int zeromq_get_bound_endpoints(zeromq_get_bound_endpointsParams *p)
   for(const auto &endpoint : endpoints)
   {
     SetWaveElement(wv, dims, endpoint);
-    dims[0]++;
+    dims.at(0)++;
   }
 
   p->result = wv;

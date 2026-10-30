@@ -363,13 +363,13 @@ void AddDataFullScaleIfSet(json &doc, waveHndl waveHandle)
                                  std::numeric_limits<double>::quiet_NaN()};
 
   // see the documentation to MDGetWaveScaling, the order 1, 0 is correct
-  auto rc = MDGetWaveScaling(waveHandle, -1, &entries[1], entries.data());
+  auto rc = MDGetWaveScaling(waveHandle, -1, &entries.at(1), entries.data());
   ASSERT(rc == 0);
 
   // heuristic;
   // in Igor you would use the first "isValid" entry of the WaveInfo string
-  if((entries[0] == 0.0 && entries[1] == 0.0) ||
-     (std::isnan(entries[0]) && std::isnan(entries[1])))
+  if((entries.at(0) == 0.0 && entries.at(1) == 0.0) ||
+     (std::isnan(entries.at(0)) && std::isnan(entries.at(1))))
   {
     return;
   }
@@ -404,11 +404,11 @@ void AddDimensionScalingIfSet(json &doc, waveHndl waveHandle,
 
   for(size_t i = 0; i < numDimensions; i++)
   {
-    auto rc = MDGetWaveScaling(waveHandle, static_cast<int>(i), &delta[i],
-                               &offset[i]);
+    auto rc = MDGetWaveScaling(waveHandle, static_cast<int>(i), &delta.at(i),
+                               &offset.at(i));
     ASSERT(rc == 0);
 
-    differentFromDefault |= (offset[i] != 0.0 || delta[i] != 1.0);
+    differentFromDefault |= (offset.at(i) != 0.0 || delta.at(i) != 1.0);
   }
 
   if(differentFromDefault)
@@ -441,7 +441,7 @@ void AddDimensionUnitsIfSet(json &doc, waveHndl waveHandle,
 
     if(strlen(unit) > 0)
     {
-      units[i]             = unit;
+      units.at(i)          = unit;
       differentFromDefault = true;
     }
   }
@@ -472,7 +472,7 @@ void AddDimensionLabelsFullIfSet(json &doc, waveHndl waveHandle,
 
     if(strlen(label) > 0)
     {
-      labels[i]            = label;
+      labels.at(i)         = label;
       differentFromDefault = true;
     }
   }
@@ -500,7 +500,7 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
 
   for(size_t i = 0; i < numDimensions; i++)
   {
-    for(CountInt j = 0; j < dimSizes[i]; j++)
+    for(CountInt j = 0; j < dimSizes.at(i); j++)
     {
       char label[MAX_DIM_LABEL_BYTES + 1];
       auto rc = MDGetDimensionLabel(waveHandle, static_cast<int>(i), j, label);
@@ -509,7 +509,7 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
       if(strlen(label) > 0)
       {
         differentFromDefault = true;
-        labels[k]            = label;
+        labels.at(k)         = label;
       }
 
       k++;

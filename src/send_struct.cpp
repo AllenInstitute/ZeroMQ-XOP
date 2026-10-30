@@ -16,8 +16,8 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
 
   const auto dimensions = GetWaveDimension(containerWaveHandle);
 
-  const auto numRows = dimensions[0];
-  const auto numCols = dimensions[1];
+  const auto numRows = dimensions.at(0);
+  const auto numCols = dimensions.at(1);
 
   if(numRows < 2)
   {
@@ -36,7 +36,7 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
   for(CountInt i = 0; i < numRows; i += 1)
   {
     std::vector<IndexInt> containerDims(MAX_DIMENSIONS, 0);
-    containerDims[0] = i;
+    containerDims.at(0) = i;
 
     auto *wv = GetWaveElement<waveHndl>(containerWaveHandle, containerDims);
 
@@ -111,16 +111,16 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
   }
 
   std::vector<IndexInt> resizeDims(MAX_DIMENSIONS, 0);
-  resizeDims[0] = numMsg;
+  resizeDims.at(0) = numMsg;
   RedimensionWave(containerWaveHandle, resizeDims);
 
   for(size_t i = 0; i < numMsg; i += 1)
   {
-    auto *const msg    = vec[i]->get();
+    auto *const msg    = vec.at(i)->get();
     const auto msgSize = zmq_msg_size(msg);
 
     std::vector<IndexInt> containerDims(MAX_DIMENSIONS, 0);
-    containerDims[0] = i;
+    containerDims.at(0) = i;
     auto *wv = GetWaveElement<waveHndl>(containerWaveHandle, containerDims);
 
     int waveType    = 0;
@@ -133,13 +133,13 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
       // first two must be single point text waves
       if(i < 2)
       {
-        dims[0]  = 1;
-        waveType = TEXT_WAVE_TYPE;
+        dims.at(0) = 1;
+        waveType   = TEXT_WAVE_TYPE;
       }
       else
       {
-        dims[0]  = msgSize;
-        waveType = NT_I8 | NT_UNSIGNED;
+        dims.at(0) = msgSize;
+        waveType   = NT_I8 | NT_UNSIGNED;
       }
 
       isTextWave = (waveType == TEXT_WAVE_TYPE);
@@ -172,11 +172,11 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
 
       if(isTextWave)
       {
-        dims[0] = 1;
+        dims.at(0) = 1;
       }
       else
       {
-        dims[0] = msgSize / GetWaveElementSize(waveType);
+        dims.at(0) = msgSize / GetWaveElementSize(waveType);
       }
 
       RedimensionWave(wv, dims);
@@ -202,8 +202,8 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
   }
 
   ASSERT(numMsg >= 2);
-  auto filter  = CreateStringFromZMsg(vec[0]->get());
-  auto payload = CreateStringFromZMsg(vec[1]->get());
+  auto filter  = CreateStringFromZMsg(vec.at(0)->get());
+  auto payload = CreateStringFromZMsg(vec.at(1)->get());
 
   GlobalData::Instance().AddLogEntry(filter + ":" + payload + " + [...]",
                                      MessageDirection::Incoming);
