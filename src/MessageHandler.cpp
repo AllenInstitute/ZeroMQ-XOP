@@ -62,6 +62,32 @@ void QueueErrorReply(const std::string &identity,
       {nullptr, identity, reply.dump(DEFAULT_INDENT), connectionGeneration});
 }
 
+void SendReply(const OutgoingReply &reply)
+{
+  try
+  {
+    if(reply.generation != connectionGeneration)
+    {
+      DEBUG_OUTPUT("Discarding the reply to a closed connection");
+      return;
+    }
+
+    auto rc = ZeroMQServerSend(reply.identity, reply.message);
+
+    DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
+  }
+  catch(const std::exception &e)
+  {
+    EMERGENCY_OUTPUT(
+        "Caught std::exception with what=\"{}\". This must NOT happen!",
+        e.what());
+  }
+  catch(...)
+  {
+    EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
+  }
+}
+
 void DrainOutgoingReplies()
 {
   auto &outgoingQueue = GetOutgoingQueue();
@@ -71,32 +97,7 @@ void DrainOutgoingReplies()
     return;
   }
 
-  outgoingQueue.apply_to_all(
-      [](const OutgoingReply &reply)
-      {
-        try
-        {
-          if(reply.generation != connectionGeneration)
-          {
-            DEBUG_OUTPUT("Discarding the reply to a closed connection");
-            return;
-          }
-
-          auto rc = ZeroMQServerSend(reply.identity, reply.message);
-
-          DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
-        }
-        catch(const std::exception &e)
-        {
-          EMERGENCY_OUTPUT(
-              "Caught std::exception with what=\"{}\". This must NOT happen!",
-              e.what());
-        }
-        catch(...)
-        {
-          EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
-        }
-      });
+  outgoingQueue.apply_to_all(SendReply);
 }
 
 void WorkerThread()
