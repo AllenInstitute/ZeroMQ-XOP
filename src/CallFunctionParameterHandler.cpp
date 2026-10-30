@@ -71,7 +71,7 @@ json ExtractFromUnion(IgorTypeUnion *ret, int igorType)
         ret->waveHandle = nullptr;
       }
 
-      return std::move(result);
+      return result;
     }
     ASSERT(0);
   }
