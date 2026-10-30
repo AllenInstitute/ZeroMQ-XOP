@@ -19,7 +19,7 @@
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 #endif
 
-#include "SafeInt/SafeInt.hpp"
+#include <SafeInt.hpp>
 
 #ifdef MACIGOR64
 #pragma clang diagnostic pop
