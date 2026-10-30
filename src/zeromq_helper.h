@@ -20,5 +20,5 @@ public:
   ZeroMQMessage &operator=(ZeroMQMessage &&)      = delete;
 
 private:
-  zmq_msg_t msg;
+  zmq_msg_t msg{};
 };
