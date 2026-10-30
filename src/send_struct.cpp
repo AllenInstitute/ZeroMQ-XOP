@@ -192,7 +192,7 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
     }
     else
     {
-      void *dest      = GetWaveDataPtr<void *>(wv);
+      void *dest      = GetWaveDataPtr<void>(wv);
       const void *src = zmq_msg_data(msg);
 
       DEBUG_OUTPUT("element[{}]: ptr={}, length={}", i, src, msgSize);
