@@ -283,14 +283,13 @@ Handle GetHandleFromString(const std::string &str);
 /// elements location within the wave.
 /// @param[in] value value that should be written to the location given by dims
 /// in w
-template <typename T,
-          typename std::enable_if_t<std::is_same<DataFolderHandle, T>::value ||
-                                        std::is_same<waveHndl, T>::value ||
-                                        std::is_same<std::string, T>::value ||
-                                        std::is_same<float, T>::value ||
-                                        std::is_same<double, T>::value ||
-                                        std::is_integral<T>::value,
-                                    int> = 0>
+template <
+    typename T,
+    typename std::enable_if_t<
+        std::is_same_v<DataFolderHandle, T> || std::is_same_v<waveHndl, T> ||
+            std::is_same_v<std::string, T> || std::is_same_v<float, T> ||
+            std::is_same_v<double, T> || std::is_integral_v<T>,
+        int> = 0>
 void SetWaveElement(waveHndl w, std::vector<IndexInt> &dims, const T &value)
 {
   int err;
@@ -367,14 +366,13 @@ void SetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexInt> &dims,
 /// @param[in] dims IndexInt vector of MAX_DIMENSIONS size that points to the
 /// elements location within the wave.
 /// @return value value that is read at the location given by dims in w
-template <typename T,
-          typename std::enable_if_t<std::is_same<DataFolderHandle, T>::value ||
-                                        std::is_same<waveHndl, T>::value ||
-                                        std::is_same<std::string, T>::value ||
-                                        std::is_same<float, T>::value ||
-                                        std::is_same<double, T>::value ||
-                                        std::is_integral<T>::value,
-                                    int> = 0>
+template <
+    typename T,
+    typename std::enable_if_t<
+        std::is_same_v<DataFolderHandle, T> || std::is_same_v<waveHndl, T> ||
+            std::is_same_v<std::string, T> || std::is_same_v<float, T> ||
+            std::is_same_v<double, T> || std::is_integral_v<T>,
+        int> = 0>
 T GetWaveElement(waveHndl w, std::vector<IndexInt> &dims)
 {
   int err;
