@@ -1213,8 +1213,10 @@ waveHndl MakeFreeWave(std::vector<CountInt> dims, int type)
   dims.resize(MAX_DIMENSIONS + 1, 0);
 
   waveHndl wv = nullptr;
-  auto ret    = MDMakeWave(&wv, "free", reinterpret_cast<DataFolderHandle>(-1),
-                           dims.data(), type, -1);
+  // the XOP Toolkit creates a free wave for the data folder handle -1
+  // NOLINTNEXTLINE(performance-no-int-to-ptr)
+  auto ret = MDMakeWave(&wv, "free", reinterpret_cast<DataFolderHandle>(-1),
+                        dims.data(), type, -1);
 
   if(ret || wv == nullptr)
   {
