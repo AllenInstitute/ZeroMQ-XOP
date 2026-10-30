@@ -811,7 +811,7 @@ int CreateDirectory(const std::string &path)
   {
     return FOLDER_EXISTS_NO_OVERWRITE;
   }
-  else if(error == ERROR_PATH_NOT_FOUND)
+  if(error == ERROR_PATH_NOT_FOUND)
   {
     return CANT_OPEN_FOLDER;
   }

@@ -153,7 +153,7 @@ void CallFunctionOperation::CanBeProcessed() const
       {
         continue;
       }
-      else if(IsBitSet(igorType, HSTRING_TYPE))
+      if(IsBitSet(igorType, HSTRING_TYPE))
       {
         continue;
       }
@@ -168,24 +168,22 @@ void CallFunctionOperation::CanBeProcessed() const
 
       throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_RET);
     }
-    else
-    {
-      // 3: input parameter
-      if(IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX))
-      {
-        continue;
-      }
-      else if(IsBitSet(igorType, HSTRING_TYPE))
-      {
-        continue;
-      }
-      else if(IsBitSet(igorType, DATAFOLDER_TYPE))
-      {
-        continue;
-      }
 
-      throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
+    // 3: input parameter
+    if(IsBitSet(igorType, NT_FP64) && !IsBitSet(igorType, NT_CMPLX))
+    {
+      continue;
     }
+    else if(IsBitSet(igorType, HSTRING_TYPE))
+    {
+      continue;
+    }
+    else if(IsBitSet(igorType, DATAFOLDER_TYPE))
+    {
+      continue;
+    }
+
+    throw RequestInterfaceException(REQ_UNSUPPORTED_FUNC_SIG);
   }
 
   DEBUG_OUTPUT("Request Object can be processed: {}", *this);
