@@ -21,6 +21,11 @@ public:
   Logging(const std::string &package);
   ~Logging();
 
+  Logging(const Logging &)            = delete;
+  Logging(Logging &&)                 = delete;
+  Logging &operator=(const Logging &) = delete;
+  Logging &operator=(Logging &&)      = delete;
+
   void AddLogEntry(const json &doc, MessageDirection dir) const;
   void AddLogEntry(const json &doc, const std::string &identity,
                    MessageDirection dir) const;
@@ -30,11 +35,6 @@ public:
                    MessageDirection dir) const;
 
 private:
-  Logging(const Logging &)        = delete;
-  Logging(const Logging &&)       = delete;
-  Logging &operator=(Logging &)   = delete;
-  Logging &&operator=(Logging &&) = delete;
-
   class Implementation;
   std::unique_ptr<Logging::Implementation> m_impl;
 };

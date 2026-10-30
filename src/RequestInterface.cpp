@@ -44,6 +44,11 @@ public:
     }
   }
 
+  InterceptorCaller(const InterceptorCaller &)            = delete;
+  InterceptorCaller(InterceptorCaller &&)                 = delete;
+  InterceptorCaller &operator=(const InterceptorCaller &) = delete;
+  InterceptorCaller &operator=(InterceptorCaller &&)      = delete;
+
 private:
   std::shared_ptr<const RequestInterface> m_req;
 };

@@ -36,6 +36,11 @@ public:
 
   ~IgorException() override;
 
+  IgorException(const IgorException &)            = default;
+  IgorException(IgorException &&)                 = default;
+  IgorException &operator=(const IgorException &) = delete;
+  IgorException &operator=(IgorException &&)      = delete;
+
   [[nodiscard]] const char *what() const noexcept override;
 
   [[nodiscard]] int GetErrorCode() const;

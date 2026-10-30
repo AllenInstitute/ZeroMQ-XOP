@@ -26,6 +26,11 @@ AllSocketTypesArray GetAllSocketTypes();
 class GlobalData
 {
 public:
+  GlobalData(const GlobalData &)            = delete;
+  GlobalData(GlobalData &&)                 = delete;
+  GlobalData &operator=(const GlobalData &) = delete;
+  GlobalData &operator=(GlobalData &&)      = delete;
+
   /// Access to singleton-type global object
   static GlobalData &Instance()
   {
@@ -79,9 +84,7 @@ public:
 
 private:
   GlobalData();
-  ~GlobalData()                             = default;
-  GlobalData(const GlobalData &)            = delete;
-  GlobalData &operator=(const GlobalData &) = delete;
+  ~GlobalData() = default;
 
   struct SocketTypeData
   {
