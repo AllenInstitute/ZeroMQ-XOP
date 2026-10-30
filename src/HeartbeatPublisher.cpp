@@ -39,7 +39,7 @@ void WorkerThread()
     {
       // check if stop is requested
       {
-        std::lock_guard<std::mutex> lock(threadShouldFinishMutex);
+        std::scoped_lock<std::mutex> lock(threadShouldFinishMutex);
         if(threadShouldFinish)
         {
           DEBUG_OUTPUT("Exiting");
@@ -102,7 +102,7 @@ void HeartbeatPublisher::Start()
   DEBUG_OUTPUT("Trying to start.");
 
   {
-    std::lock_guard<std::mutex> innerLock(threadShouldFinishMutex);
+    std::scoped_lock<std::mutex> innerLock(threadShouldFinishMutex);
     threadShouldFinish = false;
   }
 
@@ -122,7 +122,7 @@ void HeartbeatPublisher::Stop()
   DEBUG_OUTPUT("Shutting down.");
 
   {
-    std::lock_guard<std::mutex> innerLock(threadShouldFinishMutex);
+    std::scoped_lock<std::mutex> innerLock(threadShouldFinishMutex);
     threadShouldFinish = true;
   }
 
