@@ -47,7 +47,8 @@ private:
 
 } // anonymous namespace
 
-RequestInterface::RequestInterface(Private, std::string callerIdentity,
+RequestInterface::RequestInterface(Private /*unused*/,
+                                   std::string callerIdentity,
                                    const std::string &payload)
     : m_callerIdentity(std::move(callerIdentity))
 {
@@ -71,7 +72,8 @@ RequestInterface::RequestInterface(Private, std::string callerIdentity,
   FillFromJSON(doc);
 }
 
-RequestInterface::RequestInterface(Private, const std::string &payload)
+RequestInterface::RequestInterface(Private /*unused*/,
+                                   const std::string &payload)
     : RequestInterface(Private(), "", payload)
 {
 }
