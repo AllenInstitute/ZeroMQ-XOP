@@ -13,6 +13,8 @@ namespace
 {
 
 using namespace std::chrono_literals;
+
+constexpr auto HEARTBEAT_INTERVAL = 5s;
 std::recursive_mutex threadMutex;
 bool threadShouldFinish;
 std::mutex threadShouldFinishMutex;
@@ -25,7 +27,7 @@ bool WaitForNextHeartbeat()
 {
   std::unique_lock<std::mutex> lock(threadShouldFinishMutex);
 
-  return threadShouldFinishCondition.wait_for(lock, 5s, []
+  return threadShouldFinishCondition.wait_for(lock, HEARTBEAT_INTERVAL, []
                                               { return threadShouldFinish; });
 }
 

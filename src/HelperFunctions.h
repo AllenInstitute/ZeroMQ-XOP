@@ -168,7 +168,9 @@ struct GetFormatString<double, withComma>
 {
   std::string operator()() const
   {
-    static_assert(std::numeric_limits<double>::digits10 == 15,
+    // the precision of the format strings
+    constexpr int precision = 15;
+    static_assert(std::numeric_limits<double>::digits10 == precision,
                   "Unexpected double precision");
 
     if(withComma)

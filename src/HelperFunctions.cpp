@@ -9,6 +9,9 @@ namespace
 
 constexpr size_t MAX_ENDPOINT_LENGTH = 256;
 
+/// Values with a larger magnitude are converted to true
+constexpr double BOOL_TRUE_THRESHOLD = 1e-8;
+
 ExperimentModification MapOutputModeToExperimentModification(OutputMode mode)
 {
   switch(mode)
@@ -118,7 +121,7 @@ bool lockToIntegerRange<bool>(double val)
     throw IgorException(kDoesNotSupportNaNorINF);
   }
 
-  return std::abs(val) > 1e-8;
+  return std::abs(val) > BOOL_TRUE_THRESHOLD;
 }
 
 std::size_t GetWaveElementSize(int dataType)
@@ -830,8 +833,10 @@ int CreateDirectory(const std::string &path)
   return INTERNAL_ERROR;
 #else
 #ifdef MACIGOR
+  constexpr mode_t DIRECTORY_PERMISSIONS = 0777;
+
   // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mkdir.2.html
-  auto ret = mkdir(path.c_str(), 0777);
+  auto ret = mkdir(path.c_str(), DIRECTORY_PERMISSIONS);
   if(!ret)
   {
     return 0;
