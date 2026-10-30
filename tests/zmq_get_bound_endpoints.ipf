@@ -20,14 +20,15 @@ End
 
 static Function/WAVE InvalidSocketTypes()
 
-	Make/FREE/D types = {0, 5, -1}
+	Make/FREE/D types = {0, 5}
 
 	return types
 End
 
-static Function/WAVE NonFiniteSocketTypes()
+// can't be converted to the underlying type of the socket types
+static Function/WAVE UnconvertibleSocketTypes()
 
-	Make/FREE/D types = {NaN, Inf, -Inf}
+	Make/FREE/D types = {NaN, Inf, -Inf, -1, 256}
 
 	return types
 End
@@ -68,8 +69,8 @@ Function ComplainsWithInvalidSocketType([variable var])
 	CHECK_WAVE(endpoints, NULL_WAVE)
 End
 
-// UTF_TD_GENERATOR zmq_get_bound_endpoints#NonFiniteSocketTypes
-Function ComplainsWithNonFiniteSocketType([variable var])
+// UTF_TD_GENERATOR zmq_get_bound_endpoints#UnconvertibleSocketTypes
+Function ComplainsWithUnconvertibleSocketType([variable var])
 
 	variable err
 

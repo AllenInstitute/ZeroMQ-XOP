@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
@@ -14,7 +15,7 @@
 ///   OutputQueuedNotices(). For that the XOP has to be marked as
 ///   `SetXOPType(RESIDENT | IDLES);`.
 
-enum class ExperimentModification
+enum class ExperimentModification : std::uint8_t
 {
   Normal, ///< Mark experiment as modified
   Silent  ///< Don't mark the experiment as modified

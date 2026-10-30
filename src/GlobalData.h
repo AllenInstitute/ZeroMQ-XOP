@@ -11,7 +11,7 @@
 
 /// The values are the ones of the ZMQ_SOCKET_TYPE_* constants in
 /// ZeroMQ_Interop.ipf
-enum class SocketTypes
+enum class SocketTypes : std::uint8_t
 {
   Client     = 1,
   Server     = 2,
