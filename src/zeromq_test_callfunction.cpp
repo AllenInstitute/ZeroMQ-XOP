@@ -22,7 +22,7 @@ extern "C" int zeromq_test_callfunction(zeromq_test_callfunctionParams *p)
 
   DEBUG_OUTPUT("len={}, retMessage={:.255s}", len, retMessage);
 
-  p->result = WMNewHandle(len);
+  p->result = WMNewHandle(To<BCInt>(len));
   ASSERT(p->result != nullptr);
   memcpy(*(p->result), retMessage.c_str(), len);
 

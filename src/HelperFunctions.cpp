@@ -82,8 +82,8 @@ void SetDimensionLabels(waveHndl waveHandle, int Dimension,
       continue;
     }
 
-    if(const int RetVal = MDSetDimensionLabel(waveHandle, Dimension, k,
-                                              dimLabels.at(k).c_str()))
+    if(const int RetVal = MDSetDimensionLabel(
+           waveHandle, Dimension, To<IndexInt>(k), dimLabels.at(k).c_str()))
     {
       throw IgorException(RetVal);
     }
@@ -170,7 +170,7 @@ void WaveClear(waveHndl wv)
     return;
   }
 
-  MemClear(WaveData(wv), numBytes);
+  MemClear(WaveData(wv), To<BCInt>(numBytes));
 }
 
 void ApplyFlags(double flags)
@@ -627,12 +627,12 @@ void InitHandle(Handle *handle, size_t size)
 {
   if(*handle == nullptr)
   {
-    *handle = WMNewHandle(size);
+    *handle = WMNewHandle(To<BCInt>(size));
     ASSERT(*handle != nullptr);
   }
   else
   {
-    const int ret = WMSetHandleSize(*handle, size);
+    const int ret = WMSetHandleSize(*handle, To<BCInt>(size));
     ASSERT(!ret);
   }
 }
@@ -807,8 +807,6 @@ void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
 int CreateDirectory(const std::string &path)
 {
 #ifdef WINIGOR
-  int error = 0;
-
   // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createdirectorya
   auto ret = CreateDirectoryA(path.c_str(), nullptr);
 
@@ -818,7 +816,7 @@ int CreateDirectory(const std::string &path)
     return 0;
   }
 
-  error = GetLastError();
+  const DWORD error = GetLastError();
 
   if(error == ERROR_ALREADY_EXISTS)
   {

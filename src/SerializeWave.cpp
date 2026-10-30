@@ -351,7 +351,7 @@ std::string DimensionSizesToString(std::vector<CountInt> dimensionSizes)
   }
 
   fmt::memory_buffer buf;
-  OutputArray(buf, dimensionSizes.data(), dimensionSizes.size());
+  OutputArray(buf, dimensionSizes.data(), To<CountInt>(dimensionSizes.size()));
 
   return to_string(buf);
 }
@@ -374,7 +374,7 @@ void AddDataFullScaleIfSet(json &doc, waveHndl waveHandle)
   }
 
   fmt::memory_buffer buf;
-  OutputArray(buf, entries.data(), entries.size());
+  OutputArray(buf, entries.data(), To<CountInt>(entries.size()));
 
   doc["data"]["fullScale"] = json::parse(to_string(buf));
 }
@@ -414,12 +414,12 @@ void AddDimensionScalingIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, offset.data(), offset.size());
+    OutputArray(buf, offset.data(), To<CountInt>(offset.size()));
     doc["dimension"]["offset"] = json::parse(to_string(buf));
 
     buf.clear();
 
-    OutputArray(buf, delta.data(), delta.size());
+    OutputArray(buf, delta.data(), To<CountInt>(delta.size()));
     doc["dimension"]["delta"] = json::parse(to_string(buf));
   }
 }
@@ -449,7 +449,7 @@ void AddDimensionUnitsIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, units.data(), units.size());
+    OutputArray(buf, units.data(), To<CountInt>(units.size()));
     doc["dimension"]["unit"] = json::parse(to_string(buf));
   }
 }
@@ -481,7 +481,7 @@ void AddDimensionLabelsFullIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, labels.data(), labels.size());
+    OutputArray(buf, labels.data(), To<CountInt>(labels.size()));
     doc["dimension"]["label"]["full"] = json::parse(to_string(buf));
   }
 }
@@ -521,7 +521,7 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, labels.data(), labels.size());
+    OutputArray(buf, labels.data(), To<CountInt>(labels.size()));
     doc["dimension"]["label"]["each"] = json::parse(to_string(buf));
   }
 }
