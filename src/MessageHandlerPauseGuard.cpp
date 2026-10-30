@@ -14,6 +14,9 @@ MessageHandlerPauseGuard::MessageHandlerPauseGuard(bool enable)
   }
 }
 
+// FMT_STRING checks the format string at compile time, the format_error
+// thrown when checking it at runtime can not happen
+// NOLINTNEXTLINE(bugprone-exception-escape)
 MessageHandlerPauseGuard::~MessageHandlerPauseGuard()
 {
   if(m_wasRunning)

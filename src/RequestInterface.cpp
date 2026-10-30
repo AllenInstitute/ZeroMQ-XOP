@@ -25,6 +25,9 @@ public:
     m_req->CallInterceptor(InterceptorMode::Begin);
   }
 
+  // FMT_STRING checks the format string at compile time, the format_error
+  // thrown when checking it at runtime can not happen
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   ~InterceptorCaller()
   {
     try
