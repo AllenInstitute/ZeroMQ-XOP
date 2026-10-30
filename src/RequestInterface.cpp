@@ -40,7 +40,7 @@ public:
     }
     catch(...)
     {
-      // do nothing
+      DEBUG_OUTPUT("Caught unknown exception");
     }
   }
 

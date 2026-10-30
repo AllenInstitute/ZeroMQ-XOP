@@ -25,22 +25,28 @@ constexpr const char DIR_SEPARATOR[] = "/";
 #endif // MACIGOR
 #endif // WINIGOR
 
+bool IsValidUTF8(const std::string &str)
+{
+  try
+  {
+    json(str).dump();
+    return true;
+  }
+  catch(const json::type_error &)
+  {
+    return false;
+  }
+}
+
 /// ZeroMQ generates binary identities, starting with a zero byte, for clients
 /// which don't set one, see ZMQ_ROUTING_ID. A JSON string can only hold UTF-8.
 std::string ToLoggableIdentity(const std::string &identity)
 {
   ASSERT(!identity.empty());
 
-  if(identity.front() != '\0')
+  if(identity.front() != '\0' && IsValidUTF8(identity))
   {
-    try
-    {
-      json(identity).dump();
-      return identity;
-    }
-    catch(const json::type_error &)
-    {
-    }
+    return identity;
   }
 
   const auto *bytes = reinterpret_cast<const unsigned char *>(identity.data());

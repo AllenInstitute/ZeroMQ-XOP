@@ -282,9 +282,10 @@ void GlobalData::CloseConnections()
       ZEROMQ_ASSERT(rc == 0);
       socketData.m_zmq_socket = nullptr;
     }
-    catch(...)
+    catch(const std::exception &e)
     {
-      // ignore errors
+      DEBUG_OUTPUT("Ignoring the error of closing the {} socket: {}", st,
+                   e.what());
     }
   }
 }
