@@ -828,10 +828,8 @@ int CreateDirectory(const std::string &path)
   {
     return CANT_OPEN_FOLDER;
   }
-  else
-  {
-    return INTERNAL_ERROR;
-  }
+
+  return INTERNAL_ERROR;
 #else
 #ifdef MACIGOR
   // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mkdir.2.html
@@ -845,14 +843,12 @@ int CreateDirectory(const std::string &path)
   {
     return FOLDER_EXISTS_NO_OVERWRITE;
   }
-  else if(errno == ENOTDIR)
+  if(errno == ENOTDIR)
   {
     return CANT_OPEN_FOLDER;
   }
-  else
-  {
-    return INTERNAL_ERROR;
-  }
+
+  return INTERNAL_ERROR;
 
 #else
 #error "Unsupported architecture"
