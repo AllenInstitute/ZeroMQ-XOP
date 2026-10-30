@@ -335,6 +335,7 @@ packaging:
     - compile-xop-windows
     - compile-xop-release-macosx
     - testing-macosx
+    - clang-tidy
   artifacts:
     paths:
       - package
