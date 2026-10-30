@@ -34,7 +34,7 @@ public:
   explicit IgorException(int errorCode);
   IgorException(int errorCode, const std::string &errorMessage);
 
-  virtual ~IgorException() override;
+  ~IgorException() override;
 
   [[nodiscard]] const char *what() const noexcept override;
 
