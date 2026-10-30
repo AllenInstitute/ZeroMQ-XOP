@@ -20,7 +20,7 @@ bool IsValidMessageId(const std::string &messageId)
 class InterceptorCaller
 {
 public:
-  InterceptorCaller(std::shared_ptr<const RequestInterface> req)
+  explicit InterceptorCaller(std::shared_ptr<const RequestInterface> req)
       : m_req(std::move(req))
   {
     m_req->CallInterceptor(InterceptorMode::Begin);
