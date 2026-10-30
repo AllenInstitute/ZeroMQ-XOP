@@ -96,6 +96,19 @@ THREADSAFE variable zeromq_client_connect(string remotePoint);
 /// @return received message
 THREADSAFE string zeromq_client_recv();
 
+/// @brief Return the endpoints bound or connected by this XOP instance
+///
+/// The endpoints are the ones reported by `ZMQ_LAST_ENDPOINT` after each
+/// successful bind or connect, e.g. `tcp://127.0.0.1:5670` also for a bind
+/// to `tcp://127.0.0.1:*`. zeromq_stop() clears them.
+///
+/// @param socketType One of @ref ZeroMQSocketTypes, the server and publisher
+///                   sockets bind, the client and subscriber sockets connect
+///
+/// @return free text wave with one endpoint per row, null wave if there are
+///         none
+THREADSAFE WAVE zeromq_get_bound_endpoints(variable socketType);
+
 /// @name Publishers and Subscribers
 ///
 /// @{
