@@ -9,6 +9,11 @@
 class HeartbeatPublisher
 {
 public:
+  HeartbeatPublisher(const HeartbeatPublisher &)            = delete;
+  HeartbeatPublisher(HeartbeatPublisher &&)                 = delete;
+  HeartbeatPublisher &operator=(const HeartbeatPublisher &) = delete;
+  HeartbeatPublisher &operator=(HeartbeatPublisher &&)      = delete;
+
   /// Access to singleton-type global object
   static HeartbeatPublisher &Instance()
   {
@@ -23,8 +28,6 @@ public:
 private:
   HeartbeatPublisher() = default;
   ~HeartbeatPublisher();
-  HeartbeatPublisher(const HeartbeatPublisher &)            = delete;
-  HeartbeatPublisher &operator=(const HeartbeatPublisher &) = delete;
 
   class thread;
   std::thread m_thread;

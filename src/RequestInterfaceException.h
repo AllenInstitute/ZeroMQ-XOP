@@ -11,6 +11,12 @@ class RequestInterfaceException : public IgorException
 public:
   explicit RequestInterfaceException(int errorCode);
   ~RequestInterfaceException() override;
+
+  RequestInterfaceException(const RequestInterfaceException &) = default;
+  RequestInterfaceException(RequestInterfaceException &&)      = default;
+  RequestInterfaceException &
+  operator=(const RequestInterfaceException &)                       = default;
+  RequestInterfaceException &operator=(RequestInterfaceException &&) = default;
 };
 
 #endif // REQUEST_INTERFACE_EXCEPTION_H

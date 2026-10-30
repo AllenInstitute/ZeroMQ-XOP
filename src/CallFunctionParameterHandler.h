@@ -13,6 +13,13 @@ public:
   CallFunctionParameterHandler(StringVector params, FunctionInfo fip);
   ~CallFunctionParameterHandler();
 
+  CallFunctionParameterHandler(const CallFunctionParameterHandler &) = delete;
+  CallFunctionParameterHandler(CallFunctionParameterHandler &&)      = delete;
+  CallFunctionParameterHandler &
+  operator=(const CallFunctionParameterHandler &) = delete;
+  CallFunctionParameterHandler &
+  operator=(CallFunctionParameterHandler &&) = delete;
+
   // Return a jsons style array for the pass-by-reference parameters
   json GetPassByRefInputArray();
   json GetReturnValues();

@@ -9,6 +9,11 @@
 class MessageHandler
 {
 public:
+  MessageHandler(const MessageHandler &)            = delete;
+  MessageHandler(MessageHandler &&)                 = delete;
+  MessageHandler &operator=(const MessageHandler &) = delete;
+  MessageHandler &operator=(MessageHandler &&)      = delete;
+
   /// Access to singleton-type global object
   static MessageHandler &Instance()
   {
@@ -28,8 +33,6 @@ public:
 private:
   MessageHandler() = default;
   ~MessageHandler();
-  MessageHandler(const MessageHandler &)            = delete;
-  MessageHandler &operator=(const MessageHandler &) = delete;
 
   class thread;
   std::thread m_thread;

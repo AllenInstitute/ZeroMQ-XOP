@@ -15,8 +15,10 @@ public:
 
   zmq_msg_t *get();
 
-  ZeroMQMessage(const ZeroMQMessage &)  = delete;
-  void operator=(const ZeroMQMessage &) = delete;
+  ZeroMQMessage(const ZeroMQMessage &)            = delete;
+  ZeroMQMessage(ZeroMQMessage &&)                 = delete;
+  ZeroMQMessage &operator=(const ZeroMQMessage &) = delete;
+  ZeroMQMessage &operator=(ZeroMQMessage &&)      = delete;
 
 private:
   zmq_msg_t msg;
