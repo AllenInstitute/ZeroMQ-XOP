@@ -33,7 +33,11 @@ struct IncomingRequest
   uint64_t generation;
 };
 
-ConcurrentQueue<IncomingRequest> incomingQueue;
+ConcurrentQueue<IncomingRequest> &GetIncomingQueue()
+{
+  static ConcurrentQueue<IncomingRequest> queue;
+  return queue;
+}
 
 struct OutgoingReply
 {
@@ -42,12 +46,17 @@ struct OutgoingReply
   uint64_t generation;
 };
 
-ConcurrentQueue<OutgoingReply> outgoingQueue;
+ConcurrentQueue<OutgoingReply> &GetOutgoingQueue()
+{
+  static ConcurrentQueue<OutgoingReply> queue;
+  return queue;
+}
 
 void QueueErrorReply(const std::string &identity,
                      const IgorException &exception)
 {
-  const json reply = exception;
+  const json reply    = exception;
+  auto &incomingQueue = GetIncomingQueue();
 
   incomingQueue.push(
       {nullptr, identity, reply.dump(DEFAULT_INDENT), connectionGeneration});
@@ -55,6 +64,8 @@ void QueueErrorReply(const std::string &identity,
 
 void DrainOutgoingReplies()
 {
+  auto &outgoingQueue = GetOutgoingQueue();
+
   if(RunningInMainThread() || outgoingQueue.empty())
   {
     return;
@@ -100,6 +111,8 @@ void WorkerThread()
 
   rc = zmq_msg_init(&payloadMsg);
   ZEROMQ_ASSERT(rc == 0);
+
+  auto &incomingQueue = GetIncomingQueue();
 
   for(;;)
   {
@@ -174,6 +187,8 @@ void CallAndQueueReply(const IncomingRequest &incoming) noexcept
   {
     try
     {
+      auto &outgoingQueue = GetOutgoingQueue();
+
       if(incoming.generation != connectionGeneration)
       {
         DEBUG_OUTPUT("Discarding the request of a closed connection");
@@ -268,6 +283,9 @@ void MessageHandler::DiscardQueuedMessages()
 {
   connectionGeneration++;
 
+  auto &incomingQueue = GetIncomingQueue();
+  auto &outgoingQueue = GetOutgoingQueue();
+
   incomingQueue.clear();
   outgoingQueue.clear();
 }
@@ -281,6 +299,8 @@ bool MessageHandler::IsRunning() const
 
 void MessageHandler::HandleAllQueuedMessages()
 {
+  auto &incomingQueue = GetIncomingQueue();
+
   if(!RunningInMainThread() || incomingQueue.empty())
   {
     return;
