@@ -33,7 +33,11 @@ struct IncomingRequest
   uint64_t generation;
 };
 
-ConcurrentQueue<IncomingRequest> incomingQueue;
+ConcurrentQueue<IncomingRequest> &GetIncomingQueue()
+{
+  static ConcurrentQueue<IncomingRequest> queue;
+  return queue;
+}
 
 struct OutgoingReply
 {
@@ -42,25 +46,29 @@ struct OutgoingReply
   uint64_t generation;
 };
 
-ConcurrentQueue<OutgoingReply> outgoingQueue;
+ConcurrentQueue<OutgoingReply> &GetOutgoingQueue()
+{
+  static ConcurrentQueue<OutgoingReply> queue;
+  return queue;
+}
 
 void QueueErrorReply(const std::string &identity,
                      const IgorException &exception)
 {
   const json reply = exception;
 
-  incomingQueue.push(
+  GetIncomingQueue().push(
       {nullptr, identity, reply.dump(DEFAULT_INDENT), connectionGeneration});
 }
 
 void DrainOutgoingReplies()
 {
-  if(RunningInMainThread() || outgoingQueue.empty())
+  if(RunningInMainThread() || GetOutgoingQueue().empty())
   {
     return;
   }
 
-  outgoingQueue.apply_to_all(
+  GetOutgoingQueue().apply_to_all(
       [](const OutgoingReply &reply)
       {
         try
@@ -154,7 +162,7 @@ void WorkerThread()
         {
           const auto payload = CreateStringFromZMsg(&payloadMsg);
           auto req           = RequestInterface::Create(identity, payload);
-          incomingQueue.push({req, identity, "", connectionGeneration});
+          GetIncomingQueue().push({req, identity, "", connectionGeneration});
         }
         catch(const std::bad_alloc &)
         {
@@ -200,7 +208,7 @@ void CallAndQueueReply(const IncomingRequest &incoming) noexcept
 
       if(!incoming.request)
       {
-        outgoingQueue.push(
+        GetOutgoingQueue().push(
             {incoming.identity, incoming.errorReply, incoming.generation});
         return;
       }
@@ -216,7 +224,7 @@ void CallAndQueueReply(const IncomingRequest &incoming) noexcept
         return;
       }
 
-      outgoingQueue.push(
+      GetOutgoingQueue().push(
           {req->GetCallerIdentity(), message, incoming.generation});
     }
     catch(const std::exception &e)
@@ -286,8 +294,8 @@ void MessageHandler::DiscardQueuedMessages()
 {
   connectionGeneration++;
 
-  incomingQueue.apply_to_all([](const IncomingRequest &) {});
-  outgoingQueue.apply_to_all([](const OutgoingReply &) {});
+  GetIncomingQueue().apply_to_all([](const IncomingRequest &) {});
+  GetOutgoingQueue().apply_to_all([](const OutgoingReply &) {});
 }
 
 bool MessageHandler::IsRunning() const
@@ -299,15 +307,15 @@ bool MessageHandler::IsRunning() const
 
 void MessageHandler::HandleAllQueuedMessages()
 {
-  if(!RunningInMainThread() || incomingQueue.empty())
+  if(!RunningInMainThread() || GetIncomingQueue().empty())
   {
     return;
   }
 
-  auto msg = fmt::format("IDLE event messages: #{}", incomingQueue.size());
+  auto msg = fmt::format("IDLE event messages: #{}", GetIncomingQueue().size());
   GlobalData::Instance().AddLogEntry(msg);
 
-  incomingQueue.apply_to_all(CallAndQueueReply);
+  GetIncomingQueue().apply_to_all(CallAndQueueReply);
 }
 
 // FMT_STRING checks the format string at compile time, the format_error

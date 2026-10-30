@@ -128,9 +128,9 @@ using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
 #include "git_version.h"
 
 // see also FunctionInfo XOPSupport function
-const int MAX_NUM_PARAMS        = 100;
-const std::string MESSAGEID_KEY = "messageID";
-const std::string HISTORY_KEY   = "history";
+const int MAX_NUM_PARAMS            = 100;
+constexpr const char *MESSAGEID_KEY = "messageID";
+constexpr const char *HISTORY_KEY   = "history";
 
 /* Prototypes */
 HOST_IMPORT int XOPMain(IORecHandle ioRecHandle);
