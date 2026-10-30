@@ -16,8 +16,9 @@
 ///   - DEALER/ROUTER: ZMQ_RCVTIMEO = 1
 ///   - DEALER/ROUTER: ZMQ_LINGER = 0
 ///   - ROUTER: ZMQ_ROUTER_MANDATORY = 1
-///   - ROUTER: ZMQ_MAXMSGSIZE = 1024 byte
-///   - DEALER: ZMQ_IDENTITY non-empty string
+///   - ROUTER: ZMQ_ROUTER_HANDOVER = 1
+///   - DEALER: ZMQ_IDENTITY "zeromq xop: dealer $pid-$counter", unique for
+///     every socket
 /// - For compatibility reasons with the REQ socket, DEALER sockets have to
 ///   always send two frames: An empty one and one with the payload.
 
@@ -74,9 +75,20 @@ THREADSAFE variable zeromq_client_connect(string remotePoint);
 /// Receive a message as the `DEALER` socket
 ///
 /// Implemented using a blocking wait albeit abortable from within Igor Pro.
+/// Returns an empty string when the timeout of
+/// zeromq_client_set_recv_timeout() elapses.
 ///
 /// @return received message
 THREADSAFE string zeromq_client_recv();
+
+/// @brief Set the time zeromq_client_recv() waits for a message
+///
+/// A lost request or reply would otherwise let zeromq_client_recv() wait
+/// forever.
+///
+/// @param timeout timeout in seconds, 0 waits forever, which is the default
+///                and is restored by `zeromq_set(ZeroMQ_SET_FLAGS_DEFAULT)`
+THREADSAFE variable zeromq_client_set_recv_timeout(variable timeout);
 
 /// @name Publishers and Subscribers
 ///

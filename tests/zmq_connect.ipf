@@ -4,6 +4,8 @@
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
+static StrConstant CLIENT_IDENTITY_REGEX = "^zeromq xop: dealer [0-9]+-[0-9]+$"
+
 static Function GetSourceCheck_IGNORE(string type)
 	strswitch(type)
 		case "CallClientConnect":
@@ -143,4 +145,119 @@ Function AllowsMultipleConnections([string str])
 
 	ret = f("tcp://127.0.0.1:6666")
 	CHECK_EQUAL_VAR(ret, 0)
+End
+
+static Function/S GetClientIdentity_IGNORE()
+
+	string identity, reply
+
+	zeromq_stop()
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
+	zeromq_server_bind("tcp://127.0.0.1:5555")
+	zeromq_client_connect("tcp://127.0.0.1:5555")
+
+	zeromq_client_send("abcd")
+	reply = zeromq_server_recv(identity)
+	CHECK_EQUAL_STR(reply, "abcd")
+
+	return identity
+End
+
+// The server can only route replies to one connection per identity
+Function ClientsHaveUniqueIdentities()
+
+	string first, second
+
+	first = GetClientIdentity_IGNORE()
+	CHECK_EQUAL_VAR(GrepString(first, CLIENT_IDENTITY_REGEX), 1)
+
+	second = GetClientIdentity_IGNORE()
+	CHECK_EQUAL_VAR(GrepString(second, CLIENT_IDENTITY_REGEX), 1)
+
+	CHECK_NEQ_STR(first, second)
+End
+
+Function ClientRecvTimeoutComplainsWithInvalidValues()
+
+	variable err
+
+	try
+		zeromq_client_set_recv_timeout(-1); AbortOnRTE
+		FAIL()
+	catch
+		err = GetRTError(1)
+		CheckErrorMessage(err, ZMQ_INVALID_ARG)
+	endtry
+
+	try
+		zeromq_client_set_recv_timeout(NaN); AbortOnRTE
+		FAIL()
+	catch
+		err = GetRTError(1)
+		CheckErrorMessage(err, ZMQ_INVALID_ARG)
+	endtry
+End
+
+// Without a reply zeromq_client_recv() would wait forever
+Function ClientRecvReturnsAfterTimeout()
+
+	variable start, elapsed
+	string reply
+
+	zeromq_stop()
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
+	zeromq_client_set_recv_timeout(0.5)
+
+	// the server never replies, as the message handler is not running
+	zeromq_server_bind("tcp://127.0.0.1:5555")
+	zeromq_client_connect("tcp://127.0.0.1:5555")
+	zeromq_client_send("abcd")
+
+	start   = stopmstimer(-2)
+	reply   = zeromq_client_recv()
+	elapsed = (stopmstimer(-2) - start) / 1e6
+
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
+
+	CHECK_EMPTY_STR(reply)
+	CHECK_GE_VAR(elapsed, 0.5)
+	CHECK_LT_VAR(elapsed, 5)
+End
+
+Function/S EchoString_IGNORE(string str)
+
+	return str
+End
+
+// The reply to a request the caller gave up on must not be returned for
+// the next request
+Function ClientRecvDiscardsRepliesToAbandonedRequests()
+
+	string reply
+
+	string first  = "{\"version\" : 1, \"CallFunction\" : {\"name\" : \"EchoString_IGNORE\", \"params\" : [\"first\"]}}"
+	string second = "{\"version\" : 1, \"CallFunction\" : {\"name\" : \"EchoString_IGNORE\", \"params\" : [\"second\"]}}"
+
+	zeromq_stop()
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
+	zeromq_client_set_recv_timeout(0.5)
+
+	zeromq_server_bind("tcp://127.0.0.1:5555")
+	zeromq_client_connect("tcp://127.0.0.1:5555")
+
+	// the message handler is not running yet, so there is no reply
+	zeromq_client_send(first)
+	reply = zeromq_client_recv()
+	CHECK_EMPTY_STR(reply)
+
+	zeromq_handler_start()
+	zeromq_client_set_recv_timeout(5)
+
+	zeromq_client_send(second)
+	reply = zeromq_client_recv()
+
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT)
+
+	CHECK_GE_VAR(strsearch(reply, "\"second\"", 0), 0)
+	CHECK_EQUAL_VAR(strsearch(reply, "\"first\"", 0), -1)
 End

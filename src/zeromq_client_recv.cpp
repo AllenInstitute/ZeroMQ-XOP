@@ -1,5 +1,7 @@
 #include "ZeroMQ.h"
 
+#include <chrono>
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
@@ -12,7 +14,18 @@ extern "C" int zeromq_client_recv(zeromq_client_recvParams *p)
   int rc = zmq_msg_init(&payloadMsg);
   ZEROMQ_ASSERT(rc == 0);
 
-  auto wait = GlobalData::Instance().GetRecvBusyWaitingFlag();
+  auto wait          = GlobalData::Instance().GetRecvBusyWaitingFlag();
+  const auto timeout = GlobalData::Instance().GetClientRecvTimeout();
+  const auto start   = std::chrono::steady_clock::now();
+
+  bool abortRequested = false;
+
+  // the caller gives up on the reply, it must not be returned by a later call
+  auto giveUp = [p]()
+  {
+    GlobalData::Instance().AbandonClientReplies();
+    InitHandle(&(p->result), 0);
+  };
 
   for(;;)
   {
@@ -26,14 +39,26 @@ extern "C" int zeromq_client_recv(zeromq_client_recvParams *p)
         break;
       }
 
+      const std::chrono::duration<double> elapsed =
+          std::chrono::steady_clock::now() - start;
+
+      if(timeout > 0 && elapsed.count() > timeout)
+      {
+        DEBUG_OUTPUT("No reply within the timeout of {} s", timeout);
+        giveUp();
+        break;
+      }
+
       if(SpinProcess()) // abort requested
       {
+        abortRequested = true;
+
         // the reply might have arrived in the meantime
         numBytes = ZeroMQClientReceive(&payloadMsg);
 
         if(numBytes == -1 && zmq_errno() == EAGAIN)
         {
-          InitHandle(&(p->result), 0);
+          giveUp();
           break;
         }
       }
@@ -49,6 +74,19 @@ extern "C" int zeromq_client_recv(zeromq_client_recvParams *p)
     }
 
     ZEROMQ_ASSERT(numBytes >= 0);
+
+    if(GlobalData::Instance().ClientReplyReceived())
+    {
+      DEBUG_OUTPUT("Discarding the reply to an abandoned request");
+
+      if(abortRequested)
+      {
+        giveUp();
+        break;
+      }
+
+      continue;
+    }
 
     WriteZMsgIntoHandle(&(p->result), &payloadMsg);
 

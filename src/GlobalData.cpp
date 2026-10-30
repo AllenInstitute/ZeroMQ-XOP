@@ -1,5 +1,11 @@
 #include "ZeroMQ.h"
 
+#include <atomic>
+
+#ifdef MACIGOR
+#include <unistd.h>
+#endif // MACIGOR
+
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
@@ -7,6 +13,21 @@ namespace
 {
 
 constexpr char PACKAGE_NAME[] = "ZeroMQ";
+
+/// A ROUTER socket routes to one connection per identity, so every client
+/// socket of every Igor Pro instance needs its own identity
+std::string CreateClientIdentity()
+{
+  static std::atomic<uint64_t> counter{0};
+
+#ifdef WINIGOR
+  const auto pid = GetCurrentProcessId();
+#else
+  const auto pid = getpid();
+#endif // WINIGOR
+
+  return fmt::format(FMT_STRING("zeromq xop: dealer {}-{}"), pid, counter++);
+}
 
 void ApplySocketDefaults(void *s, SocketTypes st)
 {
@@ -27,8 +48,8 @@ void ApplySocketDefaults(void *s, SocketTypes st)
   {
   case SocketTypes::Client:
   {
-    const char identity[] = "zeromq xop: dealer";
-    rc = zmq_setsockopt(s, ZMQ_IDENTITY, &identity, strlen(identity));
+    const auto identity = CreateClientIdentity();
+    rc = zmq_setsockopt(s, ZMQ_IDENTITY, identity.c_str(), identity.length());
     ZEROMQ_ASSERT(rc == 0);
     return;
   }
@@ -40,10 +61,9 @@ void ApplySocketDefaults(void *s, SocketTypes st)
     rc = zmq_setsockopt(s, ZMQ_ROUTER_MANDATORY, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
 
-    int64_t bytes = 1024;
-
-    rc = zmq_setsockopt(s, ZMQ_MAXMSGSIZE, &bytes, sizeof(bytes));
+    rc = zmq_setsockopt(s, ZMQ_ROUTER_HANDOVER, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
+
     return;
   }
   case SocketTypes::Subscriber:
@@ -162,6 +182,50 @@ bool GlobalData::GetInterceptorFlag() const
   return m_interceptor;
 }
 
+void GlobalData::SetClientRecvTimeout(double val)
+{
+  DEBUG_OUTPUT("new value={}", val);
+  m_clientRecvTimeout = val;
+}
+
+double GlobalData::GetClientRecvTimeout() const
+{
+  return m_clientRecvTimeout;
+}
+
+void GlobalData::ClientRequestSent()
+{
+  LockGuard lock(GetMutex(SocketTypes::Client));
+
+  m_clientPendingReplies++;
+}
+
+void GlobalData::AbandonClientReplies()
+{
+  LockGuard lock(GetMutex(SocketTypes::Client));
+
+  DEBUG_OUTPUT("pending replies={}", m_clientPendingReplies);
+  m_clientAbandonedReplies = m_clientPendingReplies;
+}
+
+bool GlobalData::ClientReplyReceived()
+{
+  LockGuard lock(GetMutex(SocketTypes::Client));
+
+  if(m_clientPendingReplies > 0)
+  {
+    m_clientPendingReplies--;
+  }
+
+  if(m_clientAbandonedReplies > 0)
+  {
+    m_clientAbandonedReplies--;
+    return true;
+  }
+
+  return false;
+}
+
 void GlobalData::CloseConnections()
 {
   if(HasSocket(SocketTypes::Subscriber))
@@ -182,6 +246,12 @@ void GlobalData::CloseConnections()
     auto &list       = socketData.m_list;
 
     DEBUG_OUTPUT("SocketType {}, Connections={}", st, list.size());
+
+    if(st == SocketTypes::Client)
+    {
+      m_clientPendingReplies   = 0;
+      m_clientAbandonedReplies = 0;
+    }
 
     try
     {

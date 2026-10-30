@@ -192,6 +192,7 @@ void ApplyFlags(double flags)
     GlobalData::Instance().SetLoggingFlag(false);
     ToggleIPV6Support(false);
     GlobalData::Instance().SetInterceptorFlag(false);
+    GlobalData::Instance().SetClientRecvTimeout(0);
     numMatches++;
   }
 
@@ -252,6 +253,7 @@ void StopThreadsAndCloseConnections()
   MessageHandler::Instance().Stop();
   HeartbeatPublisher::Instance().Stop();
   GlobalData::Instance().CloseConnections();
+  MessageHandler::Instance().DiscardQueuedMessages();
 }
 
 void ToggleIPV6Support(bool enable)
@@ -364,7 +366,8 @@ int ZeroMQClientSend(const std::string &payload)
   return rc;
 }
 
-int ZeroMQServerSend(const std::string &identity, const std::string &payload)
+int ZeroMQServerSend(const std::string &identity, const std::string &payload,
+                     bool unreachableIsError)
 {
   GET_SOCKET(socket, SocketTypes::Server);
   const auto payloadLength = payload.length();
@@ -374,6 +377,13 @@ int ZeroMQServerSend(const std::string &identity, const std::string &payload)
   // identity
   int rc =
       zmq_send(socket.get(), identity.c_str(), identity.length(), ZMQ_SNDMORE);
+
+  // ZMQ_ROUTER_MANDATORY reports an unknown identity on the first frame
+  if(rc < 0 && zmq_errno() == EHOSTUNREACH && !unreachableIsError)
+  {
+    return -1;
+  }
+
   ZEROMQ_ASSERT(rc >= 0);
 
   // empty
@@ -428,6 +438,21 @@ int ZeroMQServerReceive(zmq_msg_t *identityMsg, zmq_msg_t *payloadMsg)
     return numBytes;
   }
 
+  // Read the remaining frames of an invalid message, so that the next call
+  // starts with the next message, identityMsg keeps the identity
+  auto throwInvalidFormat = [&socket](zmq_msg_t *msg)
+  {
+    while(zmq_msg_more(msg))
+    {
+      if(zmq_msg_recv(msg, socket.get(), 0) < 0)
+      {
+        break;
+      }
+    }
+
+    throw IgorException(INVALID_MESSAGE_FORMAT);
+  };
+
   // zeromq guarantees that either all parts in multi-part messages
   // arrive or none.
   if(!zmq_msg_more(identityMsg))
@@ -438,13 +463,13 @@ int ZeroMQServerReceive(zmq_msg_t *identityMsg, zmq_msg_t *payloadMsg)
   numBytes = zmq_msg_recv(payloadMsg, socket.get(), 0);
   if(numBytes != 0 || !zmq_msg_more(payloadMsg))
   {
-    throw IgorException(INVALID_MESSAGE_FORMAT);
+    throwInvalidFormat(payloadMsg);
   }
 
   numBytes = zmq_msg_recv(payloadMsg, socket.get(), 0);
   if(numBytes < 0 || zmq_msg_more(payloadMsg))
   {
-    throw IgorException(INVALID_MESSAGE_FORMAT);
+    throwInvalidFormat(payloadMsg);
   }
 
   return numBytes;

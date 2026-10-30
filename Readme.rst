@@ -11,6 +11,7 @@ The XOP provides the following functions:
 - :cpp:func:`zeromq_client_connect()`
 - :cpp:func:`zeromq_client_recv()`
 - :cpp:func:`zeromq_client_send()`
+- :cpp:func:`zeromq_client_set_recv_timeout()`
 - :cpp:func:`zeromq_handler_start()`
 - :cpp:func:`zeromq_handler_stop()`
 - :cpp:func:`zeromq_pub_bind`
@@ -654,8 +655,8 @@ The default socket options are:
 - ``ZMQ_SNDTIMEO``         = ``0``
 - ``ZMQ_RCVTIMEO``         = ``1`` (milliseconds)
 - ``ZMQ_ROUTER_MANDATORY`` = ``1`` (``Router`` only)
-- ``ZMQ_MAXMSGSIZE``       = ``1024`` (in bytes, ``Router`` only)
-- ``ZMQ_IDENTITY``         = ``zeromq xop: dealer`` (``Dealer`` only)
+- ``ZMQ_ROUTER_HANDOVER``  = ``1`` (``Router`` only)
+- ``ZMQ_IDENTITY``         = ``zeromq xop: dealer $pid-$counter`` (``Dealer`` only, unique for every socket)
 
 The ``Router``/Server expects three frames (identity, empty, payload) and the
 ``Dealer``/Client expects two frames (empty, payload) when sending/receiving

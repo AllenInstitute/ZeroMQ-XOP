@@ -187,7 +187,12 @@ json CallIgorFunctionFromReqInterface(const RequestInterfacePtr &req);
 
 int ZeroMQClientSend(const std::string &payload);
 int ZeroMQPublisherSend(const SendStorageVec &vec);
-int ZeroMQServerSend(const std::string &identity, const std::string &payload);
+/// @brief Send the payload to the client with the given identity
+///
+/// @return number of bytes of the payload, or -1 if `unreachableIsError` is
+///         false and there is no connected client with that identity
+int ZeroMQServerSend(const std::string &identity, const std::string &payload,
+                     bool unreachableIsError = true);
 int ZeroMQClientReceive(zmq_msg_t *payloadMsg);
 int ZeroMQSubscriberReceive(ZeroMQMessageSharedPtrVec &vec,
                             bool allowAdditionalFrames);

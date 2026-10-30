@@ -13,6 +13,7 @@ extern "C" int zeromq_client_send(zeromq_client_sendParams *p)
 
   GlobalData::Instance().AddLogEntry(msg, MessageDirection::Outgoing);
   ZeroMQClientSend(msg);
+  GlobalData::Instance().ClientRequestSent();
 
   END_OUTER_CATCH
 }

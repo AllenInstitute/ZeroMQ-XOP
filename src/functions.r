@@ -29,6 +29,14 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   HSTRING_TYPE,      // parameter 1
   },
 
+  // variable zeromq_client_set_recv_timeout(variable timeout)
+  "zeromq_client_set_recv_timeout",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  NT_FP64,      // parameter 1
+  },
+
   // variable zeromq_handler_start()
   "zeromq_handler_start",
   F_UTIL | F_EXTERNAL,    // Function category
