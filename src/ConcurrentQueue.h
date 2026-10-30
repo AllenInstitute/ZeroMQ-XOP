@@ -68,7 +68,7 @@ public:
   ///
   /// m_mutex is not held while F runs, so F can push into this queue.
   template <typename Functor>
-  void apply_to_all(Functor F)
+  void apply_to_all(Functor func)
   {
     std::queue<T> drained;
 
@@ -79,7 +79,7 @@ public:
 
     for(; !drained.empty(); drained.pop())
     {
-      F(drained.front());
+      func(drained.front());
     }
   }
 

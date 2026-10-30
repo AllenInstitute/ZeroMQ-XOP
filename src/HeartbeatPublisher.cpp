@@ -106,8 +106,8 @@ void HeartbeatPublisher::Start()
     threadShouldFinish = false;
   }
 
-  auto t = std::thread(WorkerThread);
-  m_thread.swap(t);
+  auto worker = std::thread(WorkerThread);
+  m_thread.swap(worker);
 }
 
 void HeartbeatPublisher::Stop()

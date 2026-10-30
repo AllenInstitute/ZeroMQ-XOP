@@ -51,5 +51,6 @@ void OutputQueuedNotices()
   }
 
   GlobalData::Instance().GetXOPNoticeQueue().apply_to_all(
-      [](const OutputMessagePtr &om) { OutputToHistory(om->msg, om->mode); });
+      [](const OutputMessagePtr &outputMessage)
+      { OutputToHistory(outputMessage->msg, outputMessage->mode); });
 }

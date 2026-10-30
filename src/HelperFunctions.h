@@ -115,7 +115,7 @@ std::string GetStringFromHandle(Handle strHandle);
 
 std::string GetStringFromHandleWithDispose(Handle strHandle);
 
-void SetDimensionLabels(waveHndl h, int Dimension,
+void SetDimensionLabels(waveHndl waveHandle, int Dimension,
                         const std::vector<std::string> &dimLabels);
 
 void ApplyFlags(double flags);
@@ -137,7 +137,7 @@ enum ZeroMQ_SET_FLAGS
 /// Return the ID of the Igor Pro process
 uint64_t GetProcessID();
 
-std::string GetLastEndPoint(void *s);
+std::string GetLastEndPoint(void *socket);
 void ToggleIPV6Support(bool enable);
 
 /// @brief Stops the message handler and the heartbeat publisher and closes
@@ -256,7 +256,7 @@ int CreateDirectory(const std::string &path);
 void EnsureDirectoryExists(const std::string &path);
 
 bool IsFreeWave(waveHndl wv);
-void DoBindOrConnect(Handle &h, SocketTypes st);
+void DoBindOrConnect(Handle &handle, SocketTypes st);
 
 Handle GetHandleFromString(const std::string &str);
 

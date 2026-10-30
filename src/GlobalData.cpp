@@ -24,19 +24,19 @@ std::string CreateClientIdentity()
                      counter++);
 }
 
-void ApplySocketDefaults(void *s, SocketTypes st)
+void ApplySocketDefaults(void *socket, SocketTypes st)
 {
   int valZero = 0;
   int valOne  = 1;
   int rc      = 0;
 
-  rc = zmq_setsockopt(s, ZMQ_LINGER, &valZero, sizeof(valZero));
+  rc = zmq_setsockopt(socket, ZMQ_LINGER, &valZero, sizeof(valZero));
   ZEROMQ_ASSERT(rc == 0);
 
-  rc = zmq_setsockopt(s, ZMQ_SNDTIMEO, &valZero, sizeof(valZero));
+  rc = zmq_setsockopt(socket, ZMQ_SNDTIMEO, &valZero, sizeof(valZero));
   ZEROMQ_ASSERT(rc == 0);
 
-  rc = zmq_setsockopt(s, ZMQ_RCVTIMEO, &valOne, sizeof(valOne));
+  rc = zmq_setsockopt(socket, ZMQ_RCVTIMEO, &valOne, sizeof(valOne));
   ZEROMQ_ASSERT(rc == 0);
 
   switch(st)
@@ -44,7 +44,8 @@ void ApplySocketDefaults(void *s, SocketTypes st)
   case SocketTypes::Client:
   {
     const auto identity = CreateClientIdentity();
-    rc = zmq_setsockopt(s, ZMQ_IDENTITY, identity.c_str(), identity.length());
+    rc                  = zmq_setsockopt(socket, ZMQ_IDENTITY, identity.c_str(),
+                                         identity.length());
     ZEROMQ_ASSERT(rc == 0);
     return;
   }
@@ -53,13 +54,13 @@ void ApplySocketDefaults(void *s, SocketTypes st)
     return;
   case SocketTypes::Server:
   {
-    rc = zmq_setsockopt(s, ZMQ_ROUTER_MANDATORY, &valOne, sizeof(valOne));
+    rc = zmq_setsockopt(socket, ZMQ_ROUTER_MANDATORY, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
 
-    rc = zmq_setsockopt(s, ZMQ_ROUTER_HANDOVER, &valOne, sizeof(valOne));
+    rc = zmq_setsockopt(socket, ZMQ_ROUTER_HANDOVER, &valOne, sizeof(valOne));
     ZEROMQ_ASSERT(rc == 0);
 
-    rc = zmq_setsockopt(s, ZMQ_MAXMSGSIZE, &MAX_SERVER_MESSAGE_SIZE,
+    rc = zmq_setsockopt(socket, ZMQ_MAXMSGSIZE, &MAX_SERVER_MESSAGE_SIZE,
                         sizeof(MAX_SERVER_MESSAGE_SIZE));
     ZEROMQ_ASSERT(rc == 0);
 

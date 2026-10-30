@@ -129,27 +129,27 @@ public:
                    const std::optional<std::string> &identity,
                    std::optional<MessageDirection> dir) const
   {
-    json j = m_template;
+    json doc = m_template;
 
-    j[key] = entry;
+    doc[key] = entry;
 
     if(dir.has_value())
     {
-      j[TEMPLATE_KEY_DIRECTION] = fmt::to_string(dir.value());
+      doc[TEMPLATE_KEY_DIRECTION] = fmt::to_string(dir.value());
     }
 
     if(identity.has_value() && !identity->empty())
     {
-      j[IDENTITY_KEY] = ToLoggableIdentity(identity.value());
+      doc[IDENTITY_KEY] = ToLoggableIdentity(identity.value());
     }
 
     const auto now = std::chrono::system_clock::now();
     // see https://stackoverflow.com/a/67076017
-    const auto ts = fmt::format(FMT_STRING("{0:%FT%H:%M:}{1:%S}{0:%z}"), now,
-                                now.time_since_epoch());
-    j[TEMPLATE_KEY_TS] = ts;
+    const auto timestamp = fmt::format(FMT_STRING("{0:%FT%H:%M:}{1:%S}{0:%z}"),
+                                       now, now.time_since_epoch());
+    doc[TEMPLATE_KEY_TS] = timestamp;
 
-    WriteIntoLogfile(j.dump(-1, ' ', false, json::error_handler_t::replace));
+    WriteIntoLogfile(doc.dump(-1, ' ', false, json::error_handler_t::replace));
   }
 
 #ifdef _MSC_VER

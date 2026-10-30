@@ -106,7 +106,7 @@ json RequestInterface::Call() const
   ASSERT(m_op);
 
   auto req = shared_from_this();
-  const InterceptorCaller ic{req};
+  const InterceptorCaller interceptorCaller{req};
   auto reply = m_op->Call();
 
   if(HasValidMessageId())
@@ -138,11 +138,11 @@ std::string RequestInterface::GetHistoryDuringOperation() const
   return m_op->GetHistoryDuringCall();
 }
 
-void RequestInterface::FillFromJSON(json j)
+void RequestInterface::FillFromJSON(json doc)
 {
-  auto it = j.find("version");
+  auto it = doc.find("version");
 
-  if(it == j.end() || !it.value().is_number_integer())
+  if(it == doc.end() || !it.value().is_number_integer())
   {
     throw RequestInterfaceException(REQ_INVALID_VERSION);
   }
@@ -156,9 +156,9 @@ void RequestInterface::FillFromJSON(json j)
 
   m_version = version;
 
-  it = j.find(MESSAGEID_KEY);
+  it = doc.find(MESSAGEID_KEY);
 
-  if(it != j.end()) // messageID is optional
+  if(it != doc.end()) // messageID is optional
   {
     if(!it.value().is_string())
     {
@@ -175,9 +175,9 @@ void RequestInterface::FillFromJSON(json j)
     m_messageId = messageId;
   }
 
-  it = j.find("CallFunction");
+  it = doc.find("CallFunction");
 
-  if(it == j.end() || !it.value().is_object())
+  if(it == doc.end() || !it.value().is_object())
   {
     throw RequestInterfaceException(REQ_INVALID_OPERATION);
   }

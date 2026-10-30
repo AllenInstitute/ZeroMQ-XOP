@@ -35,7 +35,7 @@ private:
     explicit Private() = default;
   };
 
-  void FillFromJSON(json j);
+  void FillFromJSON(json doc);
 
   int m_version{};
   std::string m_callerIdentity, m_messageId;
