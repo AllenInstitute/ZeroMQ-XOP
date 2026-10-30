@@ -23,7 +23,7 @@ public:
   {
     const Lock lock(m_mutex);
 
-    m_queue.emplace(data);
+    m_queue.emplace(std::move(data));
   }
 
   bool empty() const

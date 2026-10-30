@@ -7,7 +7,7 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-CallFunctionOperation::CallFunctionOperation(json doc) : m_json(doc)
+CallFunctionOperation::CallFunctionOperation(json doc) : m_json(std::move(doc))
 {
   DEBUG_OUTPUT("size={}", m_json.size());
 
