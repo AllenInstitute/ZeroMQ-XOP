@@ -14,7 +14,7 @@ const size_t MAX_MESSAGEID_LENGTH = 255;
 
 bool IsValidMessageId(const std::string &messageId)
 {
-  return messageId.length() != 0 && messageId.length() <= MAX_MESSAGEID_LENGTH;
+  return !messageId.empty() && messageId.length() <= MAX_MESSAGEID_LENGTH;
 }
 
 class InterceptorCaller
