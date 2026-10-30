@@ -203,13 +203,13 @@ void OutputArray(fmt::memory_buffer &buf, T *data, CountInt dataLength)
 
   fmt::format_to(std::back_inserter(buf), "[");
 
-  CountInt i = 0;
-  for(i = 0; i < dataLength - 1; i++)
+  CountInt index = 0;
+  for(index = 0; index < dataLength - 1; index++)
   {
-    streamWriterWithComma(buf, *(data + i));
+    streamWriterWithComma(buf, *(data + index));
   }
 
-  streamWriter(buf, *(data + i));
+  streamWriter(buf, *(data + index));
 
   fmt::format_to(std::back_inserter(buf), "]");
 }
@@ -255,8 +255,8 @@ void ToString<char *>(fmt::memory_buffer &buf, waveHndl waveHandle,
 
   fmt::format_to(std::back_inserter(buf), "[");
 
-  CountInt i = 0;
-  for(i = 0; i < dataLength - 1; i++)
+  CountInt index = 0;
+  for(index = 0; index < dataLength - 1; index++)
   {
     streamWriterWithComma(buf, data);
     data += strlen(data) + 1;
@@ -491,7 +491,7 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
 {
   const auto numDimensions  = dimSizes.size();
   auto differentFromDefault = false;
-  CountInt k                = 0;
+  CountInt labelIndex       = 0;
 
   // label for the each dimension index
   // serialized here with column-major order
@@ -508,11 +508,11 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
 
       if(strlen(label) > 0)
       {
-        differentFromDefault = true;
-        labels.at(k)         = label;
+        differentFromDefault  = true;
+        labels.at(labelIndex) = label;
       }
 
-      k++;
+      labelIndex++;
     }
   }
 

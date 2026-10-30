@@ -9,7 +9,7 @@
 class CallFunctionOperation
 {
 public:
-  explicit CallFunctionOperation(json j);
+  explicit CallFunctionOperation(json doc);
   void CanBeProcessed() const;
   json Call();
   void CallInterceptor(const std::string &identity, InterceptorMode mode) const;
@@ -31,9 +31,10 @@ struct fmt::formatter<CallFunctionOperation> : fmt::formatter<std::string>
 {
   // parse is inherited from formatter<std::string>.
   template <typename FormatContext>
-  auto format(const CallFunctionOperation &op, FormatContext &ctx) const
+  auto format(const CallFunctionOperation &operation, FormatContext &ctx) const
   {
-    return format_to(ctx.out(), "name={}, params={}", op.m_name, op.m_params);
+    return format_to(ctx.out(), "name={}, params={}", operation.m_name,
+                     operation.m_params);
   }
 };
 

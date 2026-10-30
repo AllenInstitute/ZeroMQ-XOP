@@ -49,9 +49,9 @@ private:
   const std::runtime_error m_message;
 };
 
-void to_json(json &j, const IgorException &e);
+void to_json(json &doc, const IgorException &exception);
 
-int HandleException(const std::exception &e);
+int HandleException(const std::exception &exception);
 
 #define BEGIN_OUTER_CATCH                                                      \
   p->result = decltype(p->result)();                                           \

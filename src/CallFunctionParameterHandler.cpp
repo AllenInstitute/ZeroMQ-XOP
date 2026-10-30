@@ -82,26 +82,26 @@ IgorTypeUnion ConvertStringToIgorTypeUnion(const std::string &param,
 {
   igorType = ClearBit(igorType, FV_REF_TYPE);
 
-  IgorTypeUnion u = {};
+  IgorTypeUnion value = {};
 
   switch(igorType)
   {
   case NT_FP64:
-    u.variable = ConvertStringToDouble(param);
+    value.variable = ConvertStringToDouble(param);
     break;
   case HSTRING_TYPE:
-    u.stringHandle = WMNewHandle(param.size());
-    ASSERT(u.stringHandle != nullptr);
-    memcpy(*u.stringHandle, param.c_str(), param.size());
+    value.stringHandle = WMNewHandle(param.size());
+    ASSERT(value.stringHandle != nullptr);
+    memcpy(*value.stringHandle, param.c_str(), param.size());
     break;
   case DATAFOLDER_TYPE:
-    u.dataFolderHandle = DeSerializeDataFolder(param);
+    value.dataFolderHandle = DeSerializeDataFolder(param);
     break;
   default:
     ASSERT(0);
   }
 
-  return u;
+  return value;
 }
 
 } // anonymous namespace
@@ -164,13 +164,13 @@ CallFunctionParameterHandler::CallFunctionParameterHandler(
   {
     if(i >= firstInputParamIndex)
     {
-      const auto u = ConvertStringToIgorTypeUnion(
+      const auto value = ConvertStringToIgorTypeUnion(
           inputParams.at(i - firstInputParamIndex), m_paramTypes.at(i));
 
       // we write one parameter after another into our array
       // we can not use IgorTypeUnion here as the padding on 32bit
       // (void* is 4, but a double 8) breaks the reading code in CallFunction.
-      memcpy(dest, &u, m_paramSizesInBytes.at(i));
+      memcpy(dest, &value, m_paramSizesInBytes.at(i));
     }
 
     dest += m_paramSizesInBytes.at(i);
@@ -215,17 +215,17 @@ void *CallFunctionParameterHandler::GetReturnValueStorage()
 CallFunctionParameterHandler::~CallFunctionParameterHandler()
 {
   const unsigned char *src = GetParameterValueStorage();
-  IgorTypeUnion u{};
+  IgorTypeUnion value{};
 
   for(size_t i = 0; i < m_paramTypes.size(); i++)
   {
     switch(m_paramTypes.at(i))
     {
     case HSTRING_TYPE | FV_REF_TYPE:
-      memcpy(&u, src, m_paramSizesInBytes.at(i));
-      if(u.stringHandle != nullptr)
+      memcpy(&value, src, m_paramSizesInBytes.at(i));
+      if(value.stringHandle != nullptr)
       {
-        WMDisposeHandle(u.stringHandle);
+        WMDisposeHandle(value.stringHandle);
       }
       break;
     }

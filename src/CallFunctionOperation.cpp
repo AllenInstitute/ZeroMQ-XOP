@@ -7,7 +7,7 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-CallFunctionOperation::CallFunctionOperation(json j) : m_json(j)
+CallFunctionOperation::CallFunctionOperation(json doc) : m_json(doc)
 {
   DEBUG_OUTPUT("size={}", m_json.size());
 
@@ -218,10 +218,10 @@ void CallFunctionOperation::CallInterceptor(const std::string &identity,
 
   DEBUG_OUTPUT("params={}", params);
 
-  CallFunctionParameterHandler p(params, fip);
+  CallFunctionParameterHandler paramHandler(params, fip);
 
-  rc = CallFunction(&fip, p.GetParameterValueStorage(),
-                    p.GetReturnValueStorage());
+  rc = CallFunction(&fip, paramHandler.GetParameterValueStorage(),
+                    paramHandler.GetReturnValueStorage());
   ASSERT(rc == 0);
 
   auto functionAborted = SpinProcess();
@@ -243,12 +243,12 @@ json CallFunctionOperation::Call()
   auto rc = GetFunctionInfo(m_name.c_str(), &fip);
   ASSERT(rc == 0);
 
-  CallFunctionParameterHandler p(m_params, fip);
+  CallFunctionParameterHandler paramHandler(m_params, fip);
 
   const HistoryGrabber histGrabber;
 
-  rc = CallFunction(&fip, p.GetParameterValueStorage(),
-                    p.GetReturnValueStorage());
+  rc = CallFunction(&fip, paramHandler.GetParameterValueStorage(),
+                    paramHandler.GetReturnValueStorage());
   ASSERT(rc == 0);
 
   auto functionAborted = SpinProcess();
@@ -263,9 +263,9 @@ json CallFunctionOperation::Call()
 
   json doc;
   doc["errorCode"] = {{"value", 0}};
-  doc["result"]    = {p.GetReturnValues()};
+  doc["result"]    = {paramHandler.GetReturnValues()};
 
-  auto passByRef = p.GetPassByRefInputArray();
+  auto passByRef = paramHandler.GetPassByRefInputArray();
 
   // we can have optional pass-by-ref parameters like structures
   // and in that case passByRef is empty

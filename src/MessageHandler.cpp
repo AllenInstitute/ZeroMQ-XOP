@@ -44,9 +44,10 @@ struct OutgoingReply
 
 ConcurrentQueue<OutgoingReply> outgoingQueue;
 
-void QueueErrorReply(const std::string &identity, const IgorException &e)
+void QueueErrorReply(const std::string &identity,
+                     const IgorException &exception)
 {
-  const json reply = e;
+  const json reply = exception;
 
   incomingQueue.push(
       {nullptr, identity, reply.dump(DEFAULT_INDENT), connectionGeneration});
@@ -255,8 +256,8 @@ void MessageHandler::Start()
 
   DEBUG_OUTPUT("Before WorkerThread() start.");
 
-  auto t = std::thread(WorkerThread);
-  m_thread.swap(t);
+  auto worker = std::thread(WorkerThread);
+  m_thread.swap(worker);
 }
 
 void MessageHandler::Stop()

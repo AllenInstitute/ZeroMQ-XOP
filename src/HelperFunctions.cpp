@@ -56,18 +56,18 @@ std::string GetStringFromHandleWithDispose(Handle strHandle)
 
 /// @brief Set dimension labels on wave
 ///
-/// @param	h	Wave to set dimension labels on
+/// @param	waveHandle	Wave to set dimension labels on
 /// @param	Dimension	Dimension to set labels on
 /// @param	dimLabels	vector of labels to set
 ///
 /// dimLabels[k] will be assigned to index k of the wave
 ///
 /// @throws Igor error code
-void SetDimensionLabels(waveHndl h, int Dimension,
+void SetDimensionLabels(waveHndl waveHandle, int Dimension,
                         const std::vector<std::string> &dimLabels)
 {
   // Check wave exists.
-  if(h == nullptr)
+  if(waveHandle == nullptr)
   {
     throw IgorException(NULL_WAVE_OP);
   }
@@ -80,8 +80,8 @@ void SetDimensionLabels(waveHndl h, int Dimension,
       continue;
     }
 
-    if(const int RetVal =
-           MDSetDimensionLabel(h, Dimension, k, dimLabels.at(k).c_str()))
+    if(const int RetVal = MDSetDimensionLabel(waveHandle, Dimension, k,
+                                              dimLabels.at(k).c_str()))
     {
       throw IgorException(RetVal);
     }
@@ -237,11 +237,11 @@ void ApplyFlags(double flags)
   }
 }
 
-std::string GetLastEndPoint(void *s)
+std::string GetLastEndPoint(void *socket)
 {
   char buf[256];
   size_t bufSize = sizeof(buf);
-  const int rc   = zmq_getsockopt(s, ZMQ_LAST_ENDPOINT, buf, &bufSize);
+  const int rc   = zmq_getsockopt(socket, ZMQ_LAST_ENDPOINT, buf, &bufSize);
   ZEROMQ_ASSERT(rc == 0);
 
   buf[bufSize - 1] = '\0';
@@ -713,25 +713,25 @@ std::string CleanupString(std::string str)
     return str;
   }
 
-  constexpr auto ws = " \n\r\t";
+  constexpr auto whitespace = " \n\r\t";
 
-  const size_t end = str.find_last_not_of(ws);
+  const size_t end = str.find_last_not_of(whitespace);
   if(end != std::string::npos)
   {
     str.resize(end + 1);
   }
 
-  const size_t start = str.find_first_not_of(ws);
+  const size_t start = str.find_first_not_of(whitespace);
   if(start != std::string::npos)
   {
     str = str.substr(start);
   }
 
-  for(auto &c : str)
+  for(auto &chr : str)
   {
-    if(c == '\r')
+    if(chr == '\r')
     {
-      c = '\n';
+      chr = '\n';
     }
   }
 
@@ -870,11 +870,11 @@ bool IsFreeWave(waveHndl wv)
   return dfH == nullptr;
 }
 
-void DoBindOrConnect(Handle &h, SocketTypes st)
+void DoBindOrConnect(Handle &handle, SocketTypes st)
 {
-  const auto point = GetStringFromHandle(h);
-  WMDisposeHandle(h);
-  h = nullptr;
+  const auto point = GetStringFromHandle(handle);
+  WMDisposeHandle(handle);
+  handle = nullptr;
 
   const MessageHandlerPauseGuard pauseGuard(st == SocketTypes::Server);
 
@@ -918,16 +918,16 @@ void DoBindOrConnect(Handle &h, SocketTypes st)
 /// @return Igor string handle with the content of the C++ string
 Handle GetHandleFromString(const std::string &str)
 {
-  Handle h = nullptr;
-  if(!(h = WMNewHandle(To<BCInt>(str.size()))))
+  Handle handle = nullptr;
+  if(!(handle = WMNewHandle(To<BCInt>(str.size()))))
   {
     return nullptr;
   }
-  if(PutCStringInHandle(str.c_str(), h))
+  if(PutCStringInHandle(str.c_str(), handle))
   {
     return nullptr;
   }
-  return h;
+  return handle;
 }
 
 bool IsFreeDataFolder(DataFolderHandle dfr)
@@ -971,15 +971,15 @@ size_t GetWaveIndexInMemory(waveHndl w, std::vector<IndexInt> &dims)
   dimSizes.resize(To<size_t>(numDims));
 
   size_t index = 0;
-  size_t i     = 0;
+  size_t dim   = 0;
   size_t block = 1;
-  for(auto &e : dimSizes)
+  for(auto &dimSize : dimSizes)
   {
-    auto dimIndex = To<size_t>(dims.at(i));
-    ASSERT(dimIndex < To<size_t>(e));
+    auto dimIndex = To<size_t>(dims.at(dim));
+    ASSERT(dimIndex < To<size_t>(dimSize));
     index += block * dimIndex;
-    block *= To<size_t>(e);
-    i++;
+    block *= To<size_t>(dimSize);
+    dim++;
   }
 
   return index;

@@ -37,19 +37,21 @@ int IgorException::HandleException() const
 }
 
 // Allow to serialize IgorExceptions to JSON
-void to_json(json &j, const IgorException &e)
+void to_json(json &doc, const IgorException &exception)
 {
-  j["errorCode"] = json{{"value", e.GetErrorCode()}, {"msg", e.what()}};
+  doc["errorCode"] =
+      json{{"value", exception.GetErrorCode()}, {"msg", exception.what()}};
 }
 
 //--------------------------------------------------------------
 // std::exception
 //--------------------------------------------------------------
 
-int HandleException(const std::exception &e)
+int HandleException(const std::exception &exception)
 {
   EMERGENCY_OUTPUT(
-      "Encountered unhandled C++ exception during XOP execution: {}", e.what());
+      "Encountered unhandled C++ exception during XOP execution: {}",
+      exception.what());
 
   return UNHANDLED_CPP_EXCEPTION;
 }
