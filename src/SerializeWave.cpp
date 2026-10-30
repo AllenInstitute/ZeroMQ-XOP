@@ -26,7 +26,9 @@ TickCountInt ConvertToUnixEpochUTC(TickCountInt secs)
   }
 
   // calculate the offset including local time zone to the unix epoch
-  short year       = 1970;
+  constexpr short UNIX_EPOCH_YEAR = 1970;
+
+  short year       = UNIX_EPOCH_YEAR;
   short month      = 1;
   short dayOfMonth = 1;
   double offset    = std::numeric_limits<double>::quiet_NaN();
