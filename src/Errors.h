@@ -31,25 +31,25 @@
 
 /// @name Error codes for the request JSON interface
 /// @{
-#define REQ_SUCCESS                    0
-#define REQ_UNKNOWN_ERROR              1
-#define REQ_INVALID_JSON_OBJECT        3
-#define REQ_INVALID_VERSION            4
-#define REQ_INVALID_OPERATION          5
-#define REQ_INVALID_OPERATION_FORMAT   6
-#define REQ_INVALID_MESSAGEID          7
-#define REQ_OUT_OF_MEMORY              8
+constexpr int REQ_SUCCESS                    = 0;
+constexpr int REQ_UNKNOWN_ERROR              = 1;
+constexpr int REQ_INVALID_JSON_OBJECT        = 3;
+constexpr int REQ_INVALID_VERSION            = 4;
+constexpr int REQ_INVALID_OPERATION          = 5;
+constexpr int REQ_INVALID_OPERATION_FORMAT   = 6;
+constexpr int REQ_INVALID_MESSAGEID          = 7;
+constexpr int REQ_OUT_OF_MEMORY              = 8;
 /// @name Error codes for the CallFunction class
 /// @{
-#define REQ_PROC_NOT_COMPILED        100
-#define REQ_NON_EXISTING_FUNCTION    101
-#define REQ_TOO_FEW_FUNCTION_PARAMS  102
-#define REQ_TOO_MANY_FUNCTION_PARAMS 103
-#define REQ_UNSUPPORTED_FUNC_SIG     104
-#define REQ_UNSUPPORTED_FUNC_RET     105
-#define REQ_INVALID_PARAM_FORMAT     106
-#define REQ_FUNCTION_ABORTED         107
-#define REQ_INTERCEPT_FUNC_ABORTED   108
+constexpr int REQ_PROC_NOT_COMPILED        = 100;
+constexpr int REQ_NON_EXISTING_FUNCTION    = 101;
+constexpr int REQ_TOO_FEW_FUNCTION_PARAMS  = 102;
+constexpr int REQ_TOO_MANY_FUNCTION_PARAMS = 103;
+constexpr int REQ_UNSUPPORTED_FUNC_SIG     = 104;
+constexpr int REQ_UNSUPPORTED_FUNC_RET     = 105;
+constexpr int REQ_INVALID_PARAM_FORMAT     = 106;
+constexpr int REQ_FUNCTION_ABORTED         = 107;
+constexpr int REQ_INTERCEPT_FUNC_ABORTED   = 108;
 /// @}
 /// @}
 // clang-format on
