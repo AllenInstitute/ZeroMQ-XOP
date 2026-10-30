@@ -98,13 +98,13 @@ void WriteParameter(unsigned char *dest, const std::string &param, int igorType)
     Handle handle = WMNewHandle(To<BCInt>(param.size()));
     ASSERT(handle != nullptr);
     memcpy(*handle, param.c_str(), param.size());
-    memcpy(dest, &handle, sizeof(handle));
+    memcpy(dest, static_cast<const void *>(&handle), sizeof(handle));
     break;
   }
   case DATAFOLDER_TYPE:
   {
     DataFolderHandle handle = DeSerializeDataFolder(param);
-    memcpy(dest, &handle, sizeof(handle));
+    memcpy(dest, static_cast<const void *>(&handle), sizeof(handle));
     break;
   }
   default:
@@ -224,7 +224,8 @@ CallFunctionParameterHandler::~CallFunctionParameterHandler()
     if(m_paramTypes.at(i) == (HSTRING_TYPE | FV_REF_TYPE))
     {
       Handle handle = nullptr;
-      memcpy(&handle, &m_values.at(offset), sizeof(handle));
+      memcpy(static_cast<void *>(&handle), &m_values.at(offset),
+             sizeof(handle));
       if(handle != nullptr)
       {
         WMDisposeHandle(handle);
