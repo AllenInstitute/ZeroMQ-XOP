@@ -14,7 +14,7 @@ ZeroMQMessage::~ZeroMQMessage()
   // ignore error
 }
 
-zmq_msg_t* ZeroMQMessage::get()
+zmq_msg_t *ZeroMQMessage::get()
 {
   return &msg;
 }
