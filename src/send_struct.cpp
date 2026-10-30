@@ -122,8 +122,8 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
     containerDims[0] = i;
     auto *wv = GetWaveElement<waveHndl>(containerWaveHandle, containerDims);
 
-    int waveType;
-    bool isTextWave;
+    int waveType    = 0;
+    bool isTextWave = false;
 
     if(wv == nullptr)
     {

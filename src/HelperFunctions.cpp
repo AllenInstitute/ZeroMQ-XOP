@@ -794,7 +794,7 @@ void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
 int CreateDirectory(const std::string &path)
 {
 #ifdef WINIGOR
-  int error;
+  int error = 0;
 
   // https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createdirectorya
   auto ret = CreateDirectoryA(path.c_str(), nullptr);
