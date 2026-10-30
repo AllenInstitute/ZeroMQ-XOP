@@ -28,88 +28,91 @@ XOPIORecResult RegisterFunction()
         reinterpret_cast<XOPIORecResult>(zeromq_client_set_recv_timeout);
     break;
   case 4:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_handler_start);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_get_bound_endpoints);
     break;
   case 5:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_handler_stop);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_handler_start);
     break;
   case 6:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_pub_bind);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_handler_stop);
     break;
   case 7:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_pub_send);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_pub_bind);
     break;
   case 8:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_pub_send_multi);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_pub_send);
     break;
   case 9:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_bind);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_pub_send_multi);
     break;
   case 10:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_recv);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_bind);
     break;
   case 11:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_send);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_recv);
     break;
   case 12:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_send);
     break;
   case 13:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set_interceptor_func);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set);
     break;
   case 14:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set_logging_template);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set_interceptor_func);
     break;
   case 15:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_stop);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set_logging_template);
     break;
   case 16:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_add_filter);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_stop);
     break;
   case 17:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_connect);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_add_filter);
     break;
   case 18:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_recv);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_connect);
     break;
   case 19:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_recv_multi);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_recv);
     break;
   case 20:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_remove_filter);
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_recv_multi);
     break;
   case 21:
+    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_remove_filter);
+    break;
+  case 22:
     returnValue =
         reinterpret_cast<XOPIORecResult>(zeromq_test_callfunc_identity);
     break;
-  case 22:
+  case 23:
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_callfunction);
     break;
-  case 23:
+  case 24:
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_hb_startstop);
     break;
-  case 24:
+  case 25:
     returnValue =
         reinterpret_cast<XOPIORecResult>(zeromq_test_hb_stopped_by_stop);
     break;
-  case 25:
+  case 26:
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_idleguard);
     break;
-  case 26:
+  case 27:
     returnValue =
         reinterpret_cast<XOPIORecResult>(zeromq_test_msghandler_pause);
     break;
-  case 27:
+  case 28:
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_queueswap);
     break;
-  case 28:
+  case 29:
     returnValue =
         reinterpret_cast<XOPIORecResult>(zeromq_test_reply_contention);
     break;
-  case 29:
+  case 30:
     returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_serializeWave);
     break;
-  case 30:
+  case 31:
     returnValue =
         reinterpret_cast<XOPIORecResult>(zeromq_test_socketclose_race);
     break;

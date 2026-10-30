@@ -8,6 +8,7 @@
 
 #include ":zmq_bind"
 #include ":zmq_connect"
+#include ":zmq_get_bound_endpoints"
 #include ":zmq_set_logging_template"
 #include ":zmq_memory_leaks"
 #include ":zmq_pub_sub"
@@ -943,6 +944,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	// sorted list
 	list = AddListItem("zmq_bind.ipf", list, ";", Inf)
 	list = AddListItem("zmq_connect.ipf", list, ";", Inf)
+	list = AddListItem("zmq_get_bound_endpoints.ipf", list, ";", Inf)
 	list = AddListItem("zmq_memory_leaks.ipf", list, ";", Inf)
 	list = AddListItem("zmq_pub_sub.ipf", list, ";", Inf)
 	list = AddListItem("zmq_pub_sub_multi.ipf", list, ";", Inf)

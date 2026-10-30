@@ -298,6 +298,13 @@ void GlobalData::AddToListOfBindsOrConnections(const std::string &point,
   socketData.m_list.push_back(point);
 }
 
+std::vector<std::string> GlobalData::GetListOfBindsOrConnections(SocketTypes st)
+{
+  LockGuard lock(GetMutex(st));
+
+  return GetSocketTypeData(st).m_list;
+}
+
 ConcurrentQueue<OutputMessagePtr> &GlobalData::GetXOPNoticeQueue()
 {
   return m_queue;
