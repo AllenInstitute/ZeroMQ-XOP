@@ -352,7 +352,7 @@ std::string DimensionSizesToString(std::vector<CountInt> dimensionSizes)
   }
 
   fmt::memory_buffer buf;
-  OutputArray(buf, &dimensionSizes[0], dimensionSizes.size());
+  OutputArray(buf, dimensionSizes.data(), dimensionSizes.size());
 
   return to_string(buf);
 }
@@ -363,7 +363,7 @@ void AddDataFullScaleIfSet(json &doc, waveHndl waveHandle)
                                  std::numeric_limits<double>::quiet_NaN()};
 
   // see the documentation to MDGetWaveScaling, the order 1, 0 is correct
-  auto rc = MDGetWaveScaling(waveHandle, -1, &entries[1], &entries[0]);
+  auto rc = MDGetWaveScaling(waveHandle, -1, &entries[1], entries.data());
   ASSERT(rc == 0);
 
   // heuristic;
@@ -375,7 +375,7 @@ void AddDataFullScaleIfSet(json &doc, waveHndl waveHandle)
   }
 
   fmt::memory_buffer buf;
-  OutputArray(buf, &entries[0], entries.size());
+  OutputArray(buf, entries.data(), entries.size());
 
   doc["data"]["fullScale"] = json::parse(to_string(buf));
 }
@@ -415,12 +415,12 @@ void AddDimensionScalingIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, &offset[0], offset.size());
+    OutputArray(buf, offset.data(), offset.size());
     doc["dimension"]["offset"] = json::parse(to_string(buf));
 
     buf.clear();
 
-    OutputArray(buf, &delta[0], delta.size());
+    OutputArray(buf, delta.data(), delta.size());
     doc["dimension"]["delta"] = json::parse(to_string(buf));
   }
 }
@@ -450,7 +450,7 @@ void AddDimensionUnitsIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, &units[0], units.size());
+    OutputArray(buf, units.data(), units.size());
     doc["dimension"]["unit"] = json::parse(to_string(buf));
   }
 }
@@ -481,7 +481,7 @@ void AddDimensionLabelsFullIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, &labels[0], labels.size());
+    OutputArray(buf, labels.data(), labels.size());
     doc["dimension"]["label"]["full"] = json::parse(to_string(buf));
   }
 }
@@ -520,7 +520,7 @@ void AddDimensionLabelsEachIfSet(json &doc, waveHndl waveHandle,
   {
     fmt::memory_buffer buf;
 
-    OutputArray(buf, &labels[0], labels.size());
+    OutputArray(buf, labels.data(), labels.size());
     doc["dimension"]["label"]["each"] = json::parse(to_string(buf));
   }
 }
