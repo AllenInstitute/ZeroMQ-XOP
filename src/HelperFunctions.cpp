@@ -40,7 +40,7 @@ std::string GetStringFromHandle(Handle strHandle)
   }
 
   const size_t strLen = WMGetHandleSize(strHandle);
-  return std::string(*strHandle, strLen);
+  return {*strHandle, strLen};
 }
 
 /// @brief Returns a string from an Igor string Handle and disposes the Handle
@@ -622,8 +622,7 @@ DataFolderHandle DeSerializeDataFolder(const std::string &path)
 
 std::string CreateStringFromZMsg(zmq_msg_t *msg)
 {
-  return std::string(reinterpret_cast<char *>(zmq_msg_data(msg)),
-                     zmq_msg_size(msg));
+  return {static_cast<char *>(zmq_msg_data(msg)), zmq_msg_size(msg)};
 }
 
 void InitHandle(Handle *handle, size_t size)
