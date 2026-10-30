@@ -31,6 +31,8 @@ extern "C" void XOPEntry()
     case CLEANUP:
       StopThreadsAndCloseConnections();
       break;
+    default:
+      break;
     }
   }
   catch(...)
