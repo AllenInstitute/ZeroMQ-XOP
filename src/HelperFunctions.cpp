@@ -413,8 +413,8 @@ int ZeroMQPublisherSend(const SendStorageVec &vec)
   {
     const int flag = i < (vecLen - 1) ? ZMQ_SNDMORE : 0;
 
-    const auto ptr    = vec[i].GetPtr();
-    const auto msgLen = vec[i].GetLength();
+    const auto *const ptr = vec[i].GetPtr();
+    const auto msgLen     = vec[i].GetLength();
 
     DEBUG_OUTPUT("element[{}]: ptr={}, len={}, flag={}", i, ptr, msgLen, flag);
 
@@ -678,7 +678,7 @@ int GetNumberOfReturnValues(const FunctionInfo &fip)
   // these are before all other parameters
 
   // find the first non-pass-by-ref parameter
-  auto *it = std::find_if(
+  const auto *it = std::find_if(
       std::begin(fip.parameterTypes),
       std::begin(fip.parameterTypes) + fip.numRequiredParameters,
       [](int paramType) { return !IsBitSet(paramType, FV_REF_TYPE); });

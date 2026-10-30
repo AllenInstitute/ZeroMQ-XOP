@@ -38,7 +38,7 @@ extern "C" int zeromq_get_bound_endpoints(zeromq_get_bound_endpointsParams *p)
 
   DEBUG_OUTPUT("type={}, endpoints={}", st, endpoints.size());
 
-  auto wv = MakeFreeWave({To<CountInt>(endpoints.size())}, TEXT_WAVE_TYPE);
+  auto *wv = MakeFreeWave({To<CountInt>(endpoints.size())}, TEXT_WAVE_TYPE);
 
   std::vector<IndexInt> dims(MAX_DIMENSIONS, 0);
   for(const auto &endpoint : endpoints)
