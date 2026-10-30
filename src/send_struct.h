@@ -21,7 +21,7 @@ public:
   {
   }
 
-  const void *GetPtr() const
+  [[nodiscard]] const void *GetPtr() const
   {
     if(storage.has_value())
     {
@@ -31,7 +31,7 @@ public:
     return ptr;
   }
 
-  size_t GetLength() const
+  [[nodiscard]] size_t GetLength() const
   {
     if(storage.has_value())
     {

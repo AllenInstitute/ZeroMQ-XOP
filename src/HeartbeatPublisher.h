@@ -17,7 +17,7 @@ public:
 
   void Start();
   void Stop();
-  bool IsRunning() const;
+  [[nodiscard]] bool IsRunning() const;
 
 private:
   HeartbeatPublisher() = default;

@@ -36,12 +36,12 @@ public:
 
   virtual ~IgorException() override;
 
-  const char *what() const noexcept override;
+  [[nodiscard]] const char *what() const noexcept override;
 
-  int GetErrorCode() const;
+  [[nodiscard]] int GetErrorCode() const;
 
   /// Displays the exception if required; gets the return code.
-  int HandleException() const;
+  [[nodiscard]] int HandleException() const;
 
 private:
   const int m_errorCode;

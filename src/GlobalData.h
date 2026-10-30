@@ -41,13 +41,13 @@ public:
   bool HasBindsOrConnections(SocketTypes st);
 
   void SetDebugFlag(bool val);
-  bool GetDebugFlag() const;
+  [[nodiscard]] bool GetDebugFlag() const;
 
   void SetRecvBusyWaitingFlag(bool val);
-  bool GetRecvBusyWaitingFlag() const;
+  [[nodiscard]] bool GetRecvBusyWaitingFlag() const;
 
   void SetInterceptorFlag(bool val);
-  bool GetInterceptorFlag() const;
+  [[nodiscard]] bool GetInterceptorFlag() const;
 
   void CloseConnections();
   void AddToListOfBindsOrConnections(const std::string &localPoint,
@@ -58,7 +58,7 @@ public:
   std::recursive_mutex &GetMutex(SocketTypes st);
 
   void SetLoggingFlag(bool val);
-  bool GetLoggingFlag() const;
+  [[nodiscard]] bool GetLoggingFlag() const;
 
   void AddLogEntry(const json &doc, MessageDirection dir);
   void AddLogEntry(const json &doc, const std::string &identity,
