@@ -45,8 +45,8 @@ public:
   [[nodiscard]] int HandleException() const;
 
 private:
-  const int m_errorCode;
-  const std::runtime_error m_message;
+  int m_errorCode;
+  std::runtime_error m_message;
 };
 
 void to_json(json &doc, const IgorException &exception);
