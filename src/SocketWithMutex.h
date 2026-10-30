@@ -21,10 +21,7 @@ public:
     // DEBUG_OUTPUT("Locking {}",  m_plainSocket);
   }
 
-  ~SocketWithMutex()
-  {
-    // DEBUG_OUTPUT("Unlocking {}",  m_plainSocket);
-  }
+  ~SocketWithMutex() = default;
 
   void *get()
   {
