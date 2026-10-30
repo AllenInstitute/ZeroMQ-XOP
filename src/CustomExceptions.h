@@ -1,7 +1,7 @@
 #pragma once
 
-#include <sstream>
 #include <exception>
+#include <sstream>
 #include <string>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under

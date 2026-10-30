@@ -1,5 +1,7 @@
 #pragma once
 
+#include "XOPStandardHeaders.h" // Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
+
 #include <vector>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
