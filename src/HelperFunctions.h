@@ -132,7 +132,7 @@ enum ZeroMQ_SET_FLAGS
   LOGGING              = 16,
   INTERCEPTOR_FUNCTION = 32
 };
-}
+} // namespace ZeroMQ_SET_FLAGS
 
 /// Return the ID of the Igor Pro process
 uint64_t GetProcessID();
