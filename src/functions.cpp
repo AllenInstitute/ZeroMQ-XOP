@@ -2,6 +2,8 @@
 #include "XOPStandardHeaders.h" // Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
 #include "functions.h"
 
+#include <array>
+
 XOPIORecResult RegisterFunction()
 {
   /*  NOTE:
@@ -9,113 +11,48 @@ XOPIORecResult RegisterFunction()
     message. See XOP manual "Restrictions on Direct XFUNCs" section.
   */
 
-  XOPIORecParam funcIndex    = GetXOPItem(0); /* which function invoked ? */
-  XOPIORecResult returnValue = NIL;
+  const std::array<XOPIORecResult, 32> functions = {
+      reinterpret_cast<XOPIORecResult>(zeromq_client_connect),
+      reinterpret_cast<XOPIORecResult>(zeromq_client_recv),
+      reinterpret_cast<XOPIORecResult>(zeromq_client_send),
+      reinterpret_cast<XOPIORecResult>(zeromq_client_set_recv_timeout),
+      reinterpret_cast<XOPIORecResult>(zeromq_get_bound_endpoints),
+      reinterpret_cast<XOPIORecResult>(zeromq_handler_start),
+      reinterpret_cast<XOPIORecResult>(zeromq_handler_stop),
+      reinterpret_cast<XOPIORecResult>(zeromq_pub_bind),
+      reinterpret_cast<XOPIORecResult>(zeromq_pub_send),
+      reinterpret_cast<XOPIORecResult>(zeromq_pub_send_multi),
+      reinterpret_cast<XOPIORecResult>(zeromq_server_bind),
+      reinterpret_cast<XOPIORecResult>(zeromq_server_recv),
+      reinterpret_cast<XOPIORecResult>(zeromq_server_send),
+      reinterpret_cast<XOPIORecResult>(zeromq_set),
+      reinterpret_cast<XOPIORecResult>(zeromq_set_interceptor_func),
+      reinterpret_cast<XOPIORecResult>(zeromq_set_logging_template),
+      reinterpret_cast<XOPIORecResult>(zeromq_stop),
+      reinterpret_cast<XOPIORecResult>(zeromq_sub_add_filter),
+      reinterpret_cast<XOPIORecResult>(zeromq_sub_connect),
+      reinterpret_cast<XOPIORecResult>(zeromq_sub_recv),
+      reinterpret_cast<XOPIORecResult>(zeromq_sub_recv_multi),
+      reinterpret_cast<XOPIORecResult>(zeromq_sub_remove_filter),
+      reinterpret_cast<XOPIORecResult>(zeromq_test_callfunc_identity),
+      reinterpret_cast<XOPIORecResult>(zeromq_test_callfunction),
+      reinterpret_cast<XOPIORecResult>(zeromq_test_hb_startstop),
+      reinterpret_cast<XOPIORecResult>(zeromq_test_hb_stopped_by_stop),
+      reinterpret_cast<XOPIORecResult>(zeromq_test_idleguard),
+      reinterpret_cast<XOPIORecResult>(zeromq_test_msghandler_pause),
+      reinterpret_cast<XOPIORecResult>(zeromq_test_queueswap),
+      reinterpret_cast<XOPIORecResult>(zeromq_test_reply_contention),
+      reinterpret_cast<XOPIORecResult>(zeromq_test_serializeWave),
+      reinterpret_cast<XOPIORecResult>(zeromq_test_socketclose_race),
 
-  switch(funcIndex)
+  };
+
+  const XOPIORecParam funcIndex = GetXOPItem(0); /* which function invoked ? */
+
+  if(funcIndex < 0 || static_cast<size_t>(funcIndex) >= functions.size())
   {
-  case 0:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_client_connect);
-    break;
-  case 1:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_client_recv);
-    break;
-  case 2:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_client_send);
-    break;
-  case 3:
-    returnValue =
-        reinterpret_cast<XOPIORecResult>(zeromq_client_set_recv_timeout);
-    break;
-  case 4:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_get_bound_endpoints);
-    break;
-  case 5:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_handler_start);
-    break;
-  case 6:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_handler_stop);
-    break;
-  case 7:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_pub_bind);
-    break;
-  case 8:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_pub_send);
-    break;
-  case 9:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_pub_send_multi);
-    break;
-  case 10:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_bind);
-    break;
-  case 11:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_recv);
-    break;
-  case 12:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_server_send);
-    break;
-  case 13:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set);
-    break;
-  case 14:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set_interceptor_func);
-    break;
-  case 15:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_set_logging_template);
-    break;
-  case 16:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_stop);
-    break;
-  case 17:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_add_filter);
-    break;
-  case 18:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_connect);
-    break;
-  case 19:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_recv);
-    break;
-  case 20:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_recv_multi);
-    break;
-  case 21:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_sub_remove_filter);
-    break;
-  case 22:
-    returnValue =
-        reinterpret_cast<XOPIORecResult>(zeromq_test_callfunc_identity);
-    break;
-  case 23:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_callfunction);
-    break;
-  case 24:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_hb_startstop);
-    break;
-  case 25:
-    returnValue =
-        reinterpret_cast<XOPIORecResult>(zeromq_test_hb_stopped_by_stop);
-    break;
-  case 26:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_idleguard);
-    break;
-  case 27:
-    returnValue =
-        reinterpret_cast<XOPIORecResult>(zeromq_test_msghandler_pause);
-    break;
-  case 28:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_queueswap);
-    break;
-  case 29:
-    returnValue =
-        reinterpret_cast<XOPIORecResult>(zeromq_test_reply_contention);
-    break;
-  case 30:
-    returnValue = reinterpret_cast<XOPIORecResult>(zeromq_test_serializeWave);
-    break;
-  case 31:
-    returnValue =
-        reinterpret_cast<XOPIORecResult>(zeromq_test_socketclose_race);
-    break;
+    return NIL;
   }
-  return returnValue;
+
+  return functions.at(static_cast<size_t>(funcIndex));
 }
