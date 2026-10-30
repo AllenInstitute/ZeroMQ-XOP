@@ -34,8 +34,8 @@ extern "C" int zeromq_sub_recv(zeromq_sub_recvParams *p)
 
     ZEROMQ_ASSERT(ret == 0);
 
-    auto filterMsg  = vec[0]->get();
-    auto payloadMsg = vec[1]->get();
+    auto *filterMsg  = vec[0]->get();
+    auto *payloadMsg = vec[1]->get();
 
     WriteZMsgIntoHandle(&(p->result), payloadMsg);
     WriteZMsgIntoHandle(p->filter, filterMsg);
