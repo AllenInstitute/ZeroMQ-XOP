@@ -25,7 +25,7 @@ public:
                    MessageDirection dir) const;
   void AddLogEntry(const std::string &str) const;
   void AddLogEntry(const std::string &str, MessageDirection dir) const;
-  void AddLogEntry(const std::string &doc, const std::string &identity,
+  void AddLogEntry(const std::string &str, const std::string &identity,
                    MessageDirection dir) const;
 
 private:
