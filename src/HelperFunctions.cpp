@@ -771,6 +771,9 @@ struct fmt::formatter<OutputMode> : fmt::formatter<std::string>
   }
 };
 
+namespace
+{
+
 std::string GetHeader(OutputMode mode, const char *func, int line)
 {
   switch(mode)
@@ -784,6 +787,8 @@ std::string GetHeader(OutputMode mode, const char *func, int line)
 
   ASSERT(0);
 }
+
+} // anonymous namespace
 
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
           fmt::format_args args) noexcept
@@ -942,6 +947,9 @@ Handle GetHandleFromString(const std::string &str)
   return handle;
 }
 
+namespace
+{
+
 bool IsFreeDataFolder(DataFolderHandle dfr)
 {
   DataFolderHandle rootDFR = nullptr;
@@ -965,6 +973,11 @@ bool IsFreeDataFolder(DataFolderHandle dfr)
 
   return false;
 }
+
+} // anonymous namespace
+
+namespace
+{
 
 size_t GetWaveIndexInMemory(waveHndl w, std::vector<IndexInt> &dims)
 {
@@ -996,6 +1009,8 @@ size_t GetWaveIndexInMemory(waveHndl w, std::vector<IndexInt> &dims)
 
   return index;
 }
+
+} // anonymous namespace
 
 template <>
 void SetWaveElement<std::string>(waveHndl w, std::vector<IndexInt> &dims,
