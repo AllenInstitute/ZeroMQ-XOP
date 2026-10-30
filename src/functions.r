@@ -37,6 +37,14 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   NT_FP64,      // parameter 1
   },
 
+  // WAVE zeromq_get_bound_endpoints(variable socketType)
+  "zeromq_get_bound_endpoints",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  WAVE_TYPE,          // Return value type
+  {
+  NT_FP64,      // parameter 1
+  },
+
   // variable zeromq_handler_start()
   "zeromq_handler_start",
   F_UTIL | F_EXTERNAL,    // Function category

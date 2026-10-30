@@ -12,6 +12,7 @@ The XOP provides the following functions:
 - :cpp:func:`zeromq_client_recv()`
 - :cpp:func:`zeromq_client_send()`
 - :cpp:func:`zeromq_client_set_recv_timeout()`
+- :cpp:func:`zeromq_get_bound_endpoints()`
 - :cpp:func:`zeromq_handler_start()`
 - :cpp:func:`zeromq_handler_stop()`
 - :cpp:func:`zeromq_pub_bind`

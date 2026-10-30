@@ -53,6 +53,17 @@ typedef struct zeromq_client_set_recv_timeoutParams
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_get_bound_endpointsParams
+{
+  double socketType;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  waveHndl result;
+};
+typedef struct zeromq_get_bound_endpointsParams
+    zeromq_get_bound_endpointsParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_handler_startParams
 {
   double result;
@@ -333,6 +344,9 @@ extern "C" int zeromq_client_send(zeromq_client_sendParams *p);
 // variable zeromq_client_set_recv_timeout(variable timeout)
 extern "C" int
 zeromq_client_set_recv_timeout(zeromq_client_set_recv_timeoutParams *p);
+
+// WAVE zeromq_get_bound_endpoints(variable socketType)
+extern "C" int zeromq_get_bound_endpoints(zeromq_get_bound_endpointsParams *p);
 
 // variable zeromq_handler_start()
 extern "C" int zeromq_handler_start(zeromq_handler_startParams *p);

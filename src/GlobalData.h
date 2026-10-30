@@ -68,6 +68,7 @@ public:
   void CloseConnections();
   void AddToListOfBindsOrConnections(const std::string &localPoint,
                                      SocketTypes st);
+  std::vector<std::string> GetListOfBindsOrConnections(SocketTypes st);
   ConcurrentQueue<OutputMessagePtr> &GetXOPNoticeQueue();
 
   std::recursive_mutex &GetMutex(SocketTypes st);

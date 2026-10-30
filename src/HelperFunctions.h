@@ -134,6 +134,19 @@ enum ZeroMQ_SET_FLAGS
 };
 }
 
+/// Socket types for zeromq_get_bound_endpoints()
+namespace ZeroMQ_SOCKET_TYPE
+{
+
+enum ZeroMQ_SOCKET_TYPE
+{
+  CLIENT     = 1,
+  SERVER     = 2,
+  PUBLISHER  = 3,
+  SUBSCRIBER = 4
+};
+}
+
 std::string GetLastEndPoint(void *s);
 void ToggleIPV6Support(bool enable);
 

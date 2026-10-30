@@ -122,6 +122,7 @@ SET(COVERAGE_SOURCES
   zeromq_client_recv.cpp
   zeromq_client_send.cpp
   zeromq_client_set_recv_timeout.cpp
+  zeromq_get_bound_endpoints.cpp
   zeromq_handler_start.cpp
   zeromq_handler_stop.cpp
   zeromq_helper.cpp
