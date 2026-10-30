@@ -43,8 +43,9 @@ extern "C" int zeromq_sub_recv(zeromq_sub_recvParams *p)
     auto msg    = CreateStringFromZMsg(payloadMsg);
     auto filter = CreateStringFromZMsg(filterMsg);
 
-    GlobalData::Instance().AddLogEntry(filter + ":" + msg,
-                                       MessageDirection::Incoming);
+    GlobalData::Instance().AddLogEntry(
+        fmt::format(FMT_STRING("{}:{}"), filter, msg),
+        MessageDirection::Incoming);
 
     DEBUG_OUTPUT("ret={}", ret);
     break;
