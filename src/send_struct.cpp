@@ -111,7 +111,7 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
   }
 
   std::vector<IndexInt> resizeDims(MAX_DIMENSIONS, 0);
-  resizeDims[0] = numMsg;
+  resizeDims[0] = To<IndexInt>(numMsg);
   RedimensionWave(containerWaveHandle, resizeDims);
 
   for(size_t i = 0; i < numMsg; i += 1)
@@ -120,7 +120,7 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
     const auto msgSize = zmq_msg_size(msg);
 
     std::vector<IndexInt> containerDims(MAX_DIMENSIONS, 0);
-    containerDims[0] = i;
+    containerDims[0] = To<IndexInt>(i);
     auto *wv = GetWaveElement<waveHndl>(containerWaveHandle, containerDims);
 
     int waveType    = 0;
@@ -138,7 +138,7 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
       }
       else
       {
-        dims[0]  = msgSize;
+        dims[0]  = To<IndexInt>(msgSize);
         waveType = NT_I8 | NT_UNSIGNED;
       }
 
@@ -176,7 +176,7 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
       }
       else
       {
-        dims[0] = msgSize / GetWaveElementSize(waveType);
+        dims[0] = To<IndexInt>(msgSize / GetWaveElementSize(waveType));
       }
 
       RedimensionWave(wv, dims);

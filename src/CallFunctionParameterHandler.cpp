@@ -90,7 +90,7 @@ IgorTypeUnion ConvertStringToIgorTypeUnion(const std::string &param,
     value.variable = ConvertStringToDouble(param);
     break;
   case HSTRING_TYPE:
-    value.stringHandle = WMNewHandle(param.size());
+    value.stringHandle = WMNewHandle(To<BCInt>(param.size()));
     ASSERT(value.stringHandle != nullptr);
     memcpy(*value.stringHandle, param.c_str(), param.size());
     break;
