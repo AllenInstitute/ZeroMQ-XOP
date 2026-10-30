@@ -1,21 +1,21 @@
 #pragma once
 
-#include <ctime>
+#include <algorithm>
 #include <cerrno>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
-#include <cmath>
-#include <sstream>
-#include <iterator>
-#include <algorithm>
-#include <memory>
-#include <string>
-#include <vector>
-#include <functional>
+#include <ctime>
 #include <exception>
-#include <thread>
-#include <numeric>
+#include <functional>
+#include <iterator>
+#include <memory>
 #include <mutex>
+#include <numeric>
+#include <sstream>
+#include <string>
+#include <thread>
+#include <vector>
 
 #include "zeromq_helper.h"
 
@@ -98,9 +98,9 @@ using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
 #pragma warning(disable : 4702)
 #endif
 
+#include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <fmt/ranges.h>
-#include <fmt/chrono.h>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -110,18 +110,20 @@ using ZeroMQMessageSharedPtrVec = std::vector<std::shared_ptr<ZeroMQMessage>>;
 #pragma clang diagnostic pop
 #endif
 
+// The XOP Toolkit headers come first
 #include "cmake_config.h"
 #include "functions.h"
-#include "GlobalData.h"
-#include "CustomExceptions.h"
-#include "RequestInterfaceException.h"
-#include "HeartbeatPublisher.h"
-#include "IdleGuard.h"
-#include "HelperFunctions.h"
+
 #include "ConcurrentXOPNotice.h"
-#include "Logging.h"
-#include "SocketWithMutex.h"
+#include "CustomExceptions.h"
 #include "Errors.h"
+#include "GlobalData.h"
+#include "HeartbeatPublisher.h"
+#include "HelperFunctions.h"
+#include "IdleGuard.h"
+#include "Logging.h"
+#include "RequestInterfaceException.h"
+#include "SocketWithMutex.h"
 #include "git_version.h"
 
 // see also FunctionInfo XOPSupport function

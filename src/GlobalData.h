@@ -1,11 +1,11 @@
 #pragma once
 
-#include <atomic>
-#include <mutex>
-#include <memory>
-#include "Logging.h"
 #include "ConcurrentQueue.h"
 #include "ConcurrentXOPNotice.h"
+#include "Logging.h"
+#include <atomic>
+#include <memory>
+#include <mutex>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.

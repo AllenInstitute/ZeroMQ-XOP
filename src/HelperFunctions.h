@@ -3,8 +3,8 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 #ifdef MACIGOR
 #include <sys/stat.h>
