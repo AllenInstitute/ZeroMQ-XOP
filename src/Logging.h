@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOGGING_H
+#define LOGGING_H
 
 #include <memory>
 #include <string>
@@ -37,3 +38,5 @@ private:
   class Implementation;
   std::unique_ptr<Logging::Implementation> m_impl;
 };
+
+#endif // LOGGING_H

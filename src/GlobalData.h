@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GLOBAL_DATA_H
+#define GLOBAL_DATA_H
 
 #include "ConcurrentQueue.h"
 #include "ConcurrentXOPNotice.h"
@@ -158,3 +159,5 @@ struct fmt::formatter<SocketTypes> : fmt::formatter<std::string>
     return formatter<std::string>::format(name, ctx);
   }
 };
+
+#endif // GLOBAL_DATA_H

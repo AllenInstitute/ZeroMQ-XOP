@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ZEROMQ_H
+#define ZEROMQ_H
 
 #include <algorithm>
 #include <cerrno>
@@ -133,3 +134,5 @@ const std::string HISTORY_KEY   = "history";
 
 /* Prototypes */
 HOST_IMPORT int XOPMain(IORecHandle ioRecHandle);
+
+#endif // ZEROMQ_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONCURRENT_QUEUE_H
+#define CONCURRENT_QUEUE_H
 
 #include <mutex>
 #include <queue>
@@ -80,3 +81,5 @@ private:
   std::queue<T> m_queue;
   mutable std::mutex m_mutex;
 };
+
+#endif // CONCURRENT_QUEUE_H

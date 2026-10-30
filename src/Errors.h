@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ERRORS_H
+#define ERRORS_H
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -52,3 +53,5 @@
 /// @}
 /// @}
 // clang-format on
+
+#endif // ERRORS_H

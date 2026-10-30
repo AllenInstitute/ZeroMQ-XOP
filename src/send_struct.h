@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SEND_STRUCT_H
+#define SEND_STRUCT_H
 
 #include <optional>
 #include <string>
@@ -50,3 +51,5 @@ private:
 SendStorageVec GatherPubData(waveHndl containerWaveHandle);
 void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
                     waveHndl containerWaveHandle);
+
+#endif // SEND_STRUCT_H

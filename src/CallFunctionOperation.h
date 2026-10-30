@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CALL_FUNCTION_OPERATION_H
+#define CALL_FUNCTION_OPERATION_H
 
 #include "ZeroMQ.h"
 
@@ -35,3 +36,5 @@ struct fmt::formatter<CallFunctionOperation> : fmt::formatter<std::string>
     return format_to(ctx.out(), "name={}, params={}", op.m_name, op.m_params);
   }
 };
+
+#endif // CALL_FUNCTION_OPERATION_H

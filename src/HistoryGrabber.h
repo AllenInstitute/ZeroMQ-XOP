@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HISTORY_GRABBER_H
+#define HISTORY_GRABBER_H
 
 #include "ZeroMQ.h"
 
@@ -15,3 +16,5 @@ public:
 private:
   int m_startLine{0};
 };
+
+#endif // HISTORY_GRABBER_H

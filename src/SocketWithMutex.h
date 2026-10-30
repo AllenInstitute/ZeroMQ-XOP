@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SOCKET_WITH_MUTEX_H
+#define SOCKET_WITH_MUTEX_H
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -34,3 +35,5 @@ private:
   LockGuard m_lock;
   void *m_plainSocket;
 };
+
+#endif // SOCKET_WITH_MUTEX_H

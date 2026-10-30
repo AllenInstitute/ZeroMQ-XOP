@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HELPER_FUNCTIONS_H
+#define HELPER_FUNCTIONS_H
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -481,3 +482,5 @@ void RedimensionWave(waveHndl w, std::vector<CountInt> dims);
 
 /// @brief Make a free wave with the given dimension and type
 waveHndl MakeFreeWave(std::vector<CountInt> dims, int type);
+
+#endif // HELPER_FUNCTIONS_H

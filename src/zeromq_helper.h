@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ZEROMQ_HELPER_H
+#define ZEROMQ_HELPER_H
 
 #include <memory>
 #include <vector>
@@ -20,3 +21,5 @@ public:
 private:
   zmq_msg_t msg;
 };
+
+#endif // ZEROMQ_HELPER_H

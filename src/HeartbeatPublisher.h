@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HEARTBEAT_PUBLISHER_H
+#define HEARTBEAT_PUBLISHER_H
 
 #include "ZeroMQ.h"
 
@@ -28,3 +29,5 @@ private:
   class thread;
   std::thread m_thread;
 };
+
+#endif // HEARTBEAT_PUBLISHER_H

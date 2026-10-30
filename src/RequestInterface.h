@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REQUEST_INTERFACE_H
+#define REQUEST_INTERFACE_H
 
 #include "ZeroMQ.h"
 
@@ -66,3 +67,5 @@ struct fmt::formatter<RequestInterface> : fmt::formatter<std::string>
         nicer_empty(req.m_messageId), *(req.m_op));
   }
 };
+
+#endif // REQUEST_INTERFACE_H

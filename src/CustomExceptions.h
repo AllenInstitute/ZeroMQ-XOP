@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CUSTOM_EXCEPTIONS_H
+#define CUSTOM_EXCEPTIONS_H
 
 #include <exception>
 #include <sstream>
@@ -73,3 +74,5 @@ int HandleException(const std::exception &e);
     /* Unhandled exception */                                                  \
     return UNHANDLED_CPP_EXCEPTION;                                            \
   }
+
+#endif // CUSTOM_EXCEPTIONS_H

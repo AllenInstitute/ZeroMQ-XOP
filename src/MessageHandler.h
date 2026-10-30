@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MESSAGE_HANDLER_H
+#define MESSAGE_HANDLER_H
 
 #include "ZeroMQ.h"
 
@@ -33,3 +34,5 @@ private:
   class thread;
   std::thread m_thread;
 };
+
+#endif // MESSAGE_HANDLER_H

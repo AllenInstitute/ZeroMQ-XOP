@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONCURRENT_XOP_NOTICE_H
+#define CONCURRENT_XOP_NOTICE_H
 
 #include <string>
 
@@ -27,3 +28,5 @@ using OutputMessagePtr = std::shared_ptr<OutputMessage>;
 void OutputToHistory_TS(std::string str, ExperimentModification mode);
 
 void OutputQueuedNotices();
+
+#endif // CONCURRENT_XOP_NOTICE_H

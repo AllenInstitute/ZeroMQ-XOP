@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REQUEST_INTERFACE_EXCEPTION_H
+#define REQUEST_INTERFACE_EXCEPTION_H
 
 #include "CustomExceptions.h"
 
@@ -11,3 +12,5 @@ public:
   explicit RequestInterfaceException(int errorCode);
   ~RequestInterfaceException() override;
 };
+
+#endif // REQUEST_INTERFACE_EXCEPTION_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CALL_FUNCTION_PARAMETER_HANDLER_H
+#define CALL_FUNCTION_PARAMETER_HANDLER_H
 
 #include "IgorTypeUnion.h"
 #include "ZeroMQ.h"
@@ -29,3 +30,5 @@ private:
   int m_returnType;
   IgorTypeUnion m_retStorage = {};
 };
+
+#endif // CALL_FUNCTION_PARAMETER_HANDLER_H

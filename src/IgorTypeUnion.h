@@ -1,4 +1,5 @@
-#pragma once
+#ifndef IGOR_TYPE_UNION_H
+#define IGOR_TYPE_UNION_H
 
 #include "XOPStandardHeaders.h" // Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
 
@@ -18,3 +19,5 @@ union IgorTypeUnion
 #pragma pack()
 
 using IgorTypeUnionVector = std::vector<IgorTypeUnion>;
+
+#endif // IGOR_TYPE_UNION_H
