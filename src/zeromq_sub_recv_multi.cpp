@@ -14,7 +14,7 @@ extern "C" int zeromq_sub_recv_multi(zeromq_sub_recv_multiParams *p)
 
   for(;;)
   {
-    int ret = ZeroMQSubscriberReceive(vec, true);
+    const int ret = ZeroMQSubscriberReceive(vec, true);
 
     if(ret == -1 && zmq_errno() == EAGAIN) // timeout
     {

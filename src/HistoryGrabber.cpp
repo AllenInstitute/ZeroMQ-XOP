@@ -21,7 +21,7 @@ std::string HistoryGrabber::GetHistoryUntilNow() const
 
   Handle historyHandle = WMNewHandle(0);
   ASSERT(historyHandle != nullptr);
-  int rc = HistoryFetchText(&startLoc, &endLoc, &historyHandle);
+  const int rc = HistoryFetchText(&startLoc, &endLoc, &historyHandle);
 
   if(rc)
   {
