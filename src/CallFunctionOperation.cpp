@@ -216,7 +216,7 @@ void CallFunctionOperation::CallInterceptor(const std::string &identity,
   auto mode_str = std::to_string(
       static_cast<std::underlying_type_t<InterceptorMode>>(mode));
 
-  std::vector<std::string> params{m_json.dump(), identity, mode_str};
+  const std::vector<std::string> params{m_json.dump(), identity, mode_str};
 
   DEBUG_OUTPUT("params={}", params);
 
@@ -247,7 +247,7 @@ json CallFunctionOperation::Call()
 
   CallFunctionParameterHandler p(m_params, fip);
 
-  HistoryGrabber histGrabber;
+  const HistoryGrabber histGrabber;
 
   rc = CallFunction(&fip, p.GetParameterValueStorage(),
                     p.GetReturnValueStorage());

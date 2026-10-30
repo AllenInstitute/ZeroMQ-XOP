@@ -20,28 +20,28 @@ class ConcurrentQueue
 public:
   void push(T data)
   {
-    Lock lock(m_mutex);
+    const Lock lock(m_mutex);
 
     m_queue.emplace(data);
   }
 
   bool empty() const
   {
-    Lock lock(m_mutex);
+    const Lock lock(m_mutex);
 
     return m_queue.empty();
   }
 
   void clear()
   {
-    Lock lock(m_mutex);
+    const Lock lock(m_mutex);
 
     m_queue = {};
   }
 
   size_t size() const
   {
-    Lock lock(m_mutex);
+    const Lock lock(m_mutex);
 
     return m_queue.size();
   }
@@ -73,7 +73,7 @@ public:
     std::queue<T> drained;
 
     {
-      Lock lock(m_mutex);
+      const Lock lock(m_mutex);
       std::swap(drained, m_queue);
     }
 

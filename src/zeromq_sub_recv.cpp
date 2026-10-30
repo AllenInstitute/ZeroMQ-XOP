@@ -13,7 +13,7 @@ extern "C" int zeromq_sub_recv(zeromq_sub_recvParams *p)
   for(;;)
   {
     ZeroMQMessageSharedPtrVec vec;
-    int ret = ZeroMQSubscriberReceive(vec, false);
+    const int ret = ZeroMQSubscriberReceive(vec, false);
 
     if(ret == -1 && zmq_errno() == EAGAIN) // timeout
     {

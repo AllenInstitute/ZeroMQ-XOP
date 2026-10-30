@@ -222,7 +222,7 @@ Logging::~Logging() = default;
 
 void Logging::AddLogEntry(const json &doc, MessageDirection dir) const
 {
-  std::optional<std::string> identity;
+  const std::optional<std::string> identity;
   m_impl->AddLogEntry(TEMPLATE_KEY_JSON, doc, identity, dir);
 }
 
@@ -234,14 +234,14 @@ void Logging::AddLogEntry(const json &doc, const std::string &identity,
 
 void Logging::AddLogEntry(const std::string &str) const
 {
-  std::optional<std::string> identity;
-  std::optional<MessageDirection> dir;
+  const std::optional<std::string> identity;
+  const std::optional<MessageDirection> dir;
   m_impl->AddLogEntry(TEMPLATE_KEY_STR, str, identity, dir);
 }
 
 void Logging::AddLogEntry(const std::string &str, MessageDirection dir) const
 {
-  std::optional<std::string> identity;
+  const std::optional<std::string> identity;
   m_impl->AddLogEntry(TEMPLATE_KEY_STR, str, identity, dir);
 }
 

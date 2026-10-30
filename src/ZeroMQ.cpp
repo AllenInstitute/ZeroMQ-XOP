@@ -23,7 +23,7 @@ extern "C" void XOPEntry()
     case IDLE:
       if(!IsIdleInProgress())
       {
-        IdleGuard guard;
+        const IdleGuard guard;
         MessageHandler::Instance().HandleAllQueuedMessages();
         OutputQueuedNotices();
       }

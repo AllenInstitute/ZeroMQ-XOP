@@ -4,7 +4,7 @@
 
 ZeroMQMessage::ZeroMQMessage()
 {
-  int rc = zmq_msg_init(&msg);
+  const int rc = zmq_msg_init(&msg);
   ZEROMQ_ASSERT(rc == 0);
 }
 

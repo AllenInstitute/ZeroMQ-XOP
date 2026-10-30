@@ -39,7 +39,7 @@ void WorkerThread()
     {
       // check if stop is requested
       {
-        LockGuard lock(threadShouldFinishMutex);
+        const LockGuard lock(threadShouldFinishMutex);
         if(threadShouldFinish)
         {
           DEBUG_OUTPUT("Exiting");
@@ -91,7 +91,7 @@ void WorkerThread()
 
 void HeartbeatPublisher::Start()
 {
-  LockGuardRec lock(threadMutex);
+  const LockGuardRec lock(threadMutex);
 
   if(m_thread.joinable())
   {
@@ -102,7 +102,7 @@ void HeartbeatPublisher::Start()
   DEBUG_OUTPUT("Trying to start.");
 
   {
-    LockGuard innerLock(threadShouldFinishMutex);
+    const LockGuard innerLock(threadShouldFinishMutex);
     threadShouldFinish = false;
   }
 
@@ -112,7 +112,7 @@ void HeartbeatPublisher::Start()
 
 void HeartbeatPublisher::Stop()
 {
-  LockGuardRec lock(threadMutex);
+  const LockGuardRec lock(threadMutex);
 
   if(!m_thread.joinable())
   {
@@ -122,7 +122,7 @@ void HeartbeatPublisher::Stop()
   DEBUG_OUTPUT("Shutting down.");
 
   {
-    LockGuard innerLock(threadShouldFinishMutex);
+    const LockGuard innerLock(threadShouldFinishMutex);
     threadShouldFinish = true;
   }
 
@@ -133,7 +133,7 @@ void HeartbeatPublisher::Stop()
 
 bool HeartbeatPublisher::IsRunning() const
 {
-  LockGuardRec lock(threadMutex);
+  const LockGuardRec lock(threadMutex);
 
   return m_thread.joinable();
 }

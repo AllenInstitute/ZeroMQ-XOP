@@ -66,7 +66,7 @@ SendStorageVec GatherPubData(waveHndl containerWaveHandle)
       CheckWaveDimension(wv, {1}, "Text waves need to be single point only");
 
       std::vector<IndexInt> dims(MAX_DIMENSIONS, 0);
-      std::string elem = GetWaveElement<std::string>(wv, dims);
+      const std::string elem = GetWaveElement<std::string>(wv, dims);
 
       sendStorage.emplace_back(SendStorage(elem));
 
@@ -143,8 +143,8 @@ void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,
 
       isTextWave = (waveType == TEXT_WAVE_TYPE);
 
-      wv      = MakeFreeWave(dims, waveType);
-      int ret = HoldWave(wv);
+      wv            = MakeFreeWave(dims, waveType);
+      const int ret = HoldWave(wv);
       ASSERT(ret == 0);
 
       SetWaveElement<waveHndl>(containerWaveHandle, containerDims, wv);

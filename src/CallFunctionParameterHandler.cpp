@@ -214,7 +214,7 @@ void *CallFunctionParameterHandler::GetReturnValueStorage()
 
 CallFunctionParameterHandler::~CallFunctionParameterHandler()
 {
-  unsigned char *src = GetParameterValueStorage();
+  const unsigned char *src = GetParameterValueStorage();
   IgorTypeUnion u{};
 
   for(size_t i = 0; i < m_paramTypes.size(); i++)
