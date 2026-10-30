@@ -178,7 +178,8 @@ public:
     auto bytesToWrite   = static_cast<SInt64>(str.size());
     SInt64 bytesWritten = 0;
     int rc = XOPWriteFile64(fileRef, bytesToWrite, str.c_str(), &bytesWritten);
-    ASSERT(rc == 0 && bytesWritten == bytesToWrite);
+    ASSERT(rc == 0);
+    ASSERT(bytesWritten == bytesToWrite);
 
     rc = XOPCloseFile(fileRef);
     ASSERT(rc == 0);
