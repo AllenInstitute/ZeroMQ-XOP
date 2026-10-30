@@ -16,7 +16,7 @@ public:
   friend struct fmt::formatter<CallFunctionOperation>;
 
   // Return the Igor history outputted during the function call
-  std::string GetHistoryDuringCall() const;
+  [[nodiscard]] std::string GetHistoryDuringCall() const;
 
 private:
   std::string m_name;

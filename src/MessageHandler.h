@@ -22,7 +22,7 @@ public:
   /// Discard the requests and replies of the current connections, called
   /// when the connections are closed
   void DiscardQueuedMessages();
-  bool IsRunning() const;
+  [[nodiscard]] bool IsRunning() const;
 
 private:
   MessageHandler() = default;
