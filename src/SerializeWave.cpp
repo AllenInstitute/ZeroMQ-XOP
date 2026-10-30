@@ -46,11 +46,11 @@ std::string GetWaveTypeString(int waveType)
 {
   std::string result;
 
-  const auto isComplex = waveType & NT_CMPLX;
-  waveType &= ~NT_CMPLX;
+  const auto isComplex = IsBitSet(waveType, NT_CMPLX);
+  waveType             = ClearBit(waveType, NT_CMPLX);
 
-  const auto isUnsigned = waveType & NT_UNSIGNED;
-  waveType &= ~NT_UNSIGNED;
+  const auto isUnsigned = IsBitSet(waveType, NT_UNSIGNED);
+  waveType              = ClearBit(waveType, NT_UNSIGNED);
 
   switch(waveType)
   {
@@ -323,8 +323,8 @@ std::string WaveToStringImpl(int waveType, waveHndl waveHandle, CountInt offset)
 
 std::string WaveToString(int waveType, waveHndl waveHandle)
 {
-  const auto isComplex = waveType & NT_CMPLX;
-  waveType &= ~NT_CMPLX;
+  const auto isComplex = IsBitSet(waveType, NT_CMPLX);
+  waveType             = ClearBit(waveType, NT_CMPLX);
 
   if(!isComplex)
   {

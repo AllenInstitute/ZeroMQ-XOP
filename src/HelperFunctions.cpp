@@ -90,17 +90,21 @@ void SetDimensionLabels(waveHndl waveHandle, int Dimension,
 
 bool IsBitSet(int val, int bit)
 {
-  return (val & bit) == bit;
+  const auto ubit = static_cast<unsigned int>(bit);
+
+  return (static_cast<unsigned int>(val) & ubit) == ubit;
 }
 
 int ClearBit(int val, int bit)
 {
-  return val & ~bit;
+  return static_cast<int>(static_cast<unsigned int>(val) &
+                          ~static_cast<unsigned int>(bit));
 }
 
 int SetBit(int val, int bit)
 {
-  return val | bit;
+  return static_cast<int>(static_cast<unsigned int>(val) |
+                          static_cast<unsigned int>(bit));
 }
 
 template <>
@@ -186,7 +190,7 @@ void ApplyFlags(double flags)
 
   DEBUG_OUTPUT("git revision {}", GIT_REVISION);
 
-  if((val & ZeroMQ_SET_FLAGS::DEFAULT) == ZeroMQ_SET_FLAGS::DEFAULT)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::DEFAULT))
   {
     GlobalData::Instance().SetDebugFlag(false);
     GlobalData::Instance().SetRecvBusyWaitingFlag(true);
@@ -197,33 +201,31 @@ void ApplyFlags(double flags)
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::DEBUG) == ZeroMQ_SET_FLAGS::DEBUG)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::DEBUG))
   {
     GlobalData::Instance().SetDebugFlag(true);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::IPV6) == ZeroMQ_SET_FLAGS::IPV6)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::IPV6))
   {
     ToggleIPV6Support(true);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::NO_RECV_BUSY_WAITING) ==
-     ZeroMQ_SET_FLAGS::NO_RECV_BUSY_WAITING)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::NO_RECV_BUSY_WAITING))
   {
     GlobalData::Instance().SetRecvBusyWaitingFlag(false);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::LOGGING) == ZeroMQ_SET_FLAGS::LOGGING)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::LOGGING))
   {
     GlobalData::Instance().SetLoggingFlag(true);
     numMatches++;
   }
 
-  if((val & ZeroMQ_SET_FLAGS::INTERCEPTOR_FUNCTION) ==
-     ZeroMQ_SET_FLAGS::INTERCEPTOR_FUNCTION)
+  if(IsBitSet(val, ZeroMQ_SET_FLAGS::INTERCEPTOR_FUNCTION))
   {
     GlobalData::Instance().SetInterceptorFlag(true);
     numMatches++;
