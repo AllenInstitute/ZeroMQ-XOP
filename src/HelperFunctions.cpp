@@ -780,17 +780,24 @@ std::string GetHeader(OutputMode mode, const char *func, int line)
 }
 
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
-          fmt::format_args args)
+          fmt::format_args args) noexcept
 {
-  if(mode == OutputMode::Debug && !GlobalData::Instance().GetDebugFlag())
+  try
   {
-    return;
+    if(mode == OutputMode::Debug && !GlobalData::Instance().GetDebugFlag())
+    {
+      return;
+    }
+
+    const auto header = GetHeader(mode, func, line);
+
+    OutputToHistory_TS(header + fmt::vformat(format, args),
+                       MapOutputModeToExperimentModification(mode));
   }
-
-  const auto header = GetHeader(mode, func, line);
-
-  OutputToHistory_TS(header + fmt::vformat(format, args),
-                     MapOutputModeToExperimentModification(mode));
+  catch(...) // NOLINT(bugprone-empty-catch)
+  {
+    // the output itself failed, there is nowhere left to report it
+  }
 }
 
 int CreateDirectory(const std::string &path)

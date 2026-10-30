@@ -183,6 +183,9 @@ void WorkerThread()
   zmq_msg_close(&payloadMsg);
 }
 
+// FMT_STRING checks the format string at compile time, the format_error
+// thrown when checking it at runtime can not happen
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void CallAndQueueReply(const IncomingRequest &incoming) noexcept
 {
   try
@@ -307,7 +310,17 @@ void MessageHandler::HandleAllQueuedMessages()
   incomingQueue.apply_to_all(CallAndQueueReply);
 }
 
+// FMT_STRING checks the format string at compile time, the format_error
+// thrown when checking it at runtime can not happen
+// NOLINTNEXTLINE(bugprone-exception-escape)
 MessageHandler::~MessageHandler()
 {
-  Stop();
+  try
+  {
+    Stop();
+  }
+  catch(const std::exception &e)
+  {
+    EMERGENCY_OUTPUT("Could not stop the thread: {}", e.what());
+  }
 }

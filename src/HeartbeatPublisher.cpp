@@ -138,7 +138,17 @@ bool HeartbeatPublisher::IsRunning() const
   return m_thread.joinable();
 }
 
+// FMT_STRING checks the format string at compile time, the format_error
+// thrown when checking it at runtime can not happen
+// NOLINTNEXTLINE(bugprone-exception-escape)
 HeartbeatPublisher::~HeartbeatPublisher()
 {
-  Stop();
+  try
+  {
+    Stop();
+  }
+  catch(const std::exception &e)
+  {
+    EMERGENCY_OUTPUT("Could not stop the thread: {}", e.what());
+  }
 }

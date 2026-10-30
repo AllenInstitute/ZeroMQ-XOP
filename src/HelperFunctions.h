@@ -239,12 +239,13 @@ enum class OutputMode : std::uint8_t
   Normal
 };
 
+/// Never throws, so that it can be used in destructors and catch handlers
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
-          fmt::format_args args);
+          fmt::format_args args) noexcept;
 
 template <typename... T>
 void xop_logging(OutputMode mode, const char *func, int line,
-                 fmt::format_string<T...> format, T &&...args)
+                 fmt::format_string<T...> format, T &&...args) noexcept
 {
   vlog(mode, func, line, format, fmt::make_format_args(args...));
 }
