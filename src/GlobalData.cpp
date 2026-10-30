@@ -100,9 +100,8 @@ AllSocketTypesArray GetAllSocketTypes()
 
 GlobalData::GlobalData()
     : m_debugging(false), m_busyWaiting(true), m_logging(false),
-      m_interceptor(false)
+      m_interceptor(false), zmq_context(zmq_ctx_new())
 {
-  zmq_context = zmq_ctx_new();
   ZEROMQ_ASSERT(zmq_context != nullptr);
 }
 
