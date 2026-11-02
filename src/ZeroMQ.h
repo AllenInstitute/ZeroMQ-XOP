@@ -69,8 +69,8 @@ using RequestInterfacePtr = std::shared_ptr<RequestInterface>;
 
 using StringVector = std::vector<std::string>;
 
-using LockGuard    = std::lock_guard<std::mutex>;
-using LockGuardRec = std::lock_guard<std::recursive_mutex>;
+using LockGuard    = std::scoped_lock<std::mutex>;
+using LockGuardRec = std::scoped_lock<std::recursive_mutex>;
 
 class SendStorage;
 using SendStorageVec = std::vector<SendStorage>;
