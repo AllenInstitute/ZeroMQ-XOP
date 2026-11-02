@@ -16,3 +16,6 @@
 [submodule "src/SafeInt"]
 	path = src/SafeInt
 	url = https://github.com/dcleblanc/SafeInt
+[submodule "src/is_utf8"]
+	path = src/is_utf8
+	url = https://github.com/simdutf/is_utf8
