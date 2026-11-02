@@ -228,6 +228,8 @@ CallFunctionParameterHandler::~CallFunctionParameterHandler()
         WMDisposeHandle(value.stringHandle);
       }
       break;
+    default:
+      break;
     }
 
     src += m_paramSizesInBytes[i];
