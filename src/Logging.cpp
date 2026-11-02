@@ -1,5 +1,6 @@
 #include "ZeroMQ.h"
 
+#include <is_utf8.h>
 #include <optional>
 
 namespace
@@ -31,16 +32,10 @@ std::string ToLoggableIdentity(const std::string &identity)
 {
   ASSERT(!identity.empty());
 
-  if(identity.front() != '\0')
+  // a generated identity can be valid UTF-8, only the zero byte marks it
+  if(identity.front() != '\0' && is_utf8(identity.data(), identity.size()))
   {
-    try
-    {
-      json(identity).dump();
-      return identity;
-    }
-    catch(const json::type_error &)
-    {
-    }
+    return identity;
   }
 
   const auto *bytes = reinterpret_cast<const unsigned char *>(identity.data());

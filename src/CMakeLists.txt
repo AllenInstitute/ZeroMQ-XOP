@@ -248,6 +248,11 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 
+# The CMakeLists.txt of is_utf8 also builds its benchmarks and adds warning
+# options to the targets using it
+ADD_LIBRARY(is_utf8 STATIC is_utf8/src/is_utf8.cpp)
+TARGET_INCLUDE_DIRECTORIES(is_utf8 SYSTEM PUBLIC ${CMAKE_SOURCE_DIR}/is_utf8/include)
+
 IF(APPLE)
 
   # heavily inspired by https://github.com/Kitware/CMake/blob/master/Tests/CFBundleTest/CMakeLists.txt
@@ -432,6 +437,8 @@ TARGET_LINK_LIBRARIES(${libname} PRIVATE nlohmann_json::nlohmann_json)
 ADD_SUBDIRECTORY(fmt EXCLUDE_FROM_ALL)
 
 TARGET_LINK_LIBRARIES(${libname} PRIVATE fmt-header-only)
+
+TARGET_LINK_LIBRARIES(${libname} PRIVATE is_utf8)
 
 # ADD_SUBDIRECTORY(... SYSTEM) requires CMake 3.25
 FOREACH(target IN ITEMS nlohmann_json fmt-header-only)

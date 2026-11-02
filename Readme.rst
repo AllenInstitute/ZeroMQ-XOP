@@ -532,6 +532,7 @@ zeromq-xop also depends on a couple of additional repositories, which are includ
 
 - `FMT <https://github.com/fmtlib/fmt>`__ formatting library.
 - `JSON for Modern C++ <https://github.com/nlohmann/json>`__ JSON encoding/decoding in C++.
+- `is_utf8 <https://github.com/simdutf/is_utf8>`__ UTF-8 validation.
 - `Caseymcc's CreateLaunchers (from Rylie's CMake Modules Collection) <https://github.com/rpavlik/cmake-modules>`__ helper modules used by the build system.
 
 Lastly, unit tests requires setup of the following (with instructions on doing so further below):
