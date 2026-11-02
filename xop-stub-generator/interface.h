@@ -86,6 +86,12 @@ THREADSAFE variable zeromq_client_connect(string remotePoint);
 /// Receive a message as the `DEALER` socket
 ///
 /// Implemented using a blocking wait albeit abortable from within Igor Pro.
+/// With `ZeroMQ_SET_FLAGS_NOBUSYWAITRECV` it returns an empty string if no
+/// message is available, so that the caller can poll with an own timeout.
+///
+/// A reply which arrives after the caller stopped waiting for it, e.g. after
+/// an abort, is returned by the next call. The `messageID` of the requests
+/// allows to match the replies.
 ///
 /// @return received message
 THREADSAFE string zeromq_client_recv();
@@ -149,6 +155,12 @@ THREADSAFE variable zeromq_sub_recv_multi(WAVEWAVE payload);
 ///
 /// The XOP implements a threaded message handler. This message handler can be
 /// started and stopped with the following commands.
+///
+/// The message handler only answers messages with the frames identity, empty
+/// and payload. For other messages it prints an error and sends no reply.
+///
+/// If a client disconnected before its reply is sent, e.g. because it gave up
+/// waiting, the reply is discarded and an error is printed.
 /// @{
 variable zeromq_handler_start();
 
