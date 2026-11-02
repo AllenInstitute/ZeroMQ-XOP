@@ -94,17 +94,21 @@ void SetDimensionLabels(waveHndl waveHandle, int Dimension,
 
 bool IsBitSet(int val, int bit)
 {
-  return (val & bit) == bit;
+  const auto ubit = static_cast<unsigned int>(bit);
+
+  return (static_cast<unsigned int>(val) & ubit) == ubit;
 }
 
 int ClearBit(int val, int bit)
 {
-  return val & ~bit;
+  return static_cast<int>(static_cast<unsigned int>(val) &
+                          ~static_cast<unsigned int>(bit));
 }
 
 int SetBit(int val, int bit)
 {
-  return val | bit;
+  return static_cast<int>(static_cast<unsigned int>(val) |
+                          static_cast<unsigned int>(bit));
 }
 
 template <>
