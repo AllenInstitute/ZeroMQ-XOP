@@ -927,6 +927,7 @@ Handle GetHandleFromString(const std::string &str)
   }
   if(PutCStringInHandle(str.c_str(), handle))
   {
+    WMDisposeHandle(handle);
     return nullptr;
   }
   return handle;
