@@ -230,8 +230,11 @@ enum class OutputMode : std::uint8_t
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
           fmt::format_args args) noexcept;
 
+// The forwarding references follow the type erasure example of fmt,
+// fmt::make_format_args() only needs lvalues so the arguments are not forwarded
 template <typename... T>
 void xop_logging(OutputMode mode, const char *func, int line,
+                 // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
                  fmt::format_string<T...> format, T &&...args) noexcept
 {
   vlog(mode, func, line, format, fmt::make_format_args(args...));
