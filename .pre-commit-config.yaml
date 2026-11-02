@@ -2,13 +2,13 @@
 # See https://pre-commit.com/hooks.html for more hooks
 exclude: |
          (?x) # verbose re
-         ( # start alternations
-            output
+         ^( # start alternations
+            output/
             |LICENSE.txt
             |CONTRIBUTING.md
             |utf
-            |help
-            |XOPSupport
+            |help/
+            |XOPSupport/
             |.*itx
          ) # end alternations
 repos:
