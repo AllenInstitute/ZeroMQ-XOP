@@ -21,9 +21,15 @@ std::recursive_mutex threadShouldFinishMutex;
 /// an older generation belong to clients of closed connections
 std::atomic<uint64_t> connectionGeneration{0};
 
+/// A request, or the error reply to a message which is not a valid request
+///
+/// The error replies also go through the queue to keep the order of the
+/// replies.
 struct IncomingRequest
 {
   RequestInterfacePtr request;
+  std::string identity;
+  std::string errorReply;
   uint64_t generation;
 };
 
@@ -37,6 +43,14 @@ struct OutgoingReply
 };
 
 ConcurrentQueue<OutgoingReply> outgoingQueue;
+
+void QueueErrorReply(const std::string &identity, const IgorException &e)
+{
+  const json reply = e;
+
+  incomingQueue.push(
+      {nullptr, identity, reply.dump(DEFAULT_INDENT), connectionGeneration});
+}
 
 void DrainOutgoingReplies()
 {
@@ -121,7 +135,7 @@ void WorkerThread()
         {
           const auto payload = CreateStringFromZMsg(&payloadMsg);
           auto req           = RequestInterface::Create(identity, payload);
-          incomingQueue.push({req, connectionGeneration});
+          incomingQueue.push({req, identity, "", connectionGeneration});
         }
         catch(const std::bad_alloc &)
         {
@@ -130,10 +144,7 @@ void WorkerThread()
       }
       catch(const IgorException &e)
       {
-        const json reply = e;
-        rc = ZeroMQServerSend(identity, reply.dump(DEFAULT_INDENT));
-
-        DEBUG_OUTPUT("ZeroMQSendAsServer returned {}", rc);
+        QueueErrorReply(identity, e);
       }
     }
     catch(const std::exception &e)
@@ -162,6 +173,13 @@ void CallAndQueueReply(const IncomingRequest &incoming) noexcept
       if(incoming.generation != connectionGeneration)
       {
         DEBUG_OUTPUT("Discarding the request of a closed connection");
+        return;
+      }
+
+      if(!incoming.request)
+      {
+        outgoingQueue.push(
+            {incoming.identity, incoming.errorReply, incoming.generation});
         return;
       }
 
