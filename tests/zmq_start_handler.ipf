@@ -133,3 +133,38 @@ Function RepeatedStartStop()
 
 	PASS()
 End
+
+// The error reply to an invalid request must not overtake the reply to a
+// request which was sent before it
+Function KeepsTheOrderOfErrorReplies()
+
+	variable ret, start, errorValue
+	string replyMessage
+
+	string msg = "{\"version\" : 1, \"CallFunction\" : {\"name\" : \"FunctionToCall\"}}"
+
+	zeromq_stop()
+	zeromq_set(ZeroMQ_SET_FLAGS_DEFAULT)
+	zeromq_server_bind("tcp://127.0.0.1:5555")
+	zeromq_client_connect("tcp://127.0.0.1:5555")
+
+	ret = zeromq_handler_start()
+	CHECK_EQUAL_VAR(ret, 0)
+
+	zeromq_client_send(msg)
+	zeromq_client_send("not a JSON document")
+
+	// give the message handler time to receive both messages, there are no
+	// IDLE events while this function runs
+	start = stopmstimer(-2)
+	do
+	while(stopmstimer(-2) - start < 0.5e6)
+
+	replyMessage = zeromq_client_recv()
+	errorValue   = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_SUCCESS)
+
+	replyMessage = zeromq_client_recv()
+	errorValue   = ExtractErrorValue(replyMessage)
+	CHECK_EQUAL_VAR(errorValue, REQ_INVALID_JSON_OBJECT)
+End

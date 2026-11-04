@@ -94,10 +94,10 @@ private:
   SocketTypeData m_client, m_server, m_pub, m_sub;
   std::recursive_mutex m_settingsMutex;
 
-  bool m_debugging;
-  bool m_busyWaiting;
-  bool m_logging;
-  bool m_interceptor;
+  std::atomic<bool> m_debugging;
+  std::atomic<bool> m_busyWaiting;
+  std::atomic<bool> m_logging;
+  std::atomic<bool> m_interceptor;
 
   ConcurrentQueue<OutputMessagePtr> m_queue;
   std::unique_ptr<Logging> m_loggingSink;

@@ -3,6 +3,7 @@
 #include "RequestInterface.h"
 
 #include <chrono>
+#include <condition_variable>
 #include <thread>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
@@ -14,7 +15,19 @@ namespace
 using namespace std::chrono_literals;
 std::recursive_mutex threadMutex;
 bool threadShouldFinish;
-std::recursive_mutex threadShouldFinishMutex;
+std::mutex threadShouldFinishMutex;
+std::condition_variable threadShouldFinishCondition;
+
+/// Wait until the next heartbeat is due
+///
+/// @return true if the thread should finish
+bool WaitForNextHeartbeat()
+{
+  std::unique_lock<std::mutex> lock(threadShouldFinishMutex);
+
+  return threadShouldFinishCondition.wait_for(lock, 5s, []
+                                              { return threadShouldFinish; });
+}
 
 void WorkerThread()
 {
@@ -46,11 +59,8 @@ void WorkerThread()
         {
           EMERGENCY_OUTPUT(
               "Error sending heartbeat publisher message with rc = {}", rc);
-          continue;
         }
       }
-
-      std::this_thread::sleep_for(5s);
     }
     catch(const IgorException &e)
     {
@@ -68,6 +78,12 @@ void WorkerThread()
     {
       EMERGENCY_OUTPUT("Caught exception. This must NOT happen!");
     }
+
+    if(WaitForNextHeartbeat())
+    {
+      DEBUG_OUTPUT("Exiting");
+      break;
+    }
   }
 }
 
@@ -75,7 +91,7 @@ void WorkerThread()
 
 void HeartbeatPublisher::Start()
 {
-  LockGuard lock(threadMutex);
+  LockGuardRec lock(threadMutex);
 
   if(m_thread.joinable())
   {
@@ -96,7 +112,7 @@ void HeartbeatPublisher::Start()
 
 void HeartbeatPublisher::Stop()
 {
-  LockGuard lock(threadMutex);
+  LockGuardRec lock(threadMutex);
 
   if(!m_thread.joinable())
   {
@@ -110,12 +126,14 @@ void HeartbeatPublisher::Stop()
     threadShouldFinish = true;
   }
 
+  threadShouldFinishCondition.notify_all();
+
   m_thread.join();
 }
 
 bool HeartbeatPublisher::IsRunning() const
 {
-  LockGuard lock(threadMutex);
+  LockGuardRec lock(threadMutex);
 
   return m_thread.joinable();
 }

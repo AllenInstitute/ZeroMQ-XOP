@@ -2,6 +2,7 @@
 #include "MessageHandler.h"
 #include "RequestInterface.h"
 
+#include <atomic>
 #include <chrono>
 #include <thread>
 
@@ -13,17 +14,43 @@ namespace
 
 using namespace std::chrono_literals;
 std::recursive_mutex threadMutex;
-ConcurrentQueue<RequestInterfacePtr> incomingQueue;
 bool threadShouldFinish;
 std::recursive_mutex threadShouldFinishMutex;
+
+/// Incremented when the connections are closed, requests and replies of
+/// an older generation belong to clients of closed connections
+std::atomic<uint64_t> connectionGeneration{0};
+
+/// A request, or the error reply to a message which is not a valid request
+///
+/// The error replies also go through the queue to keep the order of the
+/// replies.
+struct IncomingRequest
+{
+  RequestInterfacePtr request;
+  std::string identity;
+  std::string errorReply;
+  uint64_t generation;
+};
+
+ConcurrentQueue<IncomingRequest> incomingQueue;
 
 struct OutgoingReply
 {
   std::string identity;
   std::string message;
+  uint64_t generation;
 };
 
 ConcurrentQueue<OutgoingReply> outgoingQueue;
+
+void QueueErrorReply(const std::string &identity, const IgorException &e)
+{
+  const json reply = e;
+
+  incomingQueue.push(
+      {nullptr, identity, reply.dump(DEFAULT_INDENT), connectionGeneration});
+}
 
 void DrainOutgoingReplies()
 {
@@ -37,6 +64,12 @@ void DrainOutgoingReplies()
       {
         try
         {
+          if(reply.generation != connectionGeneration)
+          {
+            DEBUG_OUTPUT("Discarding the reply to a closed connection");
+            return;
+          }
+
           auto rc = ZeroMQServerSend(reply.identity, reply.message);
 
           DEBUG_OUTPUT("ZeroMQServerSend returned {}", rc);
@@ -75,7 +108,7 @@ void WorkerThread()
 
       // check if stop is requested
       {
-        LockGuard lock(threadShouldFinishMutex);
+        LockGuardRec lock(threadShouldFinishMutex);
         if(threadShouldFinish)
         {
           DEBUG_OUTPUT("Exiting");
@@ -102,7 +135,7 @@ void WorkerThread()
         {
           const auto payload = CreateStringFromZMsg(&payloadMsg);
           auto req           = RequestInterface::Create(identity, payload);
-          incomingQueue.push(req);
+          incomingQueue.push({req, identity, "", connectionGeneration});
         }
         catch(const std::bad_alloc &)
         {
@@ -111,10 +144,7 @@ void WorkerThread()
       }
       catch(const IgorException &e)
       {
-        const json reply = e;
-        rc = ZeroMQServerSend(identity, reply.dump(DEFAULT_INDENT));
-
-        DEBUG_OUTPUT("ZeroMQSendAsServer returned {}", rc);
+        QueueErrorReply(identity, e);
       }
     }
     catch(const std::exception &e)
@@ -134,16 +164,38 @@ void WorkerThread()
   zmq_msg_close(&payloadMsg);
 }
 
-void CallAndQueueReply(const RequestInterfacePtr &req) noexcept
+void CallAndQueueReply(const IncomingRequest &incoming) noexcept
 {
   try
   {
     try
     {
-      auto doc     = CallIgorFunctionFromReqInterface(req);
-      auto message = doc.dump(DEFAULT_INDENT);
+      if(incoming.generation != connectionGeneration)
+      {
+        DEBUG_OUTPUT("Discarding the request of a closed connection");
+        return;
+      }
 
-      outgoingQueue.push({req->GetCallerIdentity(), message});
+      if(!incoming.request)
+      {
+        outgoingQueue.push(
+            {incoming.identity, incoming.errorReply, incoming.generation});
+        return;
+      }
+
+      const auto &req = incoming.request;
+      auto doc        = CallIgorFunctionFromReqInterface(req);
+      auto message    = doc.dump(DEFAULT_INDENT);
+
+      // the called function might have closed the connections
+      if(incoming.generation != connectionGeneration)
+      {
+        DEBUG_OUTPUT("Discarding the reply to a closed connection");
+        return;
+      }
+
+      outgoingQueue.push(
+          {req->GetCallerIdentity(), message, incoming.generation});
     }
     catch(const std::exception &e)
     {
@@ -162,7 +214,7 @@ void CallAndQueueReply(const RequestInterfacePtr &req) noexcept
 
 void MessageHandler::Start()
 {
-  LockGuard lock(threadMutex);
+  LockGuardRec lock(threadMutex);
 
   if(m_thread.joinable())
   {
@@ -179,7 +231,7 @@ void MessageHandler::Start()
   // Reset the stop flag *before* the worker thread is created, while still
   // holding threadMutex. Fixes issue #76
   {
-    LockGuard innerLock(threadShouldFinishMutex);
+    LockGuardRec innerLock(threadShouldFinishMutex);
     threadShouldFinish = false;
   }
 
@@ -191,7 +243,7 @@ void MessageHandler::Start()
 
 void MessageHandler::Stop()
 {
-  LockGuard lock(threadMutex);
+  LockGuardRec lock(threadMutex);
 
   if(!m_thread.joinable())
   {
@@ -201,16 +253,24 @@ void MessageHandler::Stop()
   DEBUG_OUTPUT("Shutting down the handler.");
 
   {
-    LockGuard innerLock(threadShouldFinishMutex);
+    LockGuardRec innerLock(threadShouldFinishMutex);
     threadShouldFinish = true;
   }
 
   m_thread.join();
 }
 
+void MessageHandler::DiscardQueuedMessages()
+{
+  connectionGeneration++;
+
+  incomingQueue.clear();
+  outgoingQueue.clear();
+}
+
 bool MessageHandler::IsRunning() const
 {
-  LockGuard lock(threadMutex);
+  LockGuardRec lock(threadMutex);
 
   return m_thread.joinable();
 }

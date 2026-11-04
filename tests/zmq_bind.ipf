@@ -185,29 +185,71 @@ Function AllowsBindingMultiplePorts([string str])
 	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(6666, TCP_V4), 1)
 End
 
-Function DoesNotAcceptLargeMessagesOnServerSocket()
+static Constant MAX_SERVER_MESSAGE_SIZE = 65536
 
-	variable err, ret, rc, i
-	string identity, reply
+static Function/S ReceiveOnServer_IGNORE(variable timeout)
+
+	variable start = stopmstimer(-2)
+	string identity
+	string msg = ""
+
+	do
+		msg = zeromq_server_recv(identity)
+		if(strlen(msg) > 0)
+			break
+		endif
+	while((stopmstimer(-2) - start) < (timeout * 1e6))
+
+	return msg
+End
+
+Function AcceptsMessagesUpToTheSizeLimitOnServerSocket()
+
+	variable ret
+	string reply
 	string msg = ""
 
 	zeromq_set(ZMQ_SET_FLAGS_DEFAULT | ZMQ_SET_FLAGS_NOBUSYWAITRECV)
 
-	rc = zeromq_server_bind("tcp://127.0.0.1:5555")
+	ret = zeromq_server_bind("tcp://127.0.0.1:5555")
 	CHECK_EQUAL_VAR(ret, 0)
-	CHECK_EQUAL_VAR(GetListeningStatus_IGNORE(5555, TCP_V4), 1)
 
 	zeromq_client_connect("tcp://127.0.0.1:5555")
 
-	msg = PadString(msg, 1e6, 0x20)
+	msg = PadString(msg, MAX_SERVER_MESSAGE_SIZE, 0x20)
 
 	zeromq_client_send(msg)
 
-	for(i = 0; i < 100; i += 1)
-		reply = zeromq_server_recv(identity)
-		CHECK_EQUAL_VAR(strlen(identity), 0)
-		CHECK_EQUAL_VAR(strlen(reply), 0)
-	endfor
+	reply = ReceiveOnServer_IGNORE(1)
+	CHECK_EQUAL_STR(reply, msg)
+End
+
+// libzmq closes the connection of a client which sends a too large message,
+// the client reconnects automatically
+Function DropsLargerMessagesOnServerSocket()
+
+	variable ret
+	string reply
+	string msg = ""
+
+	zeromq_set(ZMQ_SET_FLAGS_DEFAULT | ZMQ_SET_FLAGS_NOBUSYWAITRECV)
+
+	ret = zeromq_server_bind("tcp://127.0.0.1:5555")
+	CHECK_EQUAL_VAR(ret, 0)
+
+	zeromq_client_connect("tcp://127.0.0.1:5555")
+
+	msg = PadString(msg, MAX_SERVER_MESSAGE_SIZE + 1, 0x20)
+
+	zeromq_client_send(msg)
+
+	reply = ReceiveOnServer_IGNORE(1)
+	CHECK_EMPTY_STR(reply)
+
+	zeromq_client_send("abcd")
+
+	reply = ReceiveOnServer_IGNORE(5)
+	CHECK_EQUAL_STR(reply, "abcd")
 End
 
 Function AllowsEmptyIdentityAndPayload()

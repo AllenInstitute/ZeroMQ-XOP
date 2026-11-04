@@ -4,6 +4,8 @@
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under BSD-3-Clause.
 
+static StrConstant IDENTITY_LINE_REGEX = "^identity=zeromq xop: dealer [0-9]+-[0-9]+$"
+
 static Function/WAVE NonExistingInterceptorFunctions()
 
 	Make/T/FREE funcs = {"", "I_DONT_EXIST", "123"}
@@ -119,9 +121,14 @@ Function InterceptorIsCalledWhenEnabled()
 	replyMessage = zeromq_client_recv()
 
 	historyFull = CaptureHistory(histRef, 1)
-	history = GrepList(historyFull, "^(json|identity|mode)=", 0, "\r")
+	history = GrepList(historyFull, "^(json|mode)=", 0, "\r")
 
-	CHECK_EQUAL_STR(history, "json={\"name\":\"FunctionToCall\"}\ridentity=zeromq xop: dealer\rmode=1\rjson={\"name\":\"FunctionToCall\"}\ridentity=zeromq xop: dealer\rmode=2\r")
+	CHECK_EQUAL_STR(history, "json={\"name\":\"FunctionToCall\"}\rmode=1\rjson={\"name\":\"FunctionToCall\"}\rmode=2\r")
+
+	history = GrepList(historyFull, "^identity=", 0, "\r")
+	CHECK_EQUAL_VAR(ItemsInList(history, "\r"), 2)
+	CHECK_EQUAL_VAR(GrepString(StringFromList(0, history, "\r"), IDENTITY_LINE_REGEX), 1)
+	CHECK_EQUAL_STR(StringFromList(0, history, "\r"), StringFromList(1, history, "\r"))
 
 	history = GrepList(historyFull, "^(mode)=", 0, "\r")
 	sprintf expectedStr, "mode=%d\rmode=%d\r", ZeroMQ_INTERCEPT_BEGIN, ZeroMQ_INTERCEPT_END
@@ -179,12 +186,16 @@ Function InterceptorIsCalledWithAbortingFunction()
 	endtry
 
 	historyFull = CaptureHistory(histRef, 1)
-	history = GrepList(historyFull, "^(json|identity|mode)=", 0, "\r")
+	history = GrepList(historyFull, "^(json|mode)=", 0, "\r")
 
 	// due to an Igor Pro implementation detail
 	// we don't get a ZeroMQ_INTERCEPT_END call for the interceptor if the called function aborts
 
-	CHECK_EQUAL_STR(history, "json={\"name\":\"DoAbort_IGNORE\"}\ridentity=zeromq xop: dealer\rmode=1\r")
+	CHECK_EQUAL_STR(history, "json={\"name\":\"DoAbort_IGNORE\"}\rmode=1\r")
+
+	history = GrepList(historyFull, "^identity=", 0, "\r")
+	CHECK_EQUAL_VAR(ItemsInList(history, "\r"), 1)
+	CHECK_EQUAL_VAR(GrepString(StringFromList(0, history, "\r"), IDENTITY_LINE_REGEX), 1)
 
 	history = GrepList(historyFull, "^(mode)=", 0, "\r")
 	sprintf expectedStr, "mode=%d\r", ZeroMQ_INTERCEPT_BEGIN

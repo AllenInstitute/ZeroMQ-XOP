@@ -4,6 +4,10 @@
 #include "MessageHandlerPauseGuard.h"
 #include "RequestInterface.h"
 
+#ifdef MACIGOR
+#include <unistd.h>
+#endif // MACIGOR
+
 namespace
 {
 
@@ -235,6 +239,15 @@ void ApplyFlags(double flags)
   }
 }
 
+uint64_t GetProcessID()
+{
+#ifdef WINIGOR
+  return GetCurrentProcessId();
+#else
+  return static_cast<uint64_t>(getpid());
+#endif // WINIGOR
+}
+
 std::string GetLastEndPoint(void *s)
 {
   char buf[256];
@@ -252,6 +265,7 @@ void StopThreadsAndCloseConnections()
   MessageHandler::Instance().Stop();
   HeartbeatPublisher::Instance().Stop();
   GlobalData::Instance().CloseConnections();
+  MessageHandler::Instance().DiscardQueuedMessages();
 }
 
 void ToggleIPV6Support(bool enable)

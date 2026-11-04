@@ -16,8 +16,10 @@
 ///   - DEALER/ROUTER: ZMQ_RCVTIMEO = 1
 ///   - DEALER/ROUTER: ZMQ_LINGER = 0
 ///   - ROUTER: ZMQ_ROUTER_MANDATORY = 1
-///   - ROUTER: ZMQ_MAXMSGSIZE = 1024 byte
-///   - DEALER: ZMQ_IDENTITY non-empty string
+///   - ROUTER: ZMQ_ROUTER_HANDOVER = 1
+///   - ROUTER: ZMQ_MAXMSGSIZE = 65536 bytes, see zeromq_server_bind()
+///   - DEALER: ZMQ_IDENTITY "zeromq xop: dealer $pid-$counter", unique for
+///     every socket
 /// - For compatibility reasons with the REQ socket, DEALER sockets have to
 ///   always send two frames: An empty one and one with the payload.
 
@@ -41,6 +43,11 @@ THREADSAFE variable zeromq_set(variable flags);
 ///                   `tcp://127.0.0.1:5670` should be used, the TCP/IP port
 ///                   must be > 1024 and unused, 5670 is a good default choice
 ///                   [standard port for FileMQ]
+///
+/// The server accepts messages of up to 65536 bytes (64 KiB). libzmq closes
+/// the connection of a client which sends a larger message: the message is
+/// neither received nor answered, and no error is reported. The client
+/// reconnects automatically, so its later messages are received again.
 THREADSAFE variable zeromq_server_bind(string localPoint);
 
 /// Send a messsage as the `ROUTER` socket
@@ -62,6 +69,11 @@ THREADSAFE string zeromq_server_recv(string *identity);
 /// Send a messsage as the `DEALER` socket
 ///
 /// @param msg      Message to send
+///
+/// A server of this XOP drops messages larger than 65536 bytes without a
+/// reply, see zeromq_server_bind(). With busy waiting zeromq_client_recv()
+/// then waits forever, use `ZeroMQ_SET_FLAGS_NOBUSYWAITRECV` to poll with an
+/// own timeout instead.
 THREADSAFE variable zeromq_client_send(string msg);
 
 /// @brief Connect to a ZMQ server, e.g. a different Igor instance running as a
@@ -74,6 +86,12 @@ THREADSAFE variable zeromq_client_connect(string remotePoint);
 /// Receive a message as the `DEALER` socket
 ///
 /// Implemented using a blocking wait albeit abortable from within Igor Pro.
+/// With `ZeroMQ_SET_FLAGS_NOBUSYWAITRECV` it returns an empty string if no
+/// message is available, so that the caller can poll with an own timeout.
+///
+/// A reply which arrives after the caller stopped waiting for it, e.g. after
+/// an abort, is returned by the next call. The `messageID` of the requests
+/// allows to match the replies.
 ///
 /// @return received message
 THREADSAFE string zeromq_client_recv();
@@ -137,6 +155,12 @@ THREADSAFE variable zeromq_sub_recv_multi(WAVEWAVE payload);
 ///
 /// The XOP implements a threaded message handler. This message handler can be
 /// started and stopped with the following commands.
+///
+/// The message handler only answers messages with the frames identity, empty
+/// and payload. For other messages it prints an error and sends no reply.
+///
+/// If a client disconnected before its reply is sent, e.g. because it gave up
+/// waiting, the reply is discarded and an error is printed.
 /// @{
 variable zeromq_handler_start();
 
