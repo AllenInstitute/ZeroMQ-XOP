@@ -9,12 +9,14 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
+/// The values are the ones of the ZMQ_SOCKET_TYPE_* constants in
+/// ZeroMQ_Interop.ipf
 enum class SocketTypes
 {
-  Client,
-  Server,
-  Publisher,
-  Subscriber
+  Client     = 1,
+  Server     = 2,
+  Publisher  = 3,
+  Subscriber = 4
 };
 
 using AllSocketTypesArray = std::array<SocketTypes, 4>;
@@ -50,6 +52,7 @@ public:
   void CloseConnections();
   void AddToListOfBindsOrConnections(const std::string &localPoint,
                                      SocketTypes st);
+  std::vector<std::string> GetListOfBindsOrConnections(SocketTypes st);
   ConcurrentQueue<OutputMessagePtr> &GetXOPNoticeQueue();
 
   std::recursive_mutex &GetMutex(SocketTypes st);
