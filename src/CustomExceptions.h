@@ -12,9 +12,8 @@
   {                                                                            \
     throw IgorException(                                                       \
         INTERNAL_ERROR,                                                        \
-        fmt::format(                                                           \
-            FMT_STRING("The assertion in {} line {} file {} failed\r"),        \
-            __func__, __LINE__, __FILE__));                                    \
+        fmt::format(FMT_STRING("The assertion in {} line {} file {} failed"),  \
+                    __func__, __LINE__, __FILE__));                            \
   }
 
 #define ZEROMQ_ASSERT_DETAILS(err)                                             \
@@ -29,7 +28,7 @@
     auto err = zmq_errno();                                                    \
     throw IgorException(                                                       \
         INVALID_ARG,                                                           \
-        fmt::format(FMT_STRING("ZeroMQ error: {}\r"), zmq_strerror(err)),      \
+        fmt::format(FMT_STRING("ZeroMQ error: {}"), zmq_strerror(err)),        \
         ZEROMQ_ASSERT_DETAILS(err));                                           \
   }
 
@@ -38,7 +37,7 @@
   {                                                                            \
     auto err = zmq_errno();                                                    \
     throw IgorException(INVALID_ARG,                                           \
-                        fmt::format(FMT_STRING("ZeroMQ error for {}: {}\r"),   \
+                        fmt::format(FMT_STRING("ZeroMQ error for {}: {}"),     \
                                     endpoint, zmq_strerror(err)),              \
                         ZEROMQ_ASSERT_DETAILS(err));                           \
   }

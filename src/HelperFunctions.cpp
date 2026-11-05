@@ -190,8 +190,7 @@ void ApplyFlags(double flags)
   {
     throw IgorException(
         UNKNOWN_SET_FLAG,
-        fmt::format("zeromq_set: The flag value {} must be positive.\r",
-                    flags));
+        fmt::format("zeromq_set: The flag value {} must be positive.", flags));
   }
 
   DEBUG_OUTPUT("ZMQ Library Version {}.{}.{}", ZMQ_VERSION_MAJOR,
@@ -243,7 +242,7 @@ void ApplyFlags(double flags)
   {
     throw IgorException(
         UNKNOWN_SET_FLAG,
-        fmt::format("zeromq_set: The flag {} is unknown.\r", flags));
+        fmt::format("zeromq_set: The flag {} is unknown.", flags));
   }
 }
 
