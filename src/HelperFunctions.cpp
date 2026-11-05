@@ -901,7 +901,7 @@ void DoBindOrConnect(Handle &handle, SocketTypes st)
     break;
   }
 
-  ZEROMQ_ASSERT(rc == 0);
+  ZEROMQ_ASSERT_ENDPOINT(rc == 0, point);
 
   DEBUG_OUTPUT("type={}, point={}, rc={}", st, point, rc);
   GlobalData::Instance().AddToListOfBindsOrConnections(

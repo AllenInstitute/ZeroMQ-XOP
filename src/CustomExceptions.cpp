@@ -13,7 +13,13 @@ IgorException::IgorException(int errorCode) : IgorException(errorCode, "")
 }
 
 IgorException::IgorException(int errorCode, const std::string &errorMessage)
-    : m_errorCode(errorCode), m_message(errorMessage)
+    : IgorException(errorCode, errorMessage, "")
+{
+}
+
+IgorException::IgorException(int errorCode, const std::string &errorMessage,
+                             const std::string &details)
+    : m_errorCode(errorCode), m_message(errorMessage), m_details(details)
 {
 }
 
@@ -29,8 +35,18 @@ int IgorException::GetErrorCode() const
   return m_errorCode;
 }
 
+const char *IgorException::GetDetails() const noexcept
+{
+  return m_details.what();
+}
+
 int IgorException::HandleException() const
 {
+  if(GetDetails()[0] != '\0')
+  {
+    DEBUG_OUTPUT("{}", GetDetails());
+  }
+
   NORMAL_OUTPUT("{}", what());
 
   return m_errorCode;
