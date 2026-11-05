@@ -3,8 +3,8 @@
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 #ifdef MACIGOR
 #include <sys/stat.h>
@@ -19,7 +19,7 @@
 #pragma clang diagnostic ignored "-Wdouble-promotion"
 #endif
 
-#include "SafeInt/SafeInt.hpp"
+#include <SafeInt.hpp>
 
 #ifdef MACIGOR64
 #pragma clang diagnostic pop
@@ -115,7 +115,7 @@ std::string GetStringFromHandle(Handle strHandle);
 
 std::string GetStringFromHandleWithDispose(Handle strHandle);
 
-void SetDimensionLabels(waveHndl h, int Dimension,
+void SetDimensionLabels(waveHndl waveHandle, int Dimension,
                         const std::vector<std::string> &dimLabels);
 
 void ApplyFlags(double flags);
@@ -123,21 +123,18 @@ void ApplyFlags(double flags);
 namespace ZeroMQ_SET_FLAGS
 {
 
-enum ZeroMQ_SET_FLAGS
-{
-  DEFAULT              = 1,
-  DEBUG                = 2,
-  IPV6                 = 4,
-  NO_RECV_BUSY_WAITING = 8,
-  LOGGING              = 16,
-  INTERCEPTOR_FUNCTION = 32
-};
-}
+constexpr int DEFAULT              = 1;
+constexpr int DEBUG                = 2;
+constexpr int IPV6                 = 4;
+constexpr int NO_RECV_BUSY_WAITING = 8;
+constexpr int LOGGING              = 16;
+constexpr int INTERCEPTOR_FUNCTION = 32;
+} // namespace ZeroMQ_SET_FLAGS
 
 /// Return the ID of the Igor Pro process
 uint64_t GetProcessID();
 
-std::string GetLastEndPoint(void *s);
+std::string GetLastEndPoint(void *socket);
 void ToggleIPV6Support(bool enable);
 
 /// @brief Stops the message handler and the heartbeat publisher and closes
@@ -163,7 +160,9 @@ struct GetFormatString<double, withComma>
 {
   std::string operator()() const
   {
-    static_assert(std::numeric_limits<double>::digits10 == 15,
+    // the precision of the format strings
+    constexpr int precision = 15;
+    static_assert(std::numeric_limits<double>::digits10 == precision,
                   "Unexpected double precision");
 
     if(withComma)
@@ -178,7 +177,7 @@ struct GetFormatString<double, withComma>
 template <typename T>
 std::string To_stringHighRes(const T val)
 {
-  std::string fmt = GetFormatString<T, 0>()();
+  const std::string fmt = GetFormatString<T, 0>()();
 
   return fmt::format(fmt, val);
 }
@@ -213,7 +212,7 @@ int GetNumberOfInputParameters(const FunctionInfo &fip, int numReturnValues);
 int GetFirstInputParameterIndex(const FunctionInfo &fip, int numReturnValues);
 std::string CleanupString(std::string str);
 
-enum class InterceptorMode
+enum class InterceptorMode : std::uint8_t
 {
   Begin = 1,
   End   = 2
@@ -222,19 +221,23 @@ enum class InterceptorMode
 // Straight from the fmt documentation
 // https://fmt.dev/latest/api.html#argument-lists
 
-enum class OutputMode
+enum class OutputMode : std::uint8_t
 {
   Debug,
   Emergency,
   Normal
 };
 
+/// Never throws, so that it can be used in destructors and catch handlers
 void vlog(OutputMode mode, const char *func, int line, fmt::string_view format,
-          fmt::format_args args);
+          fmt::format_args args) noexcept;
 
+// The forwarding references follow the type erasure example of fmt,
+// fmt::make_format_args() only needs lvalues so the arguments are not forwarded
 template <typename... T>
 void xop_logging(OutputMode mode, const char *func, int line,
-                 fmt::format_string<T...> format, T &&...args)
+                 // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
+                 fmt::format_string<T...> format, T &&...args) noexcept
 {
   vlog(mode, func, line, format, fmt::make_format_args(args...));
 }
@@ -256,7 +259,7 @@ int CreateDirectory(const std::string &path);
 void EnsureDirectoryExists(const std::string &path);
 
 bool IsFreeWave(waveHndl wv);
-void DoBindOrConnect(Handle &h, SocketTypes st);
+void DoBindOrConnect(Handle &handle, SocketTypes st);
 
 Handle GetHandleFromString(const std::string &str);
 
@@ -268,14 +271,13 @@ Handle GetHandleFromString(const std::string &str);
 /// elements location within the wave.
 /// @param[in] value value that should be written to the location given by dims
 /// in w
-template <typename T,
-          typename std::enable_if_t<std::is_same<DataFolderHandle, T>::value ||
-                                        std::is_same<waveHndl, T>::value ||
-                                        std::is_same<std::string, T>::value ||
-                                        std::is_same<float, T>::value ||
-                                        std::is_same<double, T>::value ||
-                                        std::is_integral<T>::value,
-                                    int> = 0>
+template <
+    typename T,
+    typename std::enable_if_t<
+        std::is_same_v<DataFolderHandle, T> || std::is_same_v<waveHndl, T> ||
+            std::is_same_v<std::string, T> || std::is_same_v<float, T> ||
+            std::is_same_v<double, T> || std::is_integral_v<T>,
+        int> = 0>
 void SetWaveElement(waveHndl w, std::vector<IndexInt> &dims, const T &value)
 {
   int err;
@@ -352,14 +354,13 @@ void SetWaveElement<DataFolderHandle>(waveHndl w, std::vector<IndexInt> &dims,
 /// @param[in] dims IndexInt vector of MAX_DIMENSIONS size that points to the
 /// elements location within the wave.
 /// @return value value that is read at the location given by dims in w
-template <typename T,
-          typename std::enable_if_t<std::is_same<DataFolderHandle, T>::value ||
-                                        std::is_same<waveHndl, T>::value ||
-                                        std::is_same<std::string, T>::value ||
-                                        std::is_same<float, T>::value ||
-                                        std::is_same<double, T>::value ||
-                                        std::is_integral<T>::value,
-                                    int> = 0>
+template <
+    typename T,
+    typename std::enable_if_t<
+        std::is_same_v<DataFolderHandle, T> || std::is_same_v<waveHndl, T> ||
+            std::is_same_v<std::string, T> || std::is_same_v<float, T> ||
+            std::is_same_v<double, T> || std::is_integral_v<T>,
+        int> = 0>
 T GetWaveElement(waveHndl w, std::vector<IndexInt> &dims)
 {
   int err;

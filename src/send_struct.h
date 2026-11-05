@@ -1,10 +1,11 @@
 #pragma once
 
-#include <vector>
-#include <string>
 #include <optional>
+#include <string>
+#include <vector>
 
-#include "ZeroMQ.h"
+#include "XOPStandardHeaders.h" // Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
+#include "zeromq_helper.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -17,11 +18,11 @@ public:
   {
   }
 
-  SendStorage(std::string str) : storage(str)
+  explicit SendStorage(std::string str) : storage(std::move(str))
   {
   }
 
-  const void *GetPtr() const
+  [[nodiscard]] const void *GetPtr() const
   {
     if(storage.has_value())
     {
@@ -31,7 +32,7 @@ public:
     return ptr;
   }
 
-  size_t GetLength() const
+  [[nodiscard]] size_t GetLength() const
   {
     if(storage.has_value())
     {
@@ -46,6 +47,8 @@ private:
   size_t len{0};
   std::optional<std::string> storage;
 };
+
+using SendStorageVec = std::vector<SendStorage>;
 
 SendStorageVec GatherPubData(waveHndl containerWaveHandle);
 void ConvertSubData(const ZeroMQMessageSharedPtrVec &vec,

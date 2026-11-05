@@ -41,8 +41,8 @@ zeromq_test_socketclose_race(zeromq_test_socketclose_raceParams *p)
                 while(!stop.load())
                 {
                   SendStorageVec sendStorage;
-                  sendStorage.emplace_back(SendStorage{"race-test"});
-                  sendStorage.emplace_back(SendStorage{""});
+                  sendStorage.emplace_back("race-test");
+                  sendStorage.emplace_back("");
                   ZeroMQPublisherSend(sendStorage); // result ignored on purpose
                 }
               });

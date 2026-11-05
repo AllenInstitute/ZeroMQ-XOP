@@ -11,9 +11,9 @@ private:
   struct Private;
 
 public:
-  explicit RequestInterface(Private, std::string callerIdentity,
+  explicit RequestInterface(Private /*unused*/, std::string callerIdentity,
                             const std::string &payload);
-  explicit RequestInterface(Private, const std::string &payload);
+  explicit RequestInterface(Private /*unused*/, const std::string &payload);
 
   static RequestInterfacePtr Create(std::string callerIdentity,
                                     const std::string &payload);
@@ -35,7 +35,7 @@ private:
     explicit Private() = default;
   };
 
-  void FillFromJSON(json j);
+  void FillFromJSON(json doc);
 
   int m_version{};
   std::string m_callerIdentity, m_messageId;

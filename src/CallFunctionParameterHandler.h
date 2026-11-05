@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ZeroMQ.h"
 #include "IgorTypeUnion.h"
+#include "ZeroMQ.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -12,6 +12,13 @@ public:
   CallFunctionParameterHandler(StringVector params, FunctionInfo fip);
   ~CallFunctionParameterHandler();
 
+  CallFunctionParameterHandler(const CallFunctionParameterHandler &) = delete;
+  CallFunctionParameterHandler(CallFunctionParameterHandler &&)      = delete;
+  CallFunctionParameterHandler &
+  operator=(const CallFunctionParameterHandler &) = delete;
+  CallFunctionParameterHandler &
+  operator=(CallFunctionParameterHandler &&) = delete;
+
   // Return a jsons style array for the pass-by-reference parameters
   json GetPassByRefInputArray();
   json GetReturnValues();
@@ -20,7 +27,7 @@ public:
 
 private:
   json ReadPassByRefParameters(int first, int last);
-  unsigned char m_values[MAX_NUM_PARAMS * sizeof(double)] = {};
+  std::array<unsigned char, MAX_NUM_PARAMS * sizeof(double)> m_values{};
   std::vector<int> m_paramTypes;
   std::vector<CountInt> m_paramSizesInBytes;
   bool m_multipleReturnValueSyntax;

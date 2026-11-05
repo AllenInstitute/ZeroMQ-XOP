@@ -9,6 +9,11 @@
 class SocketWithMutex
 {
 public:
+  SocketWithMutex(const SocketWithMutex &)            = delete;
+  SocketWithMutex(SocketWithMutex &&)                 = delete;
+  SocketWithMutex &operator=(const SocketWithMutex &) = delete;
+  SocketWithMutex &operator=(SocketWithMutex &&)      = delete;
+
   explicit SocketWithMutex(SocketTypes st)
       : m_lock(GlobalData::Instance().GetMutex(st)),
         m_plainSocket(GlobalData::Instance().GetOrCreateSocket(st))
@@ -16,13 +21,7 @@ public:
     // DEBUG_OUTPUT("Locking {}",  m_plainSocket);
   }
 
-  ~SocketWithMutex()
-  {
-    // DEBUG_OUTPUT("Unlocking {}",  m_plainSocket);
-  }
-
-  SocketWithMutex(const SocketWithMutex &)            = delete;
-  SocketWithMutex &operator=(const SocketWithMutex &) = delete;
+  ~SocketWithMutex() = default;
 
   void *get()
   {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <sstream>
 #include <exception>
+#include <sstream>
 #include <string>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
@@ -34,23 +34,28 @@ public:
   explicit IgorException(int errorCode);
   IgorException(int errorCode, const std::string &errorMessage);
 
-  virtual ~IgorException() override;
+  ~IgorException() override;
 
-  const char *what() const noexcept override;
+  IgorException(const IgorException &)            = default;
+  IgorException(IgorException &&)                 = default;
+  IgorException &operator=(const IgorException &) = delete;
+  IgorException &operator=(IgorException &&)      = delete;
 
-  int GetErrorCode() const;
+  [[nodiscard]] const char *what() const noexcept override;
+
+  [[nodiscard]] int GetErrorCode() const;
 
   /// Displays the exception if required; gets the return code.
-  int HandleException() const;
+  [[nodiscard]] int HandleException() const;
 
 private:
   const int m_errorCode;
   const std::runtime_error m_message;
 };
 
-void to_json(json &j, const IgorException &e);
+void to_json(json &doc, const IgorException &exception);
 
-int HandleException(const std::exception &e);
+int HandleException(const std::exception &exception);
 
 #define BEGIN_OUTER_CATCH                                                      \
   p->result = decltype(p->result)();                                           \

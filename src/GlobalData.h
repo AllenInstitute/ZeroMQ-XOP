@@ -1,17 +1,17 @@
 #pragma once
 
-#include <mutex>
-#include <memory>
-#include "Logging.h"
 #include "ConcurrentQueue.h"
 #include "ConcurrentXOPNotice.h"
+#include "Logging.h"
+#include <memory>
+#include <mutex>
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
 
 /// The values are the ones of the ZMQ_SOCKET_TYPE_* constants in
 /// ZeroMQ_Interop.ipf
-enum class SocketTypes
+enum class SocketTypes : std::uint8_t
 {
   Client     = 1,
   Server     = 2,
@@ -26,6 +26,11 @@ AllSocketTypesArray GetAllSocketTypes();
 class GlobalData
 {
 public:
+  GlobalData(const GlobalData &)            = delete;
+  GlobalData(GlobalData &&)                 = delete;
+  GlobalData &operator=(const GlobalData &) = delete;
+  GlobalData &operator=(GlobalData &&)      = delete;
+
   /// Access to singleton-type global object
   static GlobalData &Instance()
   {
@@ -41,13 +46,13 @@ public:
   bool HasBindsOrConnections(SocketTypes st);
 
   void SetDebugFlag(bool val);
-  bool GetDebugFlag() const;
+  [[nodiscard]] bool GetDebugFlag() const;
 
   void SetRecvBusyWaitingFlag(bool val);
-  bool GetRecvBusyWaitingFlag() const;
+  [[nodiscard]] bool GetRecvBusyWaitingFlag() const;
 
   void SetInterceptorFlag(bool val);
-  bool GetInterceptorFlag() const;
+  [[nodiscard]] bool GetInterceptorFlag() const;
 
   void CloseConnections();
   void AddToListOfBindsOrConnections(const std::string &localPoint,
@@ -58,7 +63,7 @@ public:
   std::recursive_mutex &GetMutex(SocketTypes st);
 
   void SetLoggingFlag(bool val);
-  bool GetLoggingFlag() const;
+  [[nodiscard]] bool GetLoggingFlag() const;
 
   void AddLogEntry(const json &doc, MessageDirection dir);
   void AddLogEntry(const json &doc, const std::string &identity,
@@ -79,9 +84,7 @@ public:
 
 private:
   GlobalData();
-  ~GlobalData()                             = default;
-  GlobalData(const GlobalData &)            = delete;
-  GlobalData &operator=(const GlobalData &) = delete;
+  ~GlobalData() = default;
 
   struct SocketTypeData
   {
