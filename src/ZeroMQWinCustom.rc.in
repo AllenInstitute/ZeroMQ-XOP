@@ -21,10 +21,15 @@ BEGIN
   "Unexpected multi-part message format.\0",                    // INVALID_MESSAGE_FORMAT
   "Invalid logging template.\0",                                // INVALID_LOGGING_TEMPLATE
   "Exists already as message filter .\0",                       // MESSAGE_FILTER_DUPLICATED
-  "No such message filter.\0"                                   // MESSAGE_FILTER_MISSING
+  "No such message filter.\0",                                  // MESSAGE_FILTER_MISSING
   "Invalid type encountered.\0",                                // ERR_INVALID_TYPE
   "Non-existing interceptor function\0",                        // NO_INTERCEPTOR_FUNC
   "Incompatible interceptor function signature\0",              // INVALID_INTERCEPTOR_FUNC
+  "Heartbeat publisher start/stop deadlocked.\0",               // HEARTBEAT_STARTSTOP_DEADLOCK
+  "Idle guard was not reset.\0",                                // IDLE_GUARD_NOT_RESET
+  "Queue apply deadlocked.\0",                                  // QUEUE_APPLY_DEADLOCK
+  "Socket close race deadlocked.\0",                            // SOCKET_CLOSE_RACE_DEADLOCK
+  "Message handler reply stalled.\0",                           // MSGHANDLER_REPLY_STALL
 	0,								// NOTE: 0 required to terminate the resource.
 END
 
