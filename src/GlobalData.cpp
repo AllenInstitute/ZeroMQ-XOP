@@ -100,9 +100,23 @@ AllSocketTypesArray GetAllSocketTypes()
 
 GlobalData::GlobalData()
     : m_debugging(false), m_busyWaiting(true), m_logging(false),
-      m_interceptor(false), zmq_context(zmq_ctx_new())
+      m_interceptor(false)
 {
-  ZEROMQ_ASSERT(zmq_context != nullptr);
+}
+
+/// The context is created on first use, as throwing in the constructor would
+/// leave Instance() unusable, also for outputting the error
+void *GlobalData::GetContext()
+{
+  const LockGuardRec lock(m_contextLock);
+
+  if(zmq_context == nullptr)
+  {
+    zmq_context = zmq_ctx_new();
+    ZEROMQ_ASSERT(zmq_context != nullptr);
+  }
+
+  return zmq_context;
 }
 
 void *GlobalData::GetOrCreateSocket(SocketTypes st)
@@ -115,7 +129,7 @@ void *GlobalData::GetOrCreateSocket(SocketTypes st)
     return socket;
   }
 
-  socket = zmq_socket(zmq_context, GetZeroMQSocketConstant(st));
+  socket = zmq_socket(GetContext(), GetZeroMQSocketConstant(st));
   ZEROMQ_ASSERT(socket != nullptr);
 
   DEBUG_OUTPUT("Creating {} socket {}", st, socket);
