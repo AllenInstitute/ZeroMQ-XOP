@@ -97,6 +97,8 @@ private:
 
   SocketTypeData &GetSocketTypeData(SocketTypes st);
 
+  void *GetContext();
+
   SocketTypeData m_client, m_server, m_pub, m_sub;
   std::recursive_mutex m_settingsMutex;
 
@@ -108,7 +110,8 @@ private:
   ConcurrentQueue<OutputMessagePtr> m_queue;
   std::unique_ptr<Logging> m_loggingSink;
   std::recursive_mutex m_loggingLock;
-  void *zmq_context;
+  std::recursive_mutex m_contextLock;
+  void *zmq_context{nullptr};
   std::vector<std::string> m_subMessageFilters;
 
   std::recursive_mutex m_interceptorLock;
