@@ -244,6 +244,17 @@ typedef struct zeromq_test_callfunctionParams zeromq_test_callfunctionParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_test_endpoint_contentionParams
+{
+  double numCalls;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_test_endpoint_contentionParams
+    zeromq_test_endpoint_contentionParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_test_hb_startstopParams
 {
   double iterations;
@@ -392,6 +403,10 @@ zeromq_test_callfunc_identity(zeromq_test_callfunc_identityParams *p);
 
 // string zeromq_test_callfunction(string msg)
 extern "C" int zeromq_test_callfunction(zeromq_test_callfunctionParams *p);
+
+// variable zeromq_test_endpoint_contention(variable numCalls)
+extern "C" int
+zeromq_test_endpoint_contention(zeromq_test_endpoint_contentionParams *p);
 
 // variable zeromq_test_hb_startstop(variable iterations)
 extern "C" int zeromq_test_hb_startstop(zeromq_test_hb_startstopParams *p);

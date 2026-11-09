@@ -141,9 +141,9 @@ void *GlobalData::GetOrCreateSocket(SocketTypes st)
 
 bool GlobalData::HasBindsOrConnections(SocketTypes st)
 {
-  const LockGuardRec lock(GetMutex(st));
-
   auto &socketData = GetSocketTypeData(st);
+
+  const LockGuard lock(socketData.m_listMutex);
 
   return !socketData.m_list.empty();
 }
@@ -212,7 +212,8 @@ void GlobalData::CloseConnections()
     }
 
     auto &socketData = GetSocketTypeData(st);
-    auto &list       = socketData.m_list;
+    const LockGuard listLock(socketData.m_listMutex);
+    auto &list = socketData.m_list;
 
     DEBUG_OUTPUT("SocketType {}, Connections={}", st, list.size());
 
@@ -256,17 +257,20 @@ void GlobalData::CloseConnections()
 void GlobalData::AddToListOfBindsOrConnections(const std::string &point,
                                                SocketTypes st)
 {
-  const LockGuardRec lock(GetMutex(st));
-
   auto &socketData = GetSocketTypeData(st);
+
+  const LockGuard lock(socketData.m_listMutex);
+
   socketData.m_list.push_back(point);
 }
 
 std::vector<std::string> GlobalData::GetListOfBindsOrConnections(SocketTypes st)
 {
-  const LockGuardRec lock(GetMutex(st));
+  auto &socketData = GetSocketTypeData(st);
 
-  return GetSocketTypeData(st).m_list;
+  const LockGuard lock(socketData.m_listMutex);
+
+  return socketData.m_list;
 }
 
 ConcurrentQueue<OutputMessagePtr> &GlobalData::GetXOPNoticeQueue()
