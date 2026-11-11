@@ -105,6 +105,7 @@ SET(COVERAGE_SOURCES
   CallFunctionParameterHandler.cpp
   ConcurrentXOPNotice.cpp
   CustomExceptions.cpp
+  FairMutex.cpp
   GlobalData.cpp
   HeartbeatPublisher.cpp
   HelperFunctions.cpp
@@ -112,7 +113,6 @@ SET(COVERAGE_SOURCES
   IdleGuard.cpp
   Logging.cpp
   MessageHandler.cpp
-  MessageHandlerPauseGuard.cpp
   RequestInterface.cpp
   RequestInterfaceException.cpp
   SerializeWave.cpp
@@ -140,15 +140,16 @@ SET(COVERAGE_SOURCES
   zeromq_sub_recv.cpp
   zeromq_sub_recv_multi.cpp
   zeromq_sub_remove_filter.cpp
+  zeromq_test_bind_contention.cpp
   zeromq_test_callfunc_identity.cpp
   zeromq_test_callfunction.cpp
   zeromq_test_endpoint_contention.cpp
   zeromq_test_hb_startstop.cpp
   zeromq_test_hb_stopped_by_stop.cpp
   zeromq_test_idleguard.cpp
-  zeromq_test_msghandler_pause.cpp
   zeromq_test_queueswap.cpp
   zeromq_test_reply_contention.cpp
+  zeromq_test_send_contention.cpp
   zeromq_test_serializeWave.cpp
   zeromq_test_socketclose_race.cpp
 )
@@ -170,6 +171,7 @@ SET(HEADERS
   ConcurrentXOPNotice.h
   CustomExceptions.h
   Errors.h
+  FairMutex.h
   functions.h
   GlobalData.h
   HeartbeatPublisher.h
@@ -179,7 +181,6 @@ SET(HEADERS
   IgorTypeUnion.h
   Logging.h
   MessageHandler.h
-  MessageHandlerPauseGuard.h
   RequestInterface.h
   RequestInterfaceException.h
   resource.h

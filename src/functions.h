@@ -222,6 +222,17 @@ typedef struct zeromq_sub_remove_filterParams zeromq_sub_remove_filterParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_test_bind_contentionParams
+{
+  double numCalls;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_test_bind_contentionParams
+    zeromq_test_bind_contentionParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_test_callfunc_identityParams
 {
   Handle identity;
@@ -283,16 +294,6 @@ typedef struct zeromq_test_idleguardParams zeromq_test_idleguardParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
-struct zeromq_test_msghandler_pauseParams
-{
-  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
-  double result;
-};
-typedef struct zeromq_test_msghandler_pauseParams
-    zeromq_test_msghandler_pauseParams;
-#pragma pack()
-
-#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_test_queueswapParams
 {
   UserFunctionThreadInfoPtr tp; // needed for thread safe functions
@@ -310,6 +311,17 @@ struct zeromq_test_reply_contentionParams
 };
 typedef struct zeromq_test_reply_contentionParams
     zeromq_test_reply_contentionParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_test_send_contentionParams
+{
+  double numCalls;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_test_send_contentionParams
+    zeromq_test_send_contentionParams;
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
@@ -397,6 +409,10 @@ extern "C" int zeromq_sub_recv_multi(zeromq_sub_recv_multiParams *p);
 // variable zeromq_sub_remove_filter(string filter)
 extern "C" int zeromq_sub_remove_filter(zeromq_sub_remove_filterParams *p);
 
+// variable zeromq_test_bind_contention(variable numCalls)
+extern "C" int
+zeromq_test_bind_contention(zeromq_test_bind_contentionParams *p);
+
 // string zeromq_test_callfunc_identity(string msg, string identity)
 extern "C" int
 zeromq_test_callfunc_identity(zeromq_test_callfunc_identityParams *p);
@@ -418,16 +434,16 @@ zeromq_test_hb_stopped_by_stop(zeromq_test_hb_stopped_by_stopParams *p);
 // variable zeromq_test_idleguard()
 extern "C" int zeromq_test_idleguard(zeromq_test_idleguardParams *p);
 
-// variable zeromq_test_msghandler_pause()
-extern "C" int
-zeromq_test_msghandler_pause(zeromq_test_msghandler_pauseParams *p);
-
 // variable zeromq_test_queueswap()
 extern "C" int zeromq_test_queueswap(zeromq_test_queueswapParams *p);
 
 // variable zeromq_test_reply_contention(variable numRequests)
 extern "C" int
 zeromq_test_reply_contention(zeromq_test_reply_contentionParams *p);
+
+// variable zeromq_test_send_contention(variable numCalls)
+extern "C" int
+zeromq_test_send_contention(zeromq_test_send_contentionParams *p);
 
 // string zeromq_test_serializeWave(WAVE wv)
 extern "C" int zeromq_test_serializeWave(zeromq_test_serializeWaveParams *p);

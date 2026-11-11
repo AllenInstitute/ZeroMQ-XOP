@@ -60,6 +60,9 @@ THREADSAFE variable zeromq_server_send(string identity, string msg);
 ///
 /// Implemented using a blocking wait albeit abortable from within Igor Pro.
 ///
+/// Raises an error while the message handler runs, as the handler receives
+/// the messages itself.
+///
 /// @param[out] identity client identifier, required for sending a message back
 /// via zeromq_server_send()
 ///
@@ -174,6 +177,8 @@ THREADSAFE variable zeromq_sub_recv_multi(WAVEWAVE payload);
 ///
 /// If a client disconnected before its reply is sent, e.g. because it gave up
 /// waiting, the reply is discarded and an error is printed.
+///
+/// While it runs, zeromq_server_recv() raises an error.
 /// @{
 variable zeromq_handler_start();
 
@@ -206,10 +211,11 @@ THREADSAFE variable zeromq_test_hb_startstop(variable iterations);
 variable zeromq_test_idleguard();
 THREADSAFE variable zeromq_test_queueswap();
 THREADSAFE variable zeromq_test_socketclose_race();
-THREADSAFE variable zeromq_test_msghandler_pause();
 THREADSAFE variable zeromq_test_hb_stopped_by_stop();
 THREADSAFE variable zeromq_test_reply_contention(variable numRequests);
 THREADSAFE variable zeromq_test_endpoint_contention(variable numCalls);
+THREADSAFE variable zeromq_test_send_contention(variable numCalls);
+THREADSAFE variable zeromq_test_bind_contention(variable numCalls);
 THREADSAFE string zeromq_test_callfunc_identity(string msg, string identity);
 /// @}
 /// @endcond

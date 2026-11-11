@@ -25,6 +25,7 @@
 #define QUEUE_APPLY_DEADLOCK         (18 + FIRST_XOP_ERR)
 #define SOCKET_CLOSE_RACE_DEADLOCK   (19 + FIRST_XOP_ERR)
 #define MSGHANDLER_REPLY_STALL       (20 + FIRST_XOP_ERR)
+#define HANDLER_RUNNING              (21 + FIRST_XOP_ERR)
 
 // non-XOP error codes
 
