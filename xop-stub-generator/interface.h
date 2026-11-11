@@ -210,6 +210,7 @@ THREADSAFE variable zeromq_test_msghandler_pause();
 THREADSAFE variable zeromq_test_hb_stopped_by_stop();
 THREADSAFE variable zeromq_test_reply_contention(variable numRequests);
 THREADSAFE variable zeromq_test_endpoint_contention(variable numCalls);
+THREADSAFE variable zeromq_test_send_contention(variable numCalls);
 THREADSAFE string zeromq_test_callfunc_identity(string msg, string identity);
 /// @}
 /// @endcond

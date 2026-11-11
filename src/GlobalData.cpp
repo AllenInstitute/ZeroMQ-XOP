@@ -150,7 +150,7 @@ bool GlobalData::HasBindsOrConnections(SocketTypes st)
 
 bool GlobalData::HasSocket(SocketTypes st)
 {
-  const LockGuardRec lock(GetMutex(st));
+  const LockGuardFair lock(GetMutex(st));
 
   auto &socketData = GetSocketTypeData(st);
   return socketData.m_zmq_socket != nullptr;
@@ -204,7 +204,7 @@ void GlobalData::CloseConnections()
 
   for(auto st : GetAllSocketTypes())
   {
-    const LockGuardRec lock(GetMutex(st));
+    const LockGuardFair lock(GetMutex(st));
 
     auto &socketData = GetSocketTypeData(st);
 
@@ -464,7 +464,7 @@ void GlobalData::RemoveSubscriberMessageFilter(const std::string &filter)
   }
 }
 
-std::recursive_mutex &GlobalData::GetMutex(SocketTypes st)
+FairMutex &GlobalData::GetMutex(SocketTypes st)
 {
   switch(st)
   {

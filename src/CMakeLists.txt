@@ -105,6 +105,7 @@ SET(COVERAGE_SOURCES
   CallFunctionParameterHandler.cpp
   ConcurrentXOPNotice.cpp
   CustomExceptions.cpp
+  FairMutex.cpp
   GlobalData.cpp
   HeartbeatPublisher.cpp
   HelperFunctions.cpp
@@ -149,6 +150,7 @@ SET(COVERAGE_SOURCES
   zeromq_test_msghandler_pause.cpp
   zeromq_test_queueswap.cpp
   zeromq_test_reply_contention.cpp
+  zeromq_test_send_contention.cpp
   zeromq_test_serializeWave.cpp
   zeromq_test_socketclose_race.cpp
 )
@@ -170,6 +172,7 @@ SET(HEADERS
   ConcurrentXOPNotice.h
   CustomExceptions.h
   Errors.h
+  FairMutex.h
   functions.h
   GlobalData.h
   HeartbeatPublisher.h

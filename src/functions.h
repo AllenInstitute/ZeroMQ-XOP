@@ -313,6 +313,17 @@ typedef struct zeromq_test_reply_contentionParams
 #pragma pack()
 
 #pragma pack(2) // All structures passed to Igor are two-byte aligned.
+struct zeromq_test_send_contentionParams
+{
+  double numCalls;
+  UserFunctionThreadInfoPtr tp; // needed for thread safe functions
+  double result;
+};
+typedef struct zeromq_test_send_contentionParams
+    zeromq_test_send_contentionParams;
+#pragma pack()
+
+#pragma pack(2) // All structures passed to Igor are two-byte aligned.
 struct zeromq_test_serializeWaveParams
 {
   waveHndl wv;
@@ -428,6 +439,10 @@ extern "C" int zeromq_test_queueswap(zeromq_test_queueswapParams *p);
 // variable zeromq_test_reply_contention(variable numRequests)
 extern "C" int
 zeromq_test_reply_contention(zeromq_test_reply_contentionParams *p);
+
+// variable zeromq_test_send_contention(variable numCalls)
+extern "C" int
+zeromq_test_send_contention(zeromq_test_send_contentionParams *p);
 
 // string zeromq_test_serializeWave(WAVE wv)
 extern "C" int zeromq_test_serializeWave(zeromq_test_serializeWaveParams *p);

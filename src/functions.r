@@ -248,6 +248,14 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   NT_FP64,      // parameter 1
   },
 
+  // variable zeromq_test_send_contention(variable numCalls)
+  "zeromq_test_send_contention",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  NT_FP64,      // parameter 1
+  },
+
   // string zeromq_test_serializeWave(WAVE wv)
   "zeromq_test_serializeWave",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category

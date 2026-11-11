@@ -27,6 +27,7 @@
 #include ":zmq_test_msghandler_pause"
 #include ":zmq_test_queueswap"
 #include ":zmq_test_reply_contention"
+#include ":zmq_test_send_contention"
 #include ":zmq_test_serializeWave"
 #include ":zmq_test_socketclose_race"
 
@@ -964,6 +965,7 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	list = AddListItem("zmq_test_msghandler_pause.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_queueswap.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_reply_contention.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_send_contention.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_serializeWave.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_socketclose_race.ipf", list, ";", Inf)
 
