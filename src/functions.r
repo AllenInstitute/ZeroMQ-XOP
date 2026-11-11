@@ -175,6 +175,14 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   HSTRING_TYPE,      // parameter 1
   },
 
+  // variable zeromq_test_bind_contention(variable numCalls)
+  "zeromq_test_bind_contention",
+  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
+  NT_FP64,          // Return value type
+  {
+  NT_FP64,      // parameter 1
+  },
+
   // string zeromq_test_callfunc_identity(string msg, string identity)
   "zeromq_test_callfunc_identity",
   F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
@@ -219,14 +227,6 @@ resource 'XOPF' (1100) {   // Describes functions added by XOP to IGOR.
   // variable zeromq_test_idleguard()
   "zeromq_test_idleguard",
   F_UTIL | F_EXTERNAL,    // Function category
-  NT_FP64,          // Return value type
-  {
-
-  },
-
-  // variable zeromq_test_msghandler_pause()
-  "zeromq_test_msghandler_pause",
-  F_UTIL | F_EXTERNAL | F_THREADSAFE,    // Function category
   NT_FP64,          // Return value type
   {
 

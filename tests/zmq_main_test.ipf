@@ -18,13 +18,13 @@
 #include ":zmq_start_handler"
 #include ":zmq_stop"
 #include ":zmq_stop_handler"
+#include ":zmq_test_bind_contention"
 #include ":zmq_test_callfunction"
 #include ":zmq_test_endpoint_contention"
 #include ":zmq_test_hb_startstop"
 #include ":zmq_test_hb_stopped_by_stop"
 #include ":zmq_test_idleguard"
 #include ":zmq_test_interop"
-#include ":zmq_test_msghandler_pause"
 #include ":zmq_test_queueswap"
 #include ":zmq_test_reply_contention"
 #include ":zmq_test_send_contention"
@@ -956,13 +956,13 @@ Function RunWithOpts([string testcase, string testsuite, variable allowdebug])
 	list = AddListItem("zmq_start_handler.ipf", list, ";", Inf)
 	list = AddListItem("zmq_stop.ipf", list, ";", Inf)
 	list = AddListItem("zmq_stop_handler.ipf", list, ";", Inf)
+	list = AddListItem("zmq_test_bind_contention.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_callfunction.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_endpoint_contention.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_hb_startstop.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_hb_stopped_by_stop.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_idleguard.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_interop.ipf", list, ";", Inf)
-	list = AddListItem("zmq_test_msghandler_pause.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_queueswap.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_reply_contention.ipf", list, ";", Inf)
 	list = AddListItem("zmq_test_send_contention.ipf", list, ";", Inf)
