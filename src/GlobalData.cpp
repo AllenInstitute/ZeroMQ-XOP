@@ -206,12 +206,13 @@ void GlobalData::CloseConnections()
   {
     const LockGuardRec lock(GetMutex(st));
 
-    if(!HasSocket(st))
+    auto &socketData = GetSocketTypeData(st);
+
+    if(socketData.m_zmq_socket == nullptr)
     {
       continue;
     }
 
-    auto &socketData = GetSocketTypeData(st);
     const LockGuard listLock(socketData.m_listMutex);
     auto &list = socketData.m_list;
 
