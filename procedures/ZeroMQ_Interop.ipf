@@ -94,6 +94,7 @@ Constant ZMQ_IDLE_GUARD_NOT_RESET         = 10017
 Constant ZMQ_QUEUE_APPLY_DEADLOCK         = 10018
 Constant ZMQ_SOCKET_CLOSE_RACE_DEADLOCK   = 10019
 Constant ZMQ_MSGHANDLER_REPLY_STALL       = 10020
+Constant ZMQ_HANDLER_RUNNING              = 10021
 ///@}
 
 Constant REQ_SUCCESS                  = 0

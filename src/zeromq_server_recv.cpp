@@ -1,4 +1,5 @@
 #include "ZeroMQ.h"
+#include "MessageHandler.h"
 
 // This file is part of the `ZeroMQ-XOP` project and licensed under
 // BSD-3-Clause.
@@ -20,9 +21,18 @@ extern "C" int zeromq_server_recv(zeromq_server_recvParams *p)
 
   for(;;)
   {
-    const int numBytes = ZeroMQServerReceive(&identityMsg, &payloadMsg);
+    int numBytes = 0;
+    bool timeout = false;
 
-    if(numBytes == -1 && zmq_errno() == EAGAIN) // timeout
+    {
+      // the handler and this operation would receive each other's messages
+      const auto handlerLock = MessageHandler::Instance().LockStopped();
+
+      numBytes = ZeroMQServerReceive(&identityMsg, &payloadMsg);
+      timeout  = numBytes == -1 && zmq_errno() == EAGAIN;
+    }
+
+    if(timeout)
     {
       if(!doBusyWait ||
          SpinProcess()) // user requested abort or we should not wait

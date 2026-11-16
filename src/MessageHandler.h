@@ -29,6 +29,11 @@ public:
   void DiscardQueuedMessages();
   [[nodiscard]] bool IsRunning() const;
 
+  /// @brief Throws HANDLER_RUNNING if the handler runs
+  ///
+  /// The handler can not be started while the returned lock is held.
+  [[nodiscard]] std::unique_lock<std::recursive_mutex> LockStopped() const;
+
 private:
   MessageHandler() = default;
   ~MessageHandler();

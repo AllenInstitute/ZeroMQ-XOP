@@ -685,6 +685,9 @@ only when no functions are running. In case you want to execute a function
 during the time when functions are running the operation ``DoXOPIdle`` allows
 to force an ``IDLE`` event.
 
+The message handler receives all messages of the ``Router``/Server, so
+``zeromq_server_recv()`` raises an error while it runs.
+
 The reply is sent after the function returned. If the client disconnected in
 the meantime, e.g. because it gave up waiting, the reply is discarded and an
 error ("Host unreachable") is printed into the history.

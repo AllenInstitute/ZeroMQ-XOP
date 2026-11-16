@@ -30,6 +30,7 @@ BEGIN
   "Queue apply deadlocked.\0",                                  // QUEUE_APPLY_DEADLOCK
   "Socket close race deadlocked.\0",                            // SOCKET_CLOSE_RACE_DEADLOCK
   "Message handler reply stalled.\0",                           // MSGHANDLER_REPLY_STALL
+  "Stop the message handler before receiving with zeromq_server_recv().\0", // HANDLER_RUNNING
 	0,								// NOTE: 0 required to terminate the resource.
 END
 

@@ -298,6 +298,18 @@ bool MessageHandler::IsRunning() const
   return m_thread.joinable();
 }
 
+std::unique_lock<std::recursive_mutex> MessageHandler::LockStopped() const
+{
+  std::unique_lock<std::recursive_mutex> lock(threadMutex);
+
+  if(m_thread.joinable())
+  {
+    throw IgorException(HANDLER_RUNNING);
+  }
+
+  return lock;
+}
+
 void MessageHandler::HandleAllQueuedMessages()
 {
   auto &incomingQueue = GetIncomingQueue();

@@ -30,6 +30,6 @@ public:
 
 private:
   // m_lock must be initialized before m_plainSocket
-  LockGuardRec m_lock;
+  LockGuardFair m_lock;
   void *m_plainSocket;
 };

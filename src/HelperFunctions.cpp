@@ -1,7 +1,6 @@
 #include "ZeroMQ.h"
 #include "HelperFunctions.h"
 #include "MessageHandler.h"
-#include "MessageHandlerPauseGuard.h"
 #include "RequestInterface.h"
 
 #ifdef MACIGOR
@@ -280,8 +279,6 @@ void StopThreadsAndCloseConnections()
 
 void ToggleIPV6Support(bool enable)
 {
-  const MessageHandlerPauseGuard pauseGuard(true);
-
   for(auto st : GetAllSocketTypes())
   {
     GET_SOCKET(clientSocket, st);
@@ -881,8 +878,6 @@ void DoBindOrConnect(Handle &handle, SocketTypes st)
   const auto point = GetStringFromHandle(handle);
   WMDisposeHandle(handle);
   handle = nullptr;
-
-  const MessageHandlerPauseGuard pauseGuard(st == SocketTypes::Server);
 
   GET_SOCKET(socket, st);
 

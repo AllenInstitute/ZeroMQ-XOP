@@ -168,3 +168,26 @@ Function KeepsTheOrderOfErrorReplies()
 	errorValue   = ExtractErrorValue(replyMessage)
 	CHECK_EQUAL_VAR(errorValue, REQ_INVALID_JSON_OBJECT)
 End
+
+Function ServerRecvComplainsWhileRunning()
+
+	variable err
+	string msg, identity
+
+	zeromq_set(ZMQ_SET_FLAGS_NOBUSYWAITRECV)
+	zeromq_server_bind("tcp://127.0.0.1:5555")
+	zeromq_handler_start()
+
+	try
+		msg = zeromq_server_recv(identity); AbortOnRTE
+		FAIL()
+	catch
+		err = GetRTError(1)
+		CheckErrorMessage(err, ZMQ_HANDLER_RUNNING)
+	endtry
+
+	zeromq_handler_stop()
+
+	msg = zeromq_server_recv(identity)
+	CHECK_EMPTY_STR(msg)
+End

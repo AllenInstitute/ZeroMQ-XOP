@@ -38,7 +38,8 @@ resource 'STR#' (1100) {					/* custom error messages */
   "Idle guard was not reset.",                                // IDLE_GUARD_NOT_RESET
   "Queue apply deadlocked.",                                  // QUEUE_APPLY_DEADLOCK
   "Socket close race deadlocked.",                            // SOCKET_CLOSE_RACE_DEADLOCK
-  "Message handler reply stalled."                            // MSGHANDLER_REPLY_STALL
+  "Message handler reply stalled.",                           // MSGHANDLER_REPLY_STALL
+  "Stop the message handler before receiving with zeromq_server_recv().", // HANDLER_RUNNING
 	}
 };
 

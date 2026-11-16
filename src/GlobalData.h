@@ -2,6 +2,7 @@
 
 #include "ConcurrentQueue.h"
 #include "ConcurrentXOPNotice.h"
+#include "FairMutex.h"
 #include "Logging.h"
 #include <memory>
 #include <mutex>
@@ -67,11 +68,11 @@ public:
 
   /// @brief Returns the mutex guarding the socket
   ///
-  /// The running message handler holds the Server mutex during each receive
-  /// and takes it again right after releasing it. The mutex is not fair, so
-  /// other threads can wait for it forever. Stop the handler with
-  /// MessageHandlerPauseGuard before taking it outside of the handler.
-  std::recursive_mutex &GetMutex(SocketTypes st);
+  /// The running message handler holds the Server mutex during each receive,
+  /// which waits up to 1 ms, and takes it again right after releasing it. The
+  /// mutex is fair, so another thread gets it after the receive the handler
+  /// is waiting in.
+  FairMutex &GetMutex(SocketTypes st);
 
   void SetLoggingFlag(bool val);
   [[nodiscard]] bool GetLoggingFlag() const;
@@ -101,7 +102,7 @@ private:
   {
     std::vector<std::string> m_list; // list of connections or binds
     void *m_zmq_socket{nullptr};
-    std::recursive_mutex m_mutex;
+    FairMutex m_mutex;
     /// Guards m_list, taken after m_mutex if both are needed
     std::mutex m_listMutex;
   };
