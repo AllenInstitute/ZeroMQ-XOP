@@ -12,7 +12,7 @@ if(APPLE)
   # Igor8 supports OSX 10.10 - 10.14 (10.15 nos supported).
   # Igor9 supports 10.13 & 10.14 (and 'partially' 10.15).
   # TODO: Consider adding min/max constraints in the future?
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum MacOSX version")
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum MacOSX version")
 endif()
 
 # Limit multigenerator configs to Debug and Release for now (only ones used).
@@ -288,8 +288,7 @@ IF(APPLE)
     MESSAGE(FATAL_ERROR "Could not find Rez to build resources from .r file.")
   ENDIF()
 
-  ADD_CUSTOM_COMMAND(TARGET ${libname}
-    PRE_BUILD
+  ADD_CUSTOM_COMMAND(OUTPUT ${libname}.rsrc
     COMMAND ${APPLE_RESOURCE}
     ${sysroot}
     -i ${XOP_SUPPORT_PATH}
@@ -330,7 +329,8 @@ IF(APPLE)
                          # ignore __VA_ARGS__ problem with no elements, see https://stackoverflow.com/a/11172679
                          -Wno-gnu-zero-variadic-macro-arguments
                          # The following warning exclusion is a workaround for a warning popping up in the external fmt libary
-                         -Wno-undef)
+                         -Wno-undef
+                         -Wno-missing-include-dirs)
   TARGET_COMPILE_DEFINITIONS(${libname} PRIVATE TARGET_OS_MAC)
   TARGET_COMPILE_DEFINITIONS(${libname} PRIVATE $<$<CONFIG:DEBUG>:_DEBUG>)
 
